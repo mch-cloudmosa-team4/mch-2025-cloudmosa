@@ -1,7 +1,7 @@
 # Data models module
 
 from .base import BaseResponse, ErrorResponse, HealthCheck, PaginatedResponse
-from .database import Item
+from .items import Item
 
 __all__ = [
     "BaseResponse",
