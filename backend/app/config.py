@@ -14,10 +14,10 @@ class Settings(BaseSettings):
     """
     
     # App Basic Settings
-    app_name: str = "CloudMosa Backend"
+    app_name: str = "[Project name] Backend"
     debug: bool = Field(default=False, description="Debug mode")
     version: str = "0.1.0"
-    description: str = "CloudMosa Backend API"
+    description: str = "[Project name] Backend API"
     
     # Server Settings
     host: str = Field(default="127.0.0.1", description="Server host")

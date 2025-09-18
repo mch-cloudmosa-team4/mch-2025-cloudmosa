@@ -26,7 +26,7 @@ def setup_logging(level: str = "INFO") -> logging.Logger:
         datefmt='%Y-%m-%d %H:%M:%S'
     )
     
-    logger = logging.getLogger("cloudmosa-backend")
+    logger = logging.getLogger("[Project name]-backend")
     return logger
 
 
@@ -140,7 +140,7 @@ def async_timer(func):
         end_time = datetime.now()
         
         duration = (end_time - start_time).total_seconds()
-        logger = logging.getLogger("cloudmosa-backend")
+        logger = logging.getLogger("[Project name]-backend")
         logger.info(f"{func.__name__} executed in {duration:.4f} seconds")
         
         return result

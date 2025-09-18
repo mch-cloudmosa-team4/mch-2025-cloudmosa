@@ -1,7 +1,7 @@
 
-# CloudMosa Backend
+# [Project name] Backend
 
-A FastAPI-based backend server with SQLAlchemy database integration for the CloudMosa project.
+A FastAPI-based backend server with SQLAlchemy database integration for the [Project name] project.
 
 ## Quick Start
 
@@ -49,7 +49,7 @@ The application uses SQLite by default for development. For production, you can 
 ### Environment Variables
 
 ```bash
-DATABASE_URL=postgresql://user:password@localhost/cloudmosa
+DATABASE_URL=postgresql://user:password@localhost/[Project name]
 ```
 
 ### Database Migration (TODO)

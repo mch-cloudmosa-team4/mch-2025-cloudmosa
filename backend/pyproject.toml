@@ -1,7 +1,7 @@
 [project]
 name = "backend"
 version = "0.1.0"
-description = "CloudMosa Backend API - A FastAPI-based backend server"
+description = "[Project name] Backend API - A FastAPI-based backend server"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [

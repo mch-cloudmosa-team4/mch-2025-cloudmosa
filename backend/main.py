@@ -1,5 +1,5 @@
 """
-CloudMosa Backend API
+[Project name] Backend API
 
 A FastAPI-based backend server with modular architecture.
 """
