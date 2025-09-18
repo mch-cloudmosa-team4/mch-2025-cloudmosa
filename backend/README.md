@@ -1,9 +1,9 @@
 
 # CloudMosa Backend
 
-A FastAPI-based backend server with modular architecture for the CloudMosa project.
+A FastAPI-based backend server with SQLAlchemy database integration for the CloudMosa project.
 
-## 快速開始
+## Quick Start
 
 ### Requirements
 - Python 3.12 or above
@@ -15,6 +15,10 @@ A FastAPI-based backend server with modular architecture for the CloudMosa proje
 uv sync
 ```
 
+### Initialize Database
+
+Database tables will be created automatically on first startup.
+
 ### Start the Server
 
 ```bash
@@ -23,53 +27,106 @@ uv run fastapi dev main.py
 
 The API will be available at [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
-## API 端點
+## API Endpoints
 
-- **根端點**: `http://127.0.0.1:8000/` - 基本 API 資訊
-- **API 文檔**: `http://127.0.0.1:8000/docs` - 自動生成的 Swagger 文檔  
-- **健康檢查**: `http://127.0.0.1:8000/api/v1/health` - 服務健康狀態
-- **範例 CRUD**: `http://127.0.0.1:8000/api/v1/items` - 完整的 CRUD 操作範例
+- **Root**: `http://127.0.0.1:8000/` - Basic API information
+- **API Documentation**: `http://127.0.0.1:8000/docs` - Interactive Swagger UI
+- **Health Check**: `http://127.0.0.1:8000/api/v1/health` - Service health status
+- **Items CRUD**: `http://127.0.0.1:8000/api/v1/items` - Complete CRUD operations
 
-## 專案架構
+### Items API Examples
 
-### 目錄結構
+- `GET /api/v1/items` - List all items (with pagination)
+- `POST /api/v1/items` - Create new item
+- `GET /api/v1/items/{item_id}` - Get specific item
+- `PUT /api/v1/items/{item_id}` - Update item
+- `DELETE /api/v1/items/{item_id}` - Delete item
+
+## Database Configuration
+
+The application uses SQLite by default for development. For production, you can configure PostgreSQL:
+
+### Environment Variables
+
+```bash
+DATABASE_URL=postgresql://user:password@localhost/cloudmosa
+```
+
+### Database Migration (TODO)
+
+>[!WARNING]
+> This section has not been refined. I just leave some files but not tested.
+
+Alembic is configured for database migrations:
+
+```bash
+# Generate migration
+uv run alembic revision --autogenerate -m "description"
+
+# Apply migrations
+uv run alembic upgrade head
+```
+
+## Project Architecture
+
+### Directory Structure
 
 ```
 backend/
-├── main.py              # FastAPI 應用入口
+├── main.py              # FastAPI application entry point
+├── alembic.ini          # Database migration configuration
+├── migrations/          # Alembic migration files
 ├── app/
-│   ├── config.py        # 配置管理
-│   ├── dependencies.py  # 依賴注入
-│   ├── models/          # 數據模型
-│   ├── router/          # API 路由
-│   ├── schemas/         # 請求/回應 Schema
-│   ├── utils/           # 工具函數
-│   └── crud/            # 數據庫操作 (預留)
+│   ├── config.py        # Configuration management
+│   ├── database.py      # Database connection & session
+│   ├── models/          # SQLAlchemy database models
+│   │   └── database.py  # Item model definition
+│   ├── crud/            # Database operations
+│   │   └── item.py      # Item CRUD operations
+│   ├── router/          # API routes
+│   │   └── items.py     # Items API endpoints
+│   ├── schemas/         # Pydantic schemas
+│   │   └── item.py      # Item request/response schemas
+│   └── utils/           # Utility functions
 ```
 
-### 架構特點
+### Architecture Features
 
-- **模組化設計**: 按功能分離不同模組
-- **配置管理**: Pydantic Settings，支援環境變數
-- **API 設計**: RESTful 風格，自動生成文檔
-- **依賴注入**: FastAPI 原生系統，可重用組件
-- **錯誤處理**: 全域異常處理，標準化回應
+- **Modular Design**: Functional separation across modules
+- **Database Integration**: SQLAlchemy ORM with automatic table creation
+- **Configuration Management**: Pydantic Settings with environment variable support
+- **RESTful API**: Standard REST endpoints with auto-generated documentation  
+- **Dependency Injection**: FastAPI native system for reusable components
+- **Error Handling**: Global exception handling with standardized responses
+- **Data Validation**: Pydantic models for request/response validation
+- **Database Migrations**: Alembic for version-controlled schema changes
 
-## 擴展建議
+## Development Features
 
-後續開發可以考慮添加：
+- **Hot Reload**: Automatic server restart on code changes
+- **Interactive Documentation**: Swagger UI at `/docs`
+- **Database Session Management**: Automatic session handling with dependency injection
+- **Type Safety**: Full type hints with Pydantic validation
+- **Error Handling**: Comprehensive error responses with proper HTTP status codes
 
-- **資料庫整合**: SQLAlchemy/Tortoise ORM 
-- **認證授權**: JWT Token、用戶管理
-- **快取機制**: Redis 集成
-- **測試框架**: pytest 測試配置  
-- **部署配置**: Docker 容器化
+## Expansion Suggestions
 
-## 技術棧
+Future development considerations:
 
-- **Framework**: FastAPI
+- **Authentication & Authorization**: JWT tokens, user management
+- **Caching**: Redis integration for performance
+- **Testing Framework**: pytest configuration with database testing
+- **Deployment**: Docker containerization and production setup
+- **Monitoring**: Application logging and health monitoring
+
+## Tech Stack
+
+- **Framework**: FastAPI[standard]
+- **Database**: SQLAlchemy 2.0 + SQLite/PostgreSQL
+- **Migration**: Alembic
 - **Python**: 3.12+
 - **Package Manager**: uv
 - **Configuration**: Pydantic Settings
+- **Validation**: Pydantic models
 
-這個架構提供了堅實的基礎，可以根據需求進行擴展。
+This architecture provides a solid foundation with complete database integration, ready for production deployment and further feature development.

@@ -1,27 +1,15 @@
 """
-Example API router - can be extended for actual features
+Items API router with database integration
 """
 
-from typing import List, Optional
-from fastapi import APIRouter, HTTPException, Query
-from pydantic import BaseModel
+from typing import List
+from fastapi import APIRouter, HTTPException, Query, Depends
+from sqlalchemy.orm import Session
+
+from app.database import get_db
+from app.crud.item import item
+from app.schemas.item import ItemCreate, ItemUpdate, ItemResponse
 from app.models import BaseResponse
-
-
-# Example models for demonstration
-class Item(BaseModel):
-    id: int
-    name: str
-    description: Optional[str] = None
-    price: float
-    is_active: bool = True
-
-
-class ItemCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
-    price: float
-    is_active: bool = True
 
 
 router = APIRouter(
@@ -34,76 +22,109 @@ router = APIRouter(
 )
 
 
-# Mock data storage (replace with actual database)
-mock_items = [
-    Item(id=1, name="Sample Item", description="A sample item", price=29.99),
-    Item(id=2, name="Another Item", description="Another sample item", price=19.99)
-]
-
-
-@router.get("/", response_model=List[Item], summary="List all items")
+@router.get("/", response_model=List[ItemResponse], summary="List all items")
 async def list_items(
     skip: int = Query(0, ge=0, description="Number of items to skip"),
-    limit: int = Query(10, ge=1, le=100, description="Number of items to return")
-) -> List[Item]:
+    limit: int = Query(10, ge=1, le=100, description="Number of items to return"),
+    db: Session = Depends(get_db)
+) -> List[ItemResponse]:
     """
     Retrieve a list of items with pagination
     
     Args:
         skip: Number of items to skip
         limit: Maximum number of items to return
+        db: Database session
         
     Returns:
-        List[Item]: List of items
+        List[ItemResponse]: List of items
     """
-    return mock_items[skip:skip + limit]
+    items = item.get_multi(db, skip=skip, limit=limit)
+    return [ItemResponse.model_validate(item_obj) for item_obj in items]
 
 
-@router.get("/{item_id}", response_model=Item, summary="Get item by ID")
-async def get_item(item_id: int) -> Item:
+@router.get("/{item_id}", response_model=ItemResponse, summary="Get item by ID")
+async def get_item(
+    item_id: int,
+    db: Session = Depends(get_db)
+) -> ItemResponse:
     """
     Get a specific item by its ID
     
     Args:
         item_id: The ID of the item to retrieve
+        db: Database session
         
     Returns:
-        Item: The requested item
+        ItemResponse: The requested item
         
     Raises:
         HTTPException: If item not found
     """
-    for item in mock_items:
-        if item.id == item_id:
-            return item
-    
-    raise HTTPException(status_code=404, detail="Item not found")
+    item_obj = item.get(db, item_id=item_id)
+    if not item_obj:
+        raise HTTPException(status_code=404, detail="Item not found")
+    return ItemResponse.model_validate(item_obj)
 
 
-@router.post("/", response_model=Item, status_code=201, summary="Create new item")
-async def create_item(item: ItemCreate) -> Item:
+@router.post("/", response_model=ItemResponse, status_code=201, summary="Create new item")
+async def create_item(
+    item_data: ItemCreate,
+    db: Session = Depends(get_db)
+) -> ItemResponse:
     """
     Create a new item
     
     Args:
-        item: Item data to create
+        item_data: Item data to create
+        db: Database session
         
     Returns:
-        Item: The created item
+        ItemResponse: The created item
     """
-    new_id = max([i.id for i in mock_items], default=0) + 1
-    new_item = Item(id=new_id, **item.dict())
-    mock_items.append(new_item)
-    return new_item
+    created_item = item.create(db=db, obj_in=item_data)
+    return ItemResponse.model_validate(created_item)
+
+
+@router.put("/{item_id}", response_model=ItemResponse, summary="Update item")
+async def update_item(
+    item_id: int,
+    item_update: ItemUpdate,
+    db: Session = Depends(get_db)
+) -> ItemResponse:
+    """
+    Update an existing item
+    
+    Args:
+        item_id: The ID of the item to update
+        item_update: Updated item data
+        db: Database session
+        
+    Returns:
+        ItemResponse: The updated item
+        
+    Raises:
+        HTTPException: If item not found
+    """
+    item_obj = item.get(db, item_id=item_id)
+    if not item_obj:
+        raise HTTPException(status_code=404, detail="Item not found")
+    
+    updated_item = item.update(db=db, db_obj=item_obj, obj_in=item_update)
+    return ItemResponse.model_validate(updated_item)
 
 
 @router.delete("/{item_id}", response_model=BaseResponse, summary="Delete item")
-async def delete_item(item_id: int) -> BaseResponse:
+async def delete_item(
+    item_id: int,
+    db: Session = Depends(get_db)
+) -> BaseResponse:
     """
     Delete an item by its ID
     
     Args:
         item_id: The ID of the item to delete
+        db: Database session
         
     Returns:
         BaseResponse: Deletion confirmation
@@ -111,11 +132,8 @@ async def delete_item(item_id: int) -> BaseResponse:
     Raises:
         HTTPException: If item not found
     """
-    global mock_items
+    item_obj = item.delete(db=db, item_id=item_id)
+    if not item_obj:
+        raise HTTPException(status_code=404, detail="Item not found")
     
-    for i, item in enumerate(mock_items):
-        if item.id == item_id:
-            mock_items.pop(i)
-            return BaseResponse(message=f"Item {item_id} deleted successfully")
-    
-    raise HTTPException(status_code=404, detail="Item not found")
+    return BaseResponse(message=f"Item {item_id} deleted successfully")

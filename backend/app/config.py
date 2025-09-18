@@ -4,7 +4,7 @@ Application configuration using Pydantic Settings
 
 import os
 from typing import List
-from pydantic import Field, validator
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -33,10 +33,14 @@ class Settings(BaseSettings):
         description="Allowed origins for CORS"
     )
     
-    # Database Settings (for future use)
+    # Database Settings
     database_url: str = Field(
         default="sqlite:///./app.db", 
         description="Database connection URL"
+    )
+    database_echo: bool = Field(
+        default=False,
+        description="Enable SQLAlchemy query logging"
     )
     
     # Security Settings
@@ -48,7 +52,8 @@ class Settings(BaseSettings):
     # API Settings
     api_prefix: str = Field(default="/api/v1", description="API prefix")
     
-    @validator("secret_key")
+    @field_validator("secret_key")
+    @classmethod
     def validate_secret_key(cls, v):
         if len(v) < 16:
             raise ValueError("Secret key must be at least 16 characters long")

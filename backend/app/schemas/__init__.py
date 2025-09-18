@@ -7,13 +7,18 @@ from .common import (
     ValidationError,
     ValidationErrorResponse
 )
+from .item import ItemBase, ItemCreate, ItemUpdate, ItemResponse
 
 __all__ = [
     "PaginationMeta",
     "PaginatedResponse",
     "ApiError", 
     "ValidationError",
-    "ValidationErrorResponse"
+    "ValidationErrorResponse",
+    "ItemBase",
+    "ItemCreate", 
+    "ItemUpdate",
+    "ItemResponse"
 ]
 
 from .requests import (

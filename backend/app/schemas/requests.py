@@ -3,7 +3,7 @@ Request and response schemas
 """
 
 from typing import Optional, List, Any
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 
 
@@ -31,7 +31,8 @@ class CreateItemRequest(BaseModel):
     price: float = Field(gt=0, description="Item price")
     is_active: bool = Field(True, description="Whether the item is active")
     
-    @validator("price")
+    @field_validator("price")
+    @classmethod
     def validate_price(cls, v):
         return round(v, 2)
 
@@ -43,7 +44,8 @@ class UpdateItemRequest(BaseModel):
     price: Optional[float] = Field(None, gt=0, description="Item price")
     is_active: Optional[bool] = Field(None, description="Whether the item is active")
     
-    @validator("price")
+    @field_validator("price")
+    @classmethod
     def validate_price(cls, v):
         if v is not None:
             return round(v, 2)

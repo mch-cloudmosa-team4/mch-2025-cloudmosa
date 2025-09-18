@@ -4,7 +4,9 @@ Dependency injection functions for FastAPI
 
 from typing import Optional
 from fastapi import Header, HTTPException, Query, Depends
+from sqlalchemy.orm import Session
 from app.config import settings
+from app.database import get_db
 
 
 async def get_api_key(x_api_key: Optional[str] = Header(None)) -> Optional[str]:

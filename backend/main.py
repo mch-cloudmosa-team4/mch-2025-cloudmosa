@@ -17,6 +17,7 @@ from fastapi.openapi.utils import get_openapi
 from app.config import settings
 from app.router import health_router, items_router
 from app.utils import logger, format_error_response
+from app.database import create_tables
 
 
 @asynccontextmanager
@@ -27,6 +28,9 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info(f"Starting {settings.app_name} v{settings.version}")
     logger.info(f"Debug mode: {settings.debug}")
+    logger.info("Creating database tables...")
+    create_tables()
+    logger.info("Database tables created successfully")
     yield
     # Shutdown
     logger.info(f"Shutting down {settings.app_name}")
