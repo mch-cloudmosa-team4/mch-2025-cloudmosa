@@ -214,3 +214,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# REST Client
+*.http
+*.rest
+
+# Databases
+*.db
+
+# VS Code
+.vscode/*
