@@ -1,25 +1,52 @@
 
 # [Project name] Backend
 
-A FastAPI-based backend server with SQLAlchemy database integration for the [Project name] project.
+A FastAPI-based backend server with PostgreSQL database integration for the [Project name] project.
 
 ## Quick Start
 
 ### Requirements
 - Python 3.12 or above
 - [uv](https://github.com/astral-sh/uv) package manager
+- Docker and Docker Compose
 
-### Install Dependencies
+### 1. Setup PostgreSQL Database
+
+Start the PostgreSQL database using Docker:
+
+```bash
+# Start PostgreSQL and pgAdmin containers
+docker-compose up -d
+
+# Check container status
+docker-compose ps
+```
+
+### 2. Install Dependencies
 
 ```bash
 uv sync
 ```
 
-### Initialize Database
+### 3. Environment Configuration
 
-Database tables will be created automatically on first startup.
+Copy the environment example and configure as needed:
 
-### Start the Server
+```bash
+cp .env.example .env
+```
+
+### 4. Initialize Database Tables
+
+```bash
+# Using Alembic migrations
+alembic upgrade head
+
+# Or create tables directly (development only)
+python -c "from app.database import create_tables; create_tables()"
+```
+
+### 5. Start the Server
 
 ```bash
 uv run fastapi dev main.py
@@ -44,27 +71,61 @@ The API will be available at [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
 ## Database Configuration
 
-The application uses SQLite by default for development. For production, you can configure PostgreSQL:
+The application uses PostgreSQL as the primary database with Docker for local development.
+
+### Database Services
+
+- **PostgreSQL**: `localhost:5432`
+  - Database: `backend_db`
+  - Username: `backend_user`
+  - Password: `backend_password`
+- **pgAdmin**: [http://localhost:5050](http://localhost:5050)
+  - Email: `admin@example.com`
+  - Password: `admin123`
 
 ### Environment Variables
 
+Key environment variables (see `.env.example` for complete list):
+
 ```bash
-DATABASE_URL=postgresql://user:password@localhost/[Project name]
+# Database connection
+DATABASE_URL=postgresql://backend_user:backend_password@localhost:5432/backend_db
+
+# Application settings
+DEBUG=False
+SECRET_KEY=your-secret-key-change-this-in-production
+HOST=127.0.0.1
+PORT=8000
 ```
 
-### Database Migration (TODO)
+### Docker Commands
 
->[!WARNING]
-> This section has not been refined. I just leave some files but not tested.
+```bash
+# Start database services
+docker-compose up -d
 
-Alembic is configured for database migrations:
+# Stop services
+docker-compose down
+
+# View logs
+docker-compose logs postgres
+docker-compose logs pgadmin
+
+# Reset database (removes all data)
+docker-compose down -v && docker-compose up -d
+```
+
+### Database Migration
 
 ```bash
 # Generate migration
-uv run alembic revision --autogenerate -m "description"
+alembic revision --autogenerate -m "description"
 
 # Apply migrations
-uv run alembic upgrade head
+alembic upgrade head
+
+# Rollback to previous version
+alembic downgrade -1
 ```
 
 ## Project Architecture
@@ -73,21 +134,29 @@ uv run alembic upgrade head
 
 ```
 backend/
-├── main.py              # FastAPI application entry point
-├── alembic.ini          # Database migration configuration
-├── migrations/          # Alembic migration files
+├── main.py                      # FastAPI application entry point
+├── pyproject.toml               # Project dependencies and configuration
+├── alembic.ini                  # Database migration configuration
+├── docker-compose.yml           # Docker services configuration
+├── .env.example                 # Environment variables template
+├── alembic/                     # Alembic migration files
+├── postgres-init/               # PostgreSQL initialization scripts
+├── pgadmin-config/              # pgAdmin auto-configuration
 ├── app/
-│   ├── config.py        # Configuration management
-│   ├── database.py      # Database connection & session
-│   ├── models/          # SQLAlchemy database models
-│   │   └── database.py  # Item model definition
-│   ├── crud/            # Database operations
-│   │   └── item.py      # Item CRUD operations
-│   ├── router/          # API routes
-│   │   └── items.py     # Items API endpoints
-│   ├── schemas/         # Pydantic schemas
-│   │   └── item.py      # Item request/response schemas
-│   └── utils/           # Utility functions
+│   ├── config.py                # Configuration management
+│   ├── database.py              # Database connection & session
+│   ├── dependencies.py          # FastAPI dependencies
+│   ├── models/                  # SQLAlchemy database models
+│   │   └── items.py
+│   ├── crud/                    # Database operations
+│   │   └── item.py
+│   ├── router/                  # API routes
+│   │   ├── health.py            # Health check endpoints
+│   │   └── items.py
+│   ├── schemas/                 # Pydantic schemas for HTTP request/response
+│   │   └── item.py
+│   └── utils/                   # Utility functions
+└── scripts/                     # Utility scripts
 ```
 
 ### Architecture Features
@@ -109,6 +178,35 @@ backend/
 - **Type Safety**: Full type hints with Pydantic validation
 - **Error Handling**: Comprehensive error responses with proper HTTP status codes
 
+## Troubleshooting
+
+### Common Issues
+
+**Database connection failed:**
+```bash
+# Check if containers are running
+docker-compose ps
+
+# Check database logs
+docker-compose logs postgres
+
+# Test database connection
+docker-compose exec postgres pg_isready -U backend_user
+```
+
+**Dependencies installation failed:**
+```bash
+# Clear cache and reinstall
+pip cache purge
+uv sync --reinstall
+```
+
+**Tables don't exist:**
+```bash
+# Run migrations
+alembic upgrade head
+```
+
 ## Expansion Suggestions
 
 Future development considerations:
@@ -122,11 +220,14 @@ Future development considerations:
 ## Tech Stack
 
 - **Framework**: FastAPI[standard]
-- **Database**: SQLAlchemy 2.0 + SQLite/PostgreSQL
+- **Database**: PostgreSQL 15 + SQLAlchemy 2.0
+- **Database Driver**: psycopg2-binary
 - **Migration**: Alembic
 - **Python**: 3.12+
 - **Package Manager**: uv
 - **Configuration**: Pydantic Settings
 - **Validation**: Pydantic models
+- **Development Database**: Docker + PostgreSQL
+- **Database Management**: pgAdmin 4
 
 This architecture provides a solid foundation with complete database integration, ready for production deployment and further feature development.

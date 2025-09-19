@@ -221,3 +221,6 @@ __marimo__/
 
 # Databases
 *.db
+
+# VS Code
+.vscode/*

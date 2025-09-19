@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     
     # Database Settings
     database_url: str = Field(
-        default="sqlite:///./app.db", 
+        default="postgresql://backend_user:backend_password@localhost:5432/backend_db", 
         description="Database connection URL"
     )
     database_echo: bool = Field(
