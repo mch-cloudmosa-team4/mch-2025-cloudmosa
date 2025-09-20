@@ -65,6 +65,23 @@ class Settings(BaseSettings):
     
     # API Settings
     api_prefix: str = Field(default="/api/v1", description="API prefix")
+
+    embedding_model: str = Field(
+        default="sentence-transformers/all-MiniLM-L6-v2",
+        description="Model used for calculating string embedding value"
+    )
+    embedding_model_dimension: int = Field(
+        default=384,
+        description="Embedding model dimension"
+    )
+    
+    # Object Storage (MinIO/S3-compatible)
+    minio_endpoint: str = Field(default="localhost:9000", description="MinIO endpoint host:port")
+    minio_access_key: str = Field(default="minioadmin", description="MinIO access key")
+    minio_secret_key: str = Field(default="minioadmin", description="MinIO secret key")
+    minio_region: str = Field(default="us-east-1", description="MinIO region")
+    minio_secure: bool = Field(default=False, description="Use HTTPS to access MinIO")
+    minio_bucket: str = Field(default="files", description="Default bucket for file storage")
     
     @field_validator("secret_key")
     @classmethod

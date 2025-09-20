@@ -10,12 +10,12 @@ A FastAPI-based backend server with PostgreSQL database integration for the [Pro
 - [uv](https://github.com/astral-sh/uv) package manager
 - Docker and Docker Compose
 
-### 1. Setup PostgreSQL Database
+### 1. Setup PostgreSQL + MinIO
 
 Start the PostgreSQL database using Docker:
 
 ```bash
-# Start PostgreSQL and pgAdmin containers
+# Start PostgreSQL, MinIO and pgAdmin containers
 docker-compose up -d
 
 # Check container status
@@ -54,12 +54,18 @@ uv run fastapi dev main.py
 
 The API will be available at [http://127.0.0.1:8000](http://127.0.0.1:8000).
 
+MinIO Console is available at [http://localhost:9001](http://localhost:9001) (default creds: `minioadmin`/`minioadmin`).
+
 ## API Endpoints
 
 - **Root**: `http://127.0.0.1:8000/` - Basic API information
 - **API Documentation**: `http://127.0.0.1:8000/docs` - Interactive Swagger UI
 - **Health Check**: `http://127.0.0.1:8000/api/v1/health` - Service health status
 - **Items CRUD**: `http://127.0.0.1:8000/api/v1/items` - Complete CRUD operations
+- **Files**: `http://127.0.0.1:8000/api/v1/files`
+  - `POST /upload` - Upload a file (form-data key: `file`, optional `folder` query)
+  - `GET /presign?id=...` - Get presigned download URL
+  - `DELETE /?id=...` - Delete an object
 
 ### Items API Examples
 
@@ -96,6 +102,14 @@ DEBUG=False
 SECRET_KEY=your-secret-key-change-this-in-production
 HOST=127.0.0.1
 PORT=8000
+
+# MinIO (S3-compatible) settings
+MINIO_ENDPOINT=localhost:9000
+MINIO_ACCESS_KEY=minioadmin
+MINIO_SECRET_KEY=minioadmin
+MINIO_REGION=us-east-1
+MINIO_SECURE=False
+MINIO_BUCKET=files
 ```
 
 ### Docker Commands
@@ -110,6 +124,7 @@ docker-compose down
 # View logs
 docker-compose logs postgres
 docker-compose logs pgadmin
+docker-compose logs minio
 
 # Reset database (removes all data)
 docker-compose down -v && docker-compose up -d

@@ -1,7 +1,7 @@
 # Data models module
 
 from .base import BaseResponse, ErrorResponse, HealthCheck, PaginatedResponse
-from .items import Item
+from .item import Item
 from .users import User, UserRole
 from .profiles import Profile, Gender
 from .skills import Skill
