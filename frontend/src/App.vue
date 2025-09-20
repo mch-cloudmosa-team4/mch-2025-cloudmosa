@@ -12,36 +12,48 @@
         <div class="circular-menu">
           <div
             class="menu-item item-1"
+            :class="{ hover: hoveredItem === 'profile' }"
             @click="goToPage('/profile/' + getUserId())"
-            @mouseenter="showProfileLabel = true"
-            @mouseleave="showProfileLabel = false"
+            @touchstart="handleTouchStart('profile')"
+            @touchend="handleTouchEnd"
+            @mouseenter="showProfileLabel = true; hoveredItem = 'profile'"
+            @mouseleave="showProfileLabel = false; hoveredItem = null"
           >
             <span class="material-icons-round">account_circle</span>
             <span v-if="showProfileLabel" class="item-label">Profile</span>
           </div>
           <div
             class="menu-item item-2"
+            :class="{ hover: hoveredItem === 'jobs' }"
             @click="goToPage('/job')"
-            @mouseenter="showJobsLabel = true"
-            @mouseleave="showJobsLabel = false"
+            @touchstart="handleTouchStart('jobs')"
+            @touchend="handleTouchEnd"
+            @mouseenter="showJobsLabel = true; hoveredItem = 'jobs'"
+            @mouseleave="showJobsLabel = false; hoveredItem = null"
           >
             <span v-if="showJobsLabel" class="item-label">Jobs</span>
             <span class="material-icons-round">work</span>
           </div>
           <div
             class="menu-item item-3"
+            :class="{ hover: hoveredItem === 'dashboard' }"
             @click="goToPage('/dashboard')"
-            @mouseenter="showDashboardLabel = true"
-            @mouseleave="showDashboardLabel = false"
+            @touchstart="handleTouchStart('dashboard')"
+            @touchend="handleTouchEnd"
+            @mouseenter="showDashboardLabel = true; hoveredItem = 'dashboard'"
+            @mouseleave="showDashboardLabel = false; hoveredItem = null"
           >
             <span v-if="showDashboardLabel" class="item-label">Dashboard</span>
             <span class="material-icons-round">dashboard</span>
           </div>
           <div
             class="menu-item item-4"
+            :class="{ hover: hoveredItem === 'community' }"
             @click="goToPage('/profile')"
-            @mouseenter="showCommunityLabel = true"
-            @mouseleave="showCommunityLabel = false"
+            @touchstart="handleTouchStart('community')"
+            @touchend="handleTouchEnd"
+            @mouseenter="showCommunityLabel = true; hoveredItem = 'community'"
+            @mouseleave="showCommunityLabel = false; hoveredItem = null"
           >
             <span class="material-icons-round">groups</span>
             <span v-if="showCommunityLabel" class="item-label">Community</span>
@@ -107,6 +119,7 @@ const showProfileLabel = ref(false)
 const showJobsLabel = ref(false)
 const showDashboardLabel = ref(false)
 const showCommunityLabel = ref(false)
+const hoveredItem = ref<string | null>(null)
 let hideTimer: number | null = null
 
 // 計算屬性
@@ -205,6 +218,37 @@ function goToNews() {
 function goToPage(path: string) {
   hideMenu()
   router.push(path)
+}
+
+// 觸控事件處理函數
+function handleTouchStart(item: string) {
+  hoveredItem.value = item
+  // 顯示對應的標籤
+  switch (item) {
+    case 'profile':
+      showProfileLabel.value = true
+      break
+    case 'jobs':
+      showJobsLabel.value = true
+      break
+    case 'dashboard':
+      showDashboardLabel.value = true
+      break
+    case 'community':
+      showCommunityLabel.value = true
+      break
+  }
+}
+
+function handleTouchEnd() {
+  // 短暫延遲後清除懸停狀態和標籤
+  setTimeout(() => {
+    hoveredItem.value = null
+    showProfileLabel.value = false
+    showJobsLabel.value = false
+    showDashboardLabel.value = false
+    showCommunityLabel.value = false
+  }, 150)
 }
 
 // 監聽路由變化，關閉選單
@@ -358,9 +402,16 @@ watch(route, () => {
   z-index: 1003; /* 確保選單項目在最上層 */
   opacity: 0;
   transform: scale(0);
+  /* 增加觸摸目標區域 */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* 確保觸摸反應靈敏 */
+  touch-action: manipulation;
 }
 
-.menu-item:hover {
+.menu-item:hover,
+.menu-item.hover {
   transform: scale(1.1);
   background: rgb(42, 65, 102);
   color: white;
@@ -379,13 +430,16 @@ watch(route, () => {
   margin-top: 2px;
 }
 
-.menu-item:hover .material-icons-round {
+.menu-item:hover .material-icons-round,
+.menu-item.hover .material-icons-round {
   color: white;
 }
 
 /* 懸浮狀態下 Jobs 和 Dashboard 的圖示間距 */
 .item-2:hover .material-icons-round,
-.item-3:hover .material-icons-round {
+.item-2.hover .material-icons-round,
+.item-3:hover .material-icons-round,
+.item-3.hover .material-icons-round {
   margin-bottom: 0;
   margin-top: 2px;
 }
@@ -398,7 +452,8 @@ watch(route, () => {
   animation: labelFadeIn 0.2s ease-in-out;
 }
 
-.menu-item:hover .item-label {
+.menu-item:hover .item-label,
+.menu-item.hover .item-label {
   color: white;
   animation: labelFadeIn 0.2s ease-in-out;
 }
