@@ -77,6 +77,7 @@ class Settings(BaseSettings):
     
     # Object Storage (MinIO/S3-compatible)
     minio_endpoint: str = Field(default="localhost:9000", description="MinIO endpoint host:port")
+    minio_external_endpoint: str = Field(default="localhost:9000", description="External MinIO endpoint for presigned URLs")
     minio_access_key: str = Field(default="minioadmin", description="MinIO access key")
     minio_secret_key: str = Field(default="minioadmin", description="MinIO secret key")
     minio_region: str = Field(default="us-east-1", description="MinIO region")

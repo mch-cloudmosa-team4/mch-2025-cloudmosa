@@ -18,6 +18,17 @@ from app.database import get_db
 from app.minio import get_minio_client
 
 
+def fix_presigned_url(url: str) -> str:
+    """Replace internal MinIO hostname with external endpoint for public access."""
+    if settings.minio_endpoint != settings.minio_external_endpoint:
+        # Replace the internal endpoint with external endpoint
+        protocol = "https://" if settings.minio_secure else "http://"
+        internal_url = f"{protocol}{settings.minio_endpoint}"
+        external_url = f"{protocol}{settings.minio_external_endpoint}"
+        return url.replace(internal_url, external_url)
+    return url
+
+
 router = APIRouter(
     prefix="/files",
     tags=["files"],
@@ -104,7 +115,9 @@ async def presign_download(
             object_name=id,
             expires=timedelta(seconds=expires),
         )
-        return FilePresignResponse(url=url)
+        # Fix URL for external access
+        external_url = fix_presigned_url(url)
+        return FilePresignResponse(url=external_url)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Presign failed: {exc}")
 
@@ -130,6 +143,8 @@ async def presign_redirect(
             object_name=id,
             expires=timedelta(seconds=expires),
         )
-        return RedirectResponse(url=url, status_code=307)
+        # Fix URL for external access
+        external_url = fix_presigned_url(url)
+        return RedirectResponse(url=external_url, status_code=307)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Presign redirect failed: {exc}")
