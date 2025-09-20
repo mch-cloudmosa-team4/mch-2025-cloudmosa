@@ -1,4 +1,6 @@
 // API 基礎 URL - 從環境變量獲取，或使用默認值
+import { getLocationWithAddress, type LocationData } from '../utils/location'
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
 
 interface LoginResponse {
@@ -36,57 +38,95 @@ export async function login(phone: string, password: string): Promise<void> {
   const hashedPassword = await hashPassword(password)
   console.log('🔒 Password hashed successfully')
   
+  // 獲取地理位置信息
+  let locationData: LocationData | null = null
   try {
-    // 嘗試使用隱藏的 form 提交
-    const form = document.createElement('form')
-    form.method = 'POST'
-    form.action = `${API_BASE_URL}/api/v1/auth/login`
-    form.target = '_blank'
-    form.style.display = 'none'
+    console.log('🌍 Attempting to get location data...')
+    locationData = await getLocationWithAddress()
+    console.log('📍 Location data obtained successfully:', locationData)
+  } catch (locationError) {
+    console.warn('⚠️ Could not get location data, continuing without location:', locationError)
+    // 繼續登入流程，即使沒有位置信息
+    // 不拋出錯誤，讓用戶仍能登入
+  }
+  
+  try {
+    // 準備表單數據
+    const formData = new URLSearchParams()
+    formData.append('phone', phone)
+    formData.append('passwd_hash', hashedPassword)
     
-    const phoneInput = document.createElement('input')
-    phoneInput.name = 'phone'
-    phoneInput.value = phone
-    form.appendChild(phoneInput)
-    
-    const passwordInput = document.createElement('input')
-    passwordInput.name = 'passwd_hash'
-    passwordInput.value = hashedPassword
-    form.appendChild(passwordInput)
-    
-    document.body.appendChild(form)
-    
-    console.log('📤 Submitting form to avoid CORS...')
-    
-    // 臨時解決方案：模擬成功登入
-    console.log('⚠️ Using mock response due to CORS limitation')
-    
-    // 移除表單
-    document.body.removeChild(form)
-    
-    // 模擬成功回應 - 臨時用於開發
-    const mockData = {
-      access_token: 'mock_access_token_' + Date.now(),
-      refresh_token: 'mock_refresh_token_' + Date.now(),
-      user: {
-        display_name: '測試用戶',
-        user_id: 'mock_user_id',
-        phone: phone
+    // 添加地理位置信息（如果可用）
+    if (locationData) {
+      formData.append('latitude', locationData.latitude.toString())
+      formData.append('longitude', locationData.longitude.toString())
+      
+      if (locationData.city) {
+        formData.append('city', locationData.city)
+      }
+      
+      if (locationData.country) {
+        formData.append('country', locationData.country)
+      }
+      
+      // 添加州/省份資訊（Nominatim 提供的）
+      if (locationData.state) {
+        formData.append('state', locationData.state)
+      }
+      
+      if (locationData.formatted_address) {
+        formData.append('address', locationData.formatted_address)
       }
     }
     
-    // 儲存 token 和用戶資訊
-    localStorage.setItem('auth_token', mockData.access_token)
-    localStorage.setItem('refresh_token', mockData.refresh_token)
-    localStorage.setItem('auth_name', mockData.user.display_name)
-    localStorage.setItem('auth_user_id', mockData.user.user_id)
-    localStorage.setItem('auth_phone', mockData.user.phone)
+    console.log('📤 Sending request to:', `${API_BASE_URL}/api/v1/auth/login`)
+    console.log('📤 Request body:', formData.toString())
     
-    console.log('💾 Mock user data saved to localStorage')
+    const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: formData
+    })
+
+    console.log('📥 Response received:', response.status, response.statusText)
+
+    if (!response.ok) {
+      let errorMessage = 'Login failed'
+      try {
+        const errorData: LoginError = await response.json()
+        console.log('❌ Error response data:', errorData)
+        errorMessage = errorData.detail || errorMessage
+      } catch {
+        errorMessage = `HTTP ${response.status}: ${response.statusText}`
+      }
+      throw new Error(errorMessage)
+    }
+
+    const data: LoginResponse = await response.json()
+    console.log('✅ Login response data:', data)
+    
+    // 儲存 token 和用戶資訊
+    localStorage.setItem('auth_token', data.access_token)
+    localStorage.setItem('refresh_token', data.refresh_token)
+    localStorage.setItem('auth_name', data.user.display_name)
+    localStorage.setItem('auth_user_id', data.user.user_id)
+    localStorage.setItem('auth_phone', data.user.phone)
+    
+    // 也儲存位置信息（如果有的話）
+    if (locationData) {
+      localStorage.setItem('auth_location', JSON.stringify(locationData))
+    }
+    
+    console.log('💾 User data saved to localStorage')
     
   } catch (error) {
     console.error('🚨 Login error:', error)
-    throw new Error('Login failed due to CORS restrictions. Please contact the backend administrator to add localhost:5173 to allowed origins.')
+    if (error instanceof Error) {
+      throw new Error(error.message)
+    }
+    throw new Error('Network error occurred')
   }
 }
 

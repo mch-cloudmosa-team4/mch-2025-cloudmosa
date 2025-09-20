@@ -11,7 +11,7 @@
         type="tel"
         inputmode="tel"
         autocomplete="tel"
-        placeholder="+886000000000"
+        placeholder="Enter your phone number"
         @focus="focusedIndex = 0"
         @keydown="handleKeys"
       />
@@ -44,6 +44,10 @@
       Register
     </button>
 
+    <div v-if="locationStatus" class="location-status">
+      <p :class="locationStatus.type">{{ locationStatus.message }}</p>
+    </div>
+
     <p v-if="error" class="error" role="alert">{{ error }}</p>
   </main>
 </template>
@@ -58,6 +62,7 @@ const phone = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
+const locationStatus = ref<{ type: 'info' | 'warning' | 'error'; message: string } | null>(null)
 
 const userRef = ref(null)
 const passRef = ref(null)
@@ -68,6 +73,10 @@ const focusedIndex = ref(0)
 onMounted(() => {
   if (isAuthed()) router.replace('/home')
   window.addEventListener('keydown', handleKeys)
+  
+  // 顯示位置資訊狀態
+  locationStatus.value = { type: 'info', message: '🌍 Location will be requested during login' }
+  
   // Ensure initial focus is correctly set
   nextTick(() => {
     focusAt(0)
@@ -114,16 +123,9 @@ async function submit() {
   
   if (loading.value) return
   
-  // 基本驗證
+  // 只保留基本的空值檢查，移除格式驗證
   if (!phone.value.trim()) {
     error.value = 'Please enter your phone number'
-    return
-  }
-  
-  // 簡單的電話號碼格式檢查
-  const phoneRegex = /^\+886\d{9}$/
-  if (!phoneRegex.test(phone.value.trim())) {
-    error.value = 'Please enter a valid phone number (e.g., +886000000000)'
     return
   }
   
@@ -132,26 +134,25 @@ async function submit() {
     return
   }
   
-  console.log('📝 Validation passed, calling login API...', {
+  console.log('📝 Basic validation passed, calling login API...', {
     phone: phone.value.trim(),
     password: '***' // 不顯示密碼
   })
   
   error.value = ''
   loading.value = true
+  locationStatus.value = { type: 'info', message: '🔍 Getting location...' }
   
   try {
     await login(phone.value.trim(), password.value)
     console.log('✅ Login successful!')
+    locationStatus.value = { type: 'info', message: '✅ Login successful!' }
     router.replace('/home')
   } catch (err: any) {
     console.error('❌ Login failed:', err)
+    locationStatus.value = { type: 'warning', message: '⚠️ Location unavailable, but login attempted' }
     // 顯示服務器返回的錯誤訊息
-    if (err.message === 'Invalid phone number or password') {
-      error.value = 'Invalid phone number or password'
-    } else {
-      error.value = err.message || 'Login failed. Please try again.'
-    }
+    error.value = err.message || 'Login failed. Please try again.'
   } finally {
     loading.value = false
   }
@@ -227,5 +228,27 @@ input {
   font-size: 12px;
   text-align: center;
   margin-top: 4px;
+}
+
+.location-status {
+  margin-top: 8px;
+}
+
+.location-status p {
+  font-size: 11px;
+  text-align: center;
+  margin: 2px 0;
+}
+
+.location-status .info {
+  color: #1976d2;
+}
+
+.location-status .warning {
+  color: #f57c00;
+}
+
+.location-status .error {
+  color: #d32f2f;
 }
 </style>
