@@ -148,13 +148,18 @@ systemctl enable fail2ban
 echo "🚀 啟動服務..."
 cd $PROJECT_DIR/backend
 
-# 載入環境變數
+# 載入並導出環境變數
 echo "📋 載入環境變數..."
 set -a  # 自動導出所有變數
 source $PROJECT_DIR/.env
 set +a  # 停止自動導出
 
 echo "使用的 GitHub Repository: $GITHUB_REPOSITORY"
+echo "PostgreSQL 密碼已設定: ${POSTGRES_PASSWORD:0:8}..."
+
+# 複製 .env 文件到 backend 目錄讓 docker-compose 能讀取
+cp $PROJECT_DIR/.env $PROJECT_DIR/backend/.env
+chown $SERVICE_USER:$SERVICE_USER $PROJECT_DIR/backend/.env
 
 # 檢查是否有預構建的映像，如果沒有就在本地構建
 if docker pull ghcr.io/$GITHUB_REPOSITORY/backend:latest 2>/dev/null; then
@@ -164,6 +169,7 @@ else
     echo "⚠️  預構建映像不存在，使用本地構建..."
     # 暫時修改 docker-compose 使用本地構建
     sed 's|image: ghcr.io/${GITHUB_REPOSITORY}/backend:latest|build: .|' docker-compose.prod.yml > docker-compose.local.yml
+    chown $SERVICE_USER:$SERVICE_USER docker-compose.local.yml
     sudo -u $SERVICE_USER docker-compose -f docker-compose.local.yml up -d --build
 fi
 
@@ -173,7 +179,11 @@ sleep 30
 
 # 運行資料庫遷移
 echo "🗄️  運行資料庫遷移..."
-sudo -u $SERVICE_USER docker-compose -f docker-compose.prod.yml exec -T backend uv run alembic upgrade head
+if [ -f docker-compose.local.yml ]; then
+    sudo -u $SERVICE_USER POSTGRES_PASSWORD="$POSTGRES_PASSWORD" MINIO_ACCESS_KEY="$MINIO_ACCESS_KEY" MINIO_SECRET_KEY="$MINIO_SECRET_KEY" GITHUB_REPOSITORY="$GITHUB_REPOSITORY" docker-compose -f docker-compose.local.yml exec -T backend uv run alembic upgrade head
+else
+    sudo -u $SERVICE_USER POSTGRES_PASSWORD="$POSTGRES_PASSWORD" MINIO_ACCESS_KEY="$MINIO_ACCESS_KEY" MINIO_SECRET_KEY="$MINIO_SECRET_KEY" GITHUB_REPOSITORY="$GITHUB_REPOSITORY" docker-compose -f docker-compose.prod.yml exec -T backend uv run alembic upgrade head
+fi
 
 
 # 健康檢查
