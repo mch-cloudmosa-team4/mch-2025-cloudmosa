@@ -10,15 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
+      contents: write
       pages: write
       id-token: write
-
-    # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-    # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
-    concurrency:
-      group: "pages"
-      cancel-in-progress: false
 
     steps:
       # 1️⃣ Checkout 代碼
@@ -45,17 +39,13 @@ jobs:
         env:
           NODE_ENV: production
 
-      # 5️⃣ Setup Pages
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      # 6️⃣ Upload artifact
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./frontend/dist
-
-      # 7️⃣ Deploy to GitHub Pages
+      # 5️⃣ 部署到 GitHub Pages 使用 peaceiris action
       - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend/dist
+          publish_branch: gh-pages
+          clean: true
+          enable_jekyll: false
+          force_orphan: true
