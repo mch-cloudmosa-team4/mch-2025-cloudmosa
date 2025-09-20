@@ -2,9 +2,24 @@
   <main class="screen">
     <div class="header">
       <h1 class="title">Hi, {{ name }} 👋</h1>
-      <button class="settings-btn" @click="$router.push('/menu')">
-        <span class="material-icons-round">settings</span>
-      </button>
+      <div class="logout-container">
+        <button class="logout-btn" @click="handleLogout" @mouseenter="showLogoutLabel = true" @mouseleave="showLogoutLabel = false">
+          <span class="material-icons-round">logout</span>
+        </button>
+        <span v-if="showLogoutLabel" class="logout-label">Logout</span>
+      </div>
+    </div>
+
+    <!-- 登出確認對話框 -->
+    <div v-if="showLogoutDialog" class="logout-dialog-overlay" @click="cancelLogout">
+      <div class="logout-dialog" @click.stop>
+        <h3>Confirm Logout</h3>
+        <p>Are you sure you want to logout?</p>
+        <div class="dialog-buttons">
+          <button class="dialog-btn cancel" @click="cancelLogout">Cancel</button>
+          <button class="dialog-btn confirm" @click="confirmLogout">Logout</button>
+        </div>
+      </div>
     </div>
     
     <!-- 3D 模型容器替換原來的 GIF -->
@@ -45,6 +60,8 @@ const router = useRouter()
 const name = localStorage.getItem('auth_name') || 'Guest'
 const threeContainer = ref<HTMLElement>()
 const loading = ref(true)
+const showLogoutLabel = ref(false)
+const showLogoutDialog = ref(false)
 
 // Mock level
 const level = ref(3)
@@ -202,6 +219,23 @@ const updateCameraPosition = () => {
   }
 }
 
+// 登出處理函數
+const handleLogout = () => {
+  showLogoutDialog.value = true
+}
+
+const confirmLogout = () => {
+  // 清除登入狀態
+  localStorage.removeItem('auth_token')
+  localStorage.removeItem('auth_name')
+  // 跳轉到登入頁面
+  router.replace('/login')
+}
+
+const cancelLogout = () => {
+  showLogoutDialog.value = false
+}
+
 onMounted(() => {
   initThreeJS()
   loadPigModel()
@@ -265,6 +299,118 @@ if (!isAuthed()) router.replace('/login')
 .settings-btn .material-icons-round {
   font-size: 20px;
   color: rgb(42, 65, 102);
+}
+
+/* 登出按鈕容器 */
+.logout-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logout-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.logout-btn:hover {
+  background: rgba(42, 65, 102, 0.1);
+}
+
+.logout-btn .material-icons-round {
+  font-size: 20px;
+  color: rgb(42, 65, 102);
+}
+
+.logout-label {
+  position: absolute;
+  top: 100%;
+  margin-top: 4px;
+  font-size: 10px;
+  color: rgb(42, 65, 102);
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px 6px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+/* 登出確認對話框樣式 */
+.logout-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 320px;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.logout-dialog {
+  background: white;
+  padding: 16px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  width: 180px;
+  max-width: 180px;
+}
+
+.logout-dialog h3 {
+  margin: 0 0 8px 0;
+  color: #333;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.logout-dialog p {
+  margin: 0 0 16px 0;
+  color: #666;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.dialog-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.dialog-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s ease;
+  flex: 1;
+}
+
+.dialog-btn.cancel {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.dialog-btn.cancel:hover {
+  background: #e0e0e0;
+}
+
+.dialog-btn.confirm {
+  background: rgb(42, 65, 102);
+  color: white;
+}
+
+.dialog-btn.confirm:hover {
+  background: rgb(60, 85, 122);
 }
 
 .subtitle {
