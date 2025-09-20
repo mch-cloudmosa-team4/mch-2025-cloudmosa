@@ -22,6 +22,7 @@ class JobBase(BaseModel):
     address: Optional[str] = Field(None)
     end_date: Optional[datetime] = Field(None)
     pictures: Optional[list[str]] = Field(None)
+    skills: Optional[list[str]] = Field(None)
 
     @model_validator(mode="after")
     @classmethod

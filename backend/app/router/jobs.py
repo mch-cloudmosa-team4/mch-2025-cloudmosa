@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, Query, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.crud import jobs
+from app.crud import jobs, job_requirements, job_pictures
 from app.schemas import JobCreate, JobUpdate, JobResponse
 from app.models import BaseResponse
 
@@ -28,6 +28,13 @@ async def list_jobs(
     db: Session = Depends(get_db)
 ) -> List[JobResponse]:
     jobs_list = jobs.get_multi(db, skip=skip, limit=limit)
+    for i, job in enumerate(jobs_list):
+        skills = job_requirements.get(db, job_id=job.id)
+        skills = [skill.skill_id for skill in skills]
+        jobs_list[i]["skills"] = skills
+        pictures = job_pictures.get(db, job_id=job.id)
+        pictures = [picture.job_id for picture in pictures]
+        jobs_list[i]["pictures"] = pictures
     return [JobResponse.model_validate(job) for job in jobs_list]
 
 
@@ -39,6 +46,12 @@ async def get_job(
     job = jobs.get(db, job_id=job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
+    skills = job_requirements.get(db, job_id=job.id)
+    skills = [skill.skill_id for skill in skills]
+    job["skills"] = skills
+    pictures = job_pictures.get(db, job_id=job.id)
+    pictures = [picture.job_id for picture in pictures]
+    job["pictures"] = pictures
     return JobResponse.model_validate(job)
 
 
@@ -48,10 +61,18 @@ async def create_job(
     db: Session = Depends(get_db)
 ) -> JobResponse:
     if job_data.pictures:
-        # pictures = obj_in.pictures
+        pictures = job_data["pictures"]
         del job_data["pictures"]
 
+    if job_data.skills:
+        skill_ids = job_data["skills"]
+        del job_data["skills"]
+
     created_job = jobs.create(db=db, obj_in=job_data)
+    for picture_id in pictures:
+        job_pictures.create(db, job_id=created_job.id, picture_id=picture_id)
+    for skill_id in skill_ids:
+        job_requirements.create(db, job_id=created_job.id, skill_id=skill_id)
     return JobResponse.model_validate(created_job)
 
 
@@ -62,14 +83,24 @@ async def update_job(
     db: Session = Depends(get_db)
 ) -> JobResponse:
     if job_update.pictures:
-        # pictures = obj_in.pictures
+        pictures = job_update["pictures"]
         del job_update["pictures"]
+
+    if job_update.skills:
+        skill_ids = job_update["skills"]
+        del job_update["skills"]
 
     job_obj = jobs.get(db, job_id=job_id)
     if not job_obj:
         raise HTTPException(status_code=404, detail="Job not found")
 
     updated_job = jobs.update(db=db, db_obj=job_obj, obj_in=job_update)
+    job_pictures.delete(db, job_id=updated_job.id)
+    job_requirements.delete(db, job_id=updated_job.id)
+    for picture_id in pictures:
+        job_pictures.create(db, job_id=updated_job.id, picture_id=picture_id)
+    for skill_id in skill_ids:
+        job_requirements.create(db, job_id=updated_job.id, skill_id=skill_id)
     return JobResponse.model_validate(updated_job)
 
 
@@ -82,4 +113,6 @@ async def delete_job(
     if not job_obj:
         raise HTTPException(status_code=404, detail="Job not found")
 
+    job_pictures.delete(db, job_id=job_id)
+    job_requirements.delete(db, job_id=job_id)
     return BaseResponse(message=f"Job {job_id} deleted successfully")
