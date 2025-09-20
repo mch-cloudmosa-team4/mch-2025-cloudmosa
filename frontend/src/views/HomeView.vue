@@ -1,35 +1,39 @@
 <template>
   <main class="screen">
     <div class="header">
-      <h1 class="title">Welcome</h1>
+      <h1 class="title">Hi, {{ name }} 👋</h1>
       <button class="settings-btn" @click="$router.push('/menu')">
         <span class="material-icons-round">settings</span>
       </button>
     </div>
-    <p class="subtitle">Hi, {{ name }} 👋</p>
-    <button class="btn" @click="goProfiles">Profiles</button>
-    <button class="btn" @click="goJobs">Jobs</button>
-    <button class="btn" @click="$router.push('/application')">My Applications</button>
-    <button class="btn" @click="$router.push('/chat')">Messages</button>
+    <img src="/PIG.gif" alt="fun gif" class="gif" />
+
+    <div class="level-container">
+      <span class="level-label">Level {{ level }}</span>
+      <div class="level-bar">
+        <div class="level-progress" :style="{ width: progress + '%' }"></div>
+      </div>
+      <span class="level-exp">{{ exp }}/{{ expNeeded }} EXP</span>
+    </div>
   </main>
 </template>
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { isAuthed } from '../services/auth'
+import { ref } from 'vue'
 
 const router = useRouter()
 const name = localStorage.getItem('auth_name') || 'Guest'
 
+// Mock level
+const level = ref(3)
+const exp = ref(120)          // 當前經驗
+const expNeeded = ref(200)    // 升級所需經驗
+const progress = ref((exp.value / expNeeded.value) * 100)
+
 if (!isAuthed()) router.replace('/login')
 
-function goProfiles() {
-  router.push('/profile')
-}
-
-function goJobs() {
-  router.push('/job')
-}
 </script>
 
 <style scoped>
@@ -100,5 +104,51 @@ function goJobs() {
 .btn:hover,
 .btn:focus {
   background: rgb(80, 110, 160);
+}
+
+.gif {
+  width: 80%;
+  max-height: 120px;
+  object-fit: contain;
+  margin: 8px 0;
+}
+
+.video {
+  width: 80%;
+  max-height: 120px;
+  object-fit: contain;
+  margin: 8px 0;
+}
+
+.level-container {
+  width: 100%;
+  text-align: center;
+  margin-top: auto; /* 貼近底部 */
+}
+
+.level-label {
+  font-size: 12px;
+  font-weight: bold;
+  color: #333;
+}
+
+.level-bar {
+  width: 100%;
+  height: 10px;
+  background: #ddd;
+  border-radius: 6px;
+  margin: 6px 0;
+  overflow: hidden;
+}
+
+.level-progress {
+  height: 100%;
+  background: linear-gradient(to right, #2a4166, #5070a0);
+  transition: width 0.3s ease;
+}
+
+.level-exp {
+  font-size: 11px;
+  color: #666;
 }
 </style>
