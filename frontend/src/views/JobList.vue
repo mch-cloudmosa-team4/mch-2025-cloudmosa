@@ -100,6 +100,7 @@ function goToCreate() {
 }
 
 .job-info {
+  margin-top: 16px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
