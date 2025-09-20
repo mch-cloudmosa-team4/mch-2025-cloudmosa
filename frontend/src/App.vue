@@ -224,12 +224,20 @@ watch(route, () => {
   background: #f8f8f8;
   font-family: RobotoMono, sans-serif;
   position: relative;
+  max-width: 240px; /* 確保最大寬度 */
+  max-height: 320px; /* 確保最大高度 */
 }
 
 .main-content {
   flex: 1;
   overflow-y: auto;
   font-size: 14px;
+  transition: opacity 0.3s ease; /* 添加淡化過渡效果 */
+}
+
+/* 當 Home 選單展開時，淡化主內容 */
+.app-container:has(.home-menu-overlay) .main-content {
+  opacity: 0.3; /* 淡化主內容到 30% 透明度 */
 }
 
 /* 底部導航欄 */
@@ -238,6 +246,7 @@ watch(route, () => {
   height: 45px; /* 從 60px 降低到 45px */
   background: rgb(42, 65, 102); /* 改為藍色背景 */
   border-top: 1px solid #e0e0e0;
+  z-index: 1001; /* 設置導航欄層級 */
 }
 
 .nav-container {
@@ -307,28 +316,26 @@ watch(route, () => {
 
 /* Home展開選單 - 圓弧形浮動選單 */
 .home-menu-overlay {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3); /* 稍微加深背景遮罩 */
-  z-index: 1000;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.4);
   pointer-events: none;
+  z-index: 1000;
 }
 
 .circular-menu {
   position: absolute;
-  bottom: 125px; /* 從 140px 調整為 125px，適應較低的底部導航欄 */
+  bottom: 0px; /* 距離底部導航欄的距離 */
   width: 200px;
-  height: 100px;
+  height: 130px;
   left: 50%;
   transform: translateX(-50%);
   animation: fadeIn 0.3s ease-out;
   pointer-events: auto; /* 恢復選單的鼠標事件 */
+  z-index: 1002; /* 確保在導航欄之上 */
 }
 
 .menu-item {
@@ -345,6 +352,7 @@ watch(route, () => {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
   animation: scaleIn 0.4s ease-out;
+  z-index: 1003; /* 確保選單項目在最上層 */
 }
 
 .menu-item:hover {
@@ -393,25 +401,25 @@ watch(route, () => {
 /* 圓弧形排列 - 沿著半圓弧均勻分布四個選項 */
 /* 使用圓弧數學計算：半徑80px，角度從-135°到-45°均勻分布 */
 .item-1 {
-  bottom: 40px;   /* Profile - 左下角 */
+  bottom: 5px;   /* Profile - 左下角，提高位置避免與導航欄重疊 */
   left: 15px;
   animation-delay: 0.1s;
 }
 
 .item-2 {
-  bottom: 78px;   /* Jobs - 左上角 */
-  left: 49px;
+  bottom: 37px;   /* Jobs - 左上角 */
+  left: 51px;
   animation-delay: 0.2s;
 }
 
 .item-3 {
-  bottom: 78px;   /* Dashboard - 右上角 */
-  right: 49px;
+  bottom: 37px;   /* Dashboard - 右上角 */
+  right: 51px;
   animation-delay: 0.3s;
 }
 
 .item-4 {
-  bottom: 40px;   /* Community - 右下角 */
+  bottom: 5px;   /* Community - 右下角，提高位置避免與導航欄重疊 */
   right: 15px;
   animation-delay: 0.4s;
 }
