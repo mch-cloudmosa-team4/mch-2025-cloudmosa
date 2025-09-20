@@ -20,6 +20,16 @@
         <div class="level-progress" :style="{ width: progress + '%' }"></div>
       </div>
       <span class="level-exp">{{ exp }}/{{ expNeeded }} EXP</span>
+      
+      <!-- 方向控制按鈕 -->
+      <div class="direction-controls">
+        <button class="direction-btn up" @click="rotateUp">
+          <span class="material-icons-round">keyboard_arrow_up</span>
+        </button>
+        <button class="direction-btn down" @click="rotateDown">
+          <span class="material-icons-round">keyboard_arrow_down</span>
+        </button>
+      </div>
     </div>
   </main>
 </template>
@@ -48,6 +58,8 @@ let camera: THREE.PerspectiveCamera
 let renderer: THREE.WebGLRenderer
 let pigModel: THREE.Group
 let animationId: number
+let cameraRadius = 3.5 // 相機距離中心的固定距離
+let cameraAngleY = 0    // 相機的垂直角度（0 = 平視）
 
 const initThreeJS = () => {
   if (!threeContainer.value) return
@@ -59,7 +71,8 @@ const initThreeJS = () => {
   // 相機 - 適合小容器的設置
   const aspect = threeContainer.value.clientWidth / threeContainer.value.clientHeight
   camera = new THREE.PerspectiveCamera(60, aspect, 0.1, 100)
-  camera.position.set(0, 0.8, 3.5)
+  // 初始設置相機位置
+  updateCameraPosition()
 
   // 渲染器
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
@@ -109,7 +122,7 @@ const loadPigModel = () => {
       
       // 置中模型
       pigModel.position.sub(center)
-      pigModel.position.y += 0.7
+      pigModel.position.y += 0.3
       
       // 縮放到適合容器大小
       const maxSize = Math.max(size.x, size.y, size.z)
@@ -153,6 +166,40 @@ const handleResize = () => {
   camera.aspect = aspect
   camera.updateProjectionMatrix()
   renderer.setSize(threeContainer.value.clientWidth, threeContainer.value.clientHeight)
+}
+
+// 視角旋轉控制函數
+const rotateUp = () => {
+  if (camera) {
+    // 向上旋轉視角 - 增加仰角（從下往上看）
+    cameraAngleY -= 0.15
+    // 限制最大仰角，避免轉過頭
+    if (cameraAngleY <= -1.2) cameraAngleY = -1.2
+    updateCameraPosition()
+  }
+}
+
+const rotateDown = () => {
+  if (camera) {
+    // 向下旋轉視角 - 減少仰角（從上往下看）
+    cameraAngleY += 0.15
+    // 限制最小仰角
+    if (cameraAngleY >= 1.35) cameraAngleY = 1.35
+    updateCameraPosition()
+  }
+}
+
+// 更新相機位置的輔助函數
+const updateCameraPosition = () => {
+  if (camera) {
+    // 使用球坐標系統，保持固定距離，只改變角度
+    camera.position.x = 0
+    camera.position.y = cameraRadius * Math.sin(cameraAngleY)
+    camera.position.z = cameraRadius * Math.cos(cameraAngleY)
+    
+    // 始終看向豬模型中心
+    camera.lookAt(0, 0.3, 0) // 稍微向上看一點（豬的中心位置）
+  }
 }
 
 onMounted(() => {
@@ -254,9 +301,9 @@ if (!isAuthed()) router.replace('/login')
 
 /* 3D 模型容器樣式 */
 .three-model-container {
-  width: 80%;
-  height: 120px;
-  margin-top: 30px;
+  width: 90%;
+  height: 150px;
+  margin-top: 20px;
   position: relative;
   border-radius: 8px;
   overflow: hidden;
@@ -301,6 +348,7 @@ if (!isAuthed()) router.replace('/login')
   align-self: center;
   align-items: center;
   flex-direction: column;
+  position: relative;
 }
 
 .level-label {
@@ -329,5 +377,45 @@ if (!isAuthed()) router.replace('/login')
 .level-exp {
   font-size: 11px;
   color: #666;
+}
+
+/* 方向控制按鈕樣式 */
+.direction-controls {
+  position: absolute;
+  right: 10px;
+  top: 0%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0px;
+}
+
+.direction-btn {
+  width: 18px;
+  height: 18px;
+  border: none;
+  border-radius: 3px;
+  background: transparent; /* 移除背景色 */
+  color: rgb(42, 65, 102); /* 改為深藍色圖標 */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.direction-btn:hover {
+  background: rgba(42, 65, 102, 0.1); /* 懸停時淡淡的背景 */
+  transform: scale(1.1);
+}
+
+.direction-btn:active {
+  transform: scale(0.95);
+  background: rgba(42, 65, 102, 0.2); /* 點擊時稍深的背景 */
+}
+
+.direction-btn .material-icons-round {
+  font-size: 14px;
 }
 </style>
