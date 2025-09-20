@@ -1,5 +1,6 @@
 <template>
   <main class="chat-list">
+    <!-- 上方 Tab -->
     <div class="tab-bar">
       <button
         :class="{ active: activeTab === 'employer' }"
@@ -14,12 +15,21 @@
         Applicant
       </button>
     </div>
+
+    <!-- 聊天室清單 -->
     <ul>
       <li v-for="c in myConversations" :key="c.id" class="chat-item">
         <button class="chat-btn" @click="goChat(c.id)">
+          <!-- 頭像 -->
+          <img src="/pig.png" alt="avatar" class="chat-avatar" />
+
+          <!-- 使用者資訊 -->
           <div class="chat-info">
             <span class="chat-user">User {{ getOtherUser(c) }}</span>
+            <span class="chat-sub">Last message ...</span>
           </div>
+
+          <!-- 箭頭 -->
           <span class="chat-arrow">›</span>
         </button>
       </li>
@@ -37,18 +47,14 @@ const conversations = ref([])
 const myId = getUserId()
 
 onMounted(async () => {
-  console.log(import.meta.env.BASE_URL)
   const res = await fetch(import.meta.env.BASE_URL + 'conversations.json')
   const data = await res.json()
   conversations.value = data.conversations
-  console.log('Loaded conversations: ', conversations.value)
 })
 
 const myConversations = computed(() =>
   conversations.value.filter((c) => c.user_1_id === myId || c.user_2_id === myId),
 )
-console.log('My user ID: ', myId)
-console.log('My conversations: ', myConversations.value)
 
 function goChat(id) {
   router.push(`/chat/${id}`)
@@ -67,62 +73,10 @@ const activeTab = ref<'employer' | 'applicant'>('employer')
   height: 100%;
   display: flex;
   flex-direction: column;
+  background: #fff;
 }
 
-.title {
-  font-size: 18px;
-  margin-bottom: 12px;
-}
-
-ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.chat-item {
-  margin-bottom: 8px;
-}
-
-.chat-btn {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  background: #f5f5f5;
-  cursor: pointer;
-}
-
-.chat-btn:hover,
-.chat-btn:focus {
-  background: #dbe3f5;
-}
-
-.chat-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.chat-user {
-  font-size: 14px;
-  font-weight: bold;
-  color: #2a4166;
-}
-
-/* TODO: This can serve for last message in future */
-.chat-sub {
-  font-size: 12px;
-  color: #777;
-}
-
-.chat-arrow {
-  font-size: 18px;
-  color: #aaa;
-}
+/* Tab Bar */
 .tab-bar {
   height: 35px;
   display: flex;
@@ -140,6 +94,7 @@ ul {
   font-weight: bold;
   font-size: 14px;
   cursor: pointer;
+  transition: color 0.2s;
 }
 
 .tab-bar button.active {
@@ -147,8 +102,66 @@ ul {
   color: rgb(42, 65, 102);
 }
 
-.tab-content {
+/* 聊天室項目 */
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chat-item {
+  margin-bottom: 2px;
+}
+
+.chat-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border: none;
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.chat-btn:hover {
+  background: #f0f4ff;
+}
+
+/* 頭像 */
+.chat-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 10px;
+  border: 1px solid #ddd;
+}
+
+/* 使用者資訊 */
+.chat-info {
   flex: 1;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.chat-user {
+  font-size: 15px;
+  font-weight: bold;
+  color: #2a4166;
+}
+
+.chat-sub {
+  font-size: 12px;
+  color: #777;
+  margin-top: 2px;
+}
+
+/* 箭頭 */
+.chat-arrow {
+  font-size: 18px;
+  color: #bbb;
+  margin-left: auto;
 }
 </style>
