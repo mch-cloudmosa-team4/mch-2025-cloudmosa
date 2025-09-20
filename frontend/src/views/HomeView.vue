@@ -51,13 +51,13 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { isAuthed } from '../services/auth'
+import { isAuthed, getUserName } from '../services/auth'
 import { ref, onMounted, onUnmounted } from 'vue'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 const router = useRouter()
-const name = localStorage.getItem('auth_name') || 'Guest'
+const name = getUserName()
 const threeContainer = ref<HTMLElement>()
 const loading = ref(true)
 const showLogoutLabel = ref(false)

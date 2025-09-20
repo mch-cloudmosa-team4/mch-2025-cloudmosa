@@ -4,13 +4,14 @@
     <h1 class="title">Sign in</h1>
 
     <label class="field">
-      <span>Username</span>
+      <span>Phone Number</span>
       <input
         ref="userRef"
-        v-model.trim="username"
-        type="text"
-        inputmode="text"
-        autocomplete="username"
+        v-model.trim="phone"
+        type="tel"
+        inputmode="tel"
+        autocomplete="tel"
+        placeholder="+886000000000"
         @focus="focusedIndex = 0"
         @keydown="handleKeys"
       />
@@ -53,7 +54,7 @@ import { useRouter } from 'vue-router'
 import { login, isAuthed } from '../services/auth'
 
 const router = useRouter()
-const username = ref('')
+const phone = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
@@ -109,14 +110,48 @@ function handleKeys(e) {
 }
 
 async function submit() {
+  console.log('🔐 Login button clicked!')
+  
   if (loading.value) return
+  
+  // 基本驗證
+  if (!phone.value.trim()) {
+    error.value = 'Please enter your phone number'
+    return
+  }
+  
+  // 簡單的電話號碼格式檢查
+  const phoneRegex = /^\+886\d{9}$/
+  if (!phoneRegex.test(phone.value.trim())) {
+    error.value = 'Please enter a valid phone number (e.g., +886000000000)'
+    return
+  }
+  
+  if (!password.value) {
+    error.value = 'Please enter your password'
+    return
+  }
+  
+  console.log('📝 Validation passed, calling login API...', {
+    phone: phone.value.trim(),
+    password: '***' // 不顯示密碼
+  })
+  
   error.value = ''
   loading.value = true
+  
   try {
-    await login(username.value, password.value)
+    await login(phone.value.trim(), password.value)
+    console.log('✅ Login successful!')
     router.replace('/home')
-  } catch (err) {
-    error.value = err.message || 'Login failed'
+  } catch (err: any) {
+    console.error('❌ Login failed:', err)
+    // 顯示服務器返回的錯誤訊息
+    if (err.message === 'Invalid phone number or password') {
+      error.value = 'Invalid phone number or password'
+    } else {
+      error.value = err.message || 'Login failed. Please try again.'
+    }
   } finally {
     loading.value = false
   }
