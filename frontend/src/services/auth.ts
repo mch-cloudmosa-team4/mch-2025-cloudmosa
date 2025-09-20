@@ -188,3 +188,67 @@ export function getAuthHeaders(): Record<string, string> {
     'Content-Type': 'application/json'
   }
 }
+
+export async function register(userData: {
+  phone: string
+  password: string
+  display_name: string
+  email?: string
+}): Promise<void> {
+  try {
+    console.log('🌐 Starting register API call...', userData)
+
+    // 把密碼 hash 成 passwd_hash
+    const hashedPassword = await hashPassword(userData.password)
+    console.log('🔒 Password hashed successfully: ', hashedPassword)
+
+    // 準備請求資料
+    const requestData: Record<string, any> = {
+      phone: userData.phone,
+      passwd_hash: hashedPassword,
+      display_name: userData.display_name,
+    }
+
+    // 如果有額外資料則附加
+    if (userData.email) requestData.email = userData.email
+
+    console.log('📤 Sending request to:', `${API_BASE_URL}/api/v1/auth/register`)
+    console.log('📤 Request data:', requestData)
+
+    const response = await fetch(`http://172.18.15.22:8000/api/v1/auth/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData)
+    })
+
+    console.log('📥 Response received:', response.status, response.statusText)
+
+    if (!response.ok) {
+      let errorMessage = 'Register failed'
+      try {
+        const errorData = await response.json()
+        console.error('❌ Error response data:', errorData)
+        errorMessage = errorData.detail || errorMessage
+      } catch {
+        errorMessage = `HTTP ${response.status}: ${response.statusText}`
+      }
+      throw new Error(errorMessage)
+    }
+
+    const data = await response.json()
+    console.log('✅ Register success:', data)
+
+    // 成功註冊後可自動登入，或提示使用者登入
+    // 這裡我選擇直接登入一次
+    await login(userData.phone, userData.password)
+
+  } catch (error) {
+    console.error('🚨 Register error:', error)
+    if (error instanceof Error) {
+      throw new Error(error.message)
+    }
+    throw new Error('Network error occurred')
+  }
+}
