@@ -36,6 +36,10 @@
       {{ loading ? 'Signing in...' : 'Login (Enter)' }}
     </button>
 
+    <button class="btn" @click="$router.push('/register')">
+      Register
+    </button>
+
     <p v-if="error" class="error" role="alert">{{ error }}</p>
   </main>
 </template>
