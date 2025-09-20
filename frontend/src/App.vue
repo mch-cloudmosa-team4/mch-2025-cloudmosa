@@ -92,11 +92,14 @@
         <!-- Home按鈕 -->
         <div
           class="nav-item home-item"
-          :class="{ active: activeTab === 'home' }"
+          :class="{ 
+            active: activeTab === 'home',
+            selected: selectedMenuIndex === -1 && showHomeMenu
+          }"
           @click="handleHomeClick"
         >
           <span class="material-icons-round">home</span>
-          <span v-if="showHomeMenu" class="nav-label">Home</span>
+          <span v-if="showHomeMenu && selectedMenuIndex === -1" class="nav-label">Home</span>
         </div>
 
         <!-- News按鈕 -->
@@ -132,7 +135,7 @@ const showJobsLabel = ref(false)
 const showDashboardLabel = ref(false)
 const showCommunityLabel = ref(false)
 const hoveredItem = ref<string | null>(null)
-const selectedMenuIndex = ref(0) // 當前選中的選單項目索引
+const selectedMenuIndex = ref(-1) // -1 表示選中 Home，0-3 表示選中其他項目
 const menuItems = ['profile', 'jobs', 'dashboard', 'community'] // 選單項目順序
 let hideTimer: number | null = null
 
@@ -161,9 +164,9 @@ const hasUnreadNews = computed(() => {
 
 function handleHomeClick() {
   if (!showHomeMenu.value) {
-    selectedMenuIndex.value = 0 // 重置到第一個項目
+    selectedMenuIndex.value = -1 // 重置到 Home 選中狀態
     showHomeMenu.value = true
-    updateSelection() // 高亮第一個項目
+    updateSelection() // 清除所有項目高亮
   } else {
     hideMenu()
     router.push('/home')
@@ -203,7 +206,7 @@ function hideMenu() {
     hideTimer = null
   }
   showHomeMenu.value = false
-  selectedMenuIndex.value = 0 // 重置選中索引
+  selectedMenuIndex.value = -1 // 重置選中索引到 Home
   hoveredItem.value = null
   // 重置所有標籤狀態
   showProfileLabel.value = false
@@ -294,20 +297,30 @@ function handleKeyPress(event: KeyboardEvent) {
 }
 
 function navigateLeft() {
-  if (selectedMenuIndex.value === 0) {
-    // 如果在 profile (第一個)，關閉選單
+  if (selectedMenuIndex.value === -1) {
+    // 如果在 Home，向左選到 Profile
+    selectedMenuIndex.value = 0
+    updateSelection()
+  } else if (selectedMenuIndex.value === 0) {
+    // 如果在 Profile，關閉選單（回到 Home 未展開狀態）
     hideMenu()
   } else {
+    // 在其他項目時，向左移動
     selectedMenuIndex.value--
     updateSelection()
   }
 }
 
 function navigateRight() {
-  if (selectedMenuIndex.value === menuItems.length - 1) {
-    // 如果在 community (最後一個)，關閉選單
+  if (selectedMenuIndex.value === -1) {
+    // 如果在 Home，向右選到 Community
+    selectedMenuIndex.value = 3
+    updateSelection()
+  } else if (selectedMenuIndex.value === 3) {
+    // 如果在 Community，關閉選單（回到 Home 未展開狀態）
     hideMenu()
   } else {
+    // 在其他項目時，向右移動
     selectedMenuIndex.value++
     updateSelection()
   }
@@ -321,10 +334,15 @@ function updateSelection() {
   showCommunityLabel.value = false
   hoveredItem.value = null
 
+  if (selectedMenuIndex.value === -1) {
+    // 選中 Home，不顯示任何項目標籤
+    return
+  }
+
   // 設置當前選中項目
   const currentItem = menuItems[selectedMenuIndex.value]
   hoveredItem.value = currentItem
-
+  
   switch (currentItem) {
     case 'profile':
       showProfileLabel.value = true
@@ -339,9 +357,13 @@ function updateSelection() {
       showCommunityLabel.value = true
       break
   }
-}
+}function selectCurrentItem() {
+  if (selectedMenuIndex.value === -1) {
+    // 選中 Home
+    goToHome()
+    return
+  }
 
-function selectCurrentItem() {
   const currentItem = menuItems[selectedMenuIndex.value]
   switch (currentItem) {
     case 'profile':
@@ -466,8 +488,20 @@ onUnmounted(() => {
   color: white !important; /* 被選中時圖示變為白色 */
 }
 
+.nav-item {
+  color: rgba(255, 255, 255, 0.7); /* 預設半透明白色 */
+}
 .nav-item.active {
   color: white; /* 被選中的按鈕變白色 */
+}
+
+.nav-item.selected {
+  color: white; /* 選中狀態下的按鈕變白色 */
+  background: rgba(255, 255, 255, 0.1); /* 添加淡淡的背景高亮 */
+}
+
+.nav-item.selected .material-icons-round {
+  color: white !important;
 }
 
 .nav-item .material-icons-round {
