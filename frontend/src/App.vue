@@ -7,7 +7,7 @@
         v-if="showHomeMenu"
         class="home-menu-overlay"
         @mouseenter="cancelHideTimer"
-        @mouseleave="startHideTimer"
+        @mouseleave="hideMenu"
       >
         <div class="circular-menu">
           <div
@@ -69,9 +69,7 @@
         <div
           class="nav-item home-item"
           :class="{ active: activeTab === 'home' }"
-          @click="goToHome"
-          @mouseenter="showMenu"
-          @mouseleave="startHideTimer"
+          @click="handleHomeClick"
         >
           <span class="material-icons-round">home</span>
           <span v-if="showHomeMenu" class="nav-label">Home</span>
@@ -133,6 +131,15 @@ const hasUnreadNews = computed(() => {
   // 這裡可以根據實際需求來判斷是否有未讀通知
   return true
 })
+
+function handleHomeClick() {
+  if (!showHomeMenu.value) {
+    showHomeMenu.value = true
+  } else {
+    hideMenu()
+    router.push('/home')
+  }
+}
 
 // 方法
 function showMenu() {
