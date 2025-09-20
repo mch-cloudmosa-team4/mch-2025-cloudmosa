@@ -2,13 +2,25 @@
   <main v-if="application" class="application-detail">
     <h1 class="title">Application Detail</h1>
 
-    <p class="description"><strong>ID:</strong> {{ application.id }}</p>
-    <p class="description"><strong>Applicant ID:</strong> {{ application.applicant_id }}</p>
-    <p class="description"><strong>Job ID:</strong> {{ application.job_id }}</p>
-    <p class="description"><strong>Message:</strong> {{ application.message }}</p>
-    <p class="description"><strong>Status:</strong> {{ application.status }}</p>
-    <p class="description"><strong>Created At:</strong> {{ application.created_at }}</p>
-    <p class="description"><strong>Updated At:</strong> {{ application.updated_at }}</p>
+    <div class="description">
+      <button class="applicant-btn" @click="goApplicantProfile">
+        User {{ application.applicant_id }}
+      </button>
+    </div>
+    <div class="description">
+      <button class="applicant-btn" @click="goJobDetail">
+        Job {{ application.job_id }}
+      </button>
+    </div>
+    <div class="description">
+      <button class="status-btn">
+        Status {{ application.status }}
+      </button>
+    </div>
+    <p class="description"><strong>Message:</strong></p>
+    <div class="message-box">
+      {{ application.message }}
+    </div>
 
     <!-- Approve 按鈕 -->
     <button
@@ -60,6 +72,18 @@ function approveApplication() {
   const conversationId = 1
   router.push(`/chat/${conversationId}`)
 }
+
+function goApplicantProfile() {
+  if (application.value) {
+    router.push(`/profile/${application.value.applicant_id}`)
+  }
+}
+
+function goJobDetail() {
+  if (application.value) {
+    router.push(`/job/${application.value.job_id}`)
+  }
+}
 </script>
 
 <style scoped>
@@ -76,12 +100,53 @@ function approveApplication() {
 .title {
   font-size: 16px;
   font-weight: bold;
-  margin-bottom: 12px;
+  margin-bottom: 15px;
   text-align: center;
 }
 
 .description {
   padding-left: 16px;
+}
+
+.applicant-btn {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 20px;  /* ✅ 橢圓形 */
+  background: rgb(229, 227, 227);
+  color: rgb(44, 46, 60);
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.applicant-btn:hover {
+  background: rgb(80, 110, 160);
+}
+
+.status-btn {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 20px;  /* ✅ 橢圓形 */
+  background: rgb(53, 66, 118);
+  color: rgb(229, 227, 227);
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.status-btn:hover {
+  background: rgb(80, 110, 160);
+}
+
+.message-box {
+  align-self: center;
+  padding: 10px;
+  width: 80%;
+  border: none;
+  border-radius: 5px;  /* ✅ 橢圓形 */
+  color: #161620;
+  background-color: #e5e5e5;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
 }
 
 /* Approve 按鈕 */
@@ -91,7 +156,7 @@ function approveApplication() {
   border: none;
   border-radius: 6px;
   background: rgb(103, 157, 103);
-  color: white;
+  color: rgb(255, 255, 255);
   font-weight: bold;
   cursor: pointer;
   width: 80%;
