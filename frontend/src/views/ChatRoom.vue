@@ -8,10 +8,17 @@
       <div
         v-for="m in chatMessages"
         :key="m.sent_at"
-        :class="['message', { me: m.sender_id === myId }]"
+        class="message-wrapper"
+        :class="{ me: m.sender_id === myId }"
       >
-        <p>{{ m.message }}</p>
-        <small>{{ new Date(m.sent_at).toLocaleString() }}</small>
+        <!-- 訊息框 -->
+        <div class="message">
+          <p>{{ m.message }}</p>
+        </div>
+        <!-- 時間放在訊息框下面 -->
+        <small class="sent-date">
+          {{ new Date(m.sent_at).toLocaleString() }}
+        </small>
       </div>
     </div>
     <div class="input-bar">
@@ -97,14 +104,24 @@ function scrollToBottom() {
   margin: 12px 0;
   flex: 1;
 }
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 12px;
+}
 .message {
-  padding: 8px;
-  border-radius: 8px;
+  margin-left: 5px;
+  border-radius: 20px;
   background: #eee;
   align-self: flex-start;
   max-width: 70%;
+  font-size: 10px;
+  padding: 10px;
+  padding-top: 0px;
+  padding-bottom: 0px;
 }
-.message.me {
+.message-wrapper.me .message {
+  margin-right: 5px;
   background: rgb(130, 157, 201);
   color: white;
   align-self: flex-end;
@@ -114,9 +131,20 @@ function scrollToBottom() {
   display: block;
   color: rgb(130, 157, 201);
 }
-.message.me small {
+.message-wrapper.me .message small {
   color: white;
   text-align: right;
+}
+.sent-date {
+  font-size: 6px;
+  color: #888;
+  margin-top: 2px;
+  margin-left: 10px;
+}
+
+.message-wrapper.me .sent-date {
+  text-align: right; /* 自己發的日期靠右 */
+  margin-right: 10px;
 }
 .top-bar {
   position: sticky;
