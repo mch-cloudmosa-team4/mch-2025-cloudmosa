@@ -17,6 +17,7 @@ from app.schemas.user_skills import (
     UserSkillsRequest,
     UserSkillSummary
 )
+import uuid
 
 
 router = APIRouter(
@@ -58,8 +59,6 @@ async def get_users_skills(
                 user_id=user_id, 
                 include_skill_details=True
             )
-            print(user_id)
-            print(user_skill_list)
             
             # Convert to response format
             skills_summary = []
@@ -180,7 +179,6 @@ async def add_my_skill(
         
         # Handle errors
         if skills_not_found:
-            print("Some skills were not found in the database.")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Skills not found: {', '.join(skills_not_found)}"
@@ -483,7 +481,7 @@ async def remove_my_skill(
         skills_summary = []
         for removed_skill in skills_removed:
             skills_summary.append(UserSkillSummary(
-                id=removed_skill["skill_id"],  # Use skill_id as id
+                id=uuid.UUID(removed_skill["skill_id"]),
                 name=removed_skill["name"],
                 level=removed_skill["level"]
             ))
