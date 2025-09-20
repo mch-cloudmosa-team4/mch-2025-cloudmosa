@@ -3,22 +3,29 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [ frontend-dev ]  # 只在 frontend-dev branch push 時觸發
+  workflow_dispatch:  # 允許手動觸發
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write
+      contents: read
       pages: write
       id-token: write
+
+    # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+    # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
 
     steps:
       # 1️⃣ Checkout 代碼
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ 安裝 Node.js，並指定 lock file 位置以正確使用 cache
+      # 2️⃣ 安裝 Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -38,17 +45,17 @@ jobs:
         env:
           NODE_ENV: production
 
-      # 4.1️⃣ 列出 build 產生的資料夾
-      - name: List frontend folder
-        run: ls -R frontend
+      # 5️⃣ Setup Pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
 
-      # 5️⃣ 部署到 GitHub Pages
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
+      # 6️⃣ Upload artifact
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          # 根據專案自動選擇 build output
-          publish_dir: ./frontend/dist  # Vite 預設
-          # publish_dir: ./frontend/build  # 如果是 React CRA，請改成這個
-          publish_branch: gh-pages       # 確保與 GitHub Pages 設定一致
-          clean: true
+          path: ./frontend/dist
+
+      # 7️⃣ Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
