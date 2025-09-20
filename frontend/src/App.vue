@@ -271,24 +271,7 @@ function handleTouchEnd() {
 
 // 鍵盤導航函數
 function handleKeyPress(event: KeyboardEvent) {
-  if (!showHomeMenu.value) {
-    // 當選單沒開時才處理上下滾動
-    const content = document.querySelector('.main-content') as HTMLElement
-    if (content) {
-      if (event.key === 'ArrowUp' && content.scrollTop === 0) {
-        event.preventDefault()
-        content.scrollBy({ top: -50, behavior: 'smooth' })
-      } else if (
-        event.key === 'ArrowDown' &&
-        content.scrollTop + content.clientHeight >= content.scrollHeight
-      ) {
-        event.preventDefault()
-        content.scrollBy({ top: 50, behavior: 'smooth' })
-      }
-    }
-    return
-  }
-
+  if (!showHomeMenu.value) return
 
   switch (event.key) {
     case 'ArrowLeft':
