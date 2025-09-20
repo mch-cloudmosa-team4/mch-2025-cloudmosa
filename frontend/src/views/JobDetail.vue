@@ -14,10 +14,12 @@
     <p class="description"><strong>Created At:</strong> {{ job.created_at }}</p>
     <p class="description"><strong>Updated At:</strong> {{ job.updated_at }}</p>
 
+    <!-- TODO: Do not show this button if employer -->
     <button class="apply-btn" @click="applyJob">
-      <!-- TODO: Add query for current status -->
+      <!-- TODO: For applicant, add query for current status -->
       Apply
     </button>
+    <!-- TODO: For employer, show all the applcations -->
   </main>
   <main v-else>
     <p>Loading job details...</p>

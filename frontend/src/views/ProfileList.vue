@@ -1,5 +1,12 @@
 <template>
   <main>
+    <div class="filters">
+      <input
+        type="text"
+        placeholder="Search people..."
+        class="search-box"
+      />
+    </div>
     <h1>Profiles</h1>
     <button @click="goMe()">Go to My Profile</button>
     <ul>
@@ -36,3 +43,34 @@ function goMe() {
   router.push(`/profile/${getUserId()}`)
 }
 </script>
+
+<style scoped>
+.filters {
+  position: sticky;
+  top: 0;
+  background: none;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 10;
+}
+
+.search-box {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 50px;
+  font-size: 13px;
+  width: 80%;
+}
+
+.filter-select {
+  width: 85%;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+  background: #f9f9f9;
+}
+
+</style>

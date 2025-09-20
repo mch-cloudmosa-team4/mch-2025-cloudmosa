@@ -1,5 +1,18 @@
 <template>
   <main>
+    <div class="filters">
+      <input
+        type="text"
+        placeholder="Search jobs..."
+        class="search-box"
+      />
+      <select class="filter-select">
+        <option value="">Filter by skill</option>
+        <option value="skill_1">Skill 1</option>
+        <option value="skill_2">Skill 2</option>
+        <option value="skill_3">Skill 3</option>
+      </select>
+    </div>
     <h1>Jobs</h1>
     <ul>
       <li v-for="j in jobs" :key="j.id">
@@ -36,6 +49,34 @@ const goJob = (id) => {
 </script>
 
 <style scoped>
+.filters {
+  position: sticky;
+  top: 0;
+  background: none;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 10;
+}
+
+.search-box {
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 50px;
+  font-size: 13px;
+  width: 80%;
+}
+
+.filter-select {
+  width: 85%;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 13px;
+  background: #f9f9f9;
+}
+
 .job-btn {
   width: 100%;
   display: flex;
