@@ -1,5 +1,6 @@
 <template>
   <main>
+    <h1>Profiles</h1>
     <div class="filters">
       <input
         type="text"
@@ -7,7 +8,6 @@
         class="search-box"
       />
     </div>
-    <h1>Profiles</h1>
     <button @click="goMe()">Go to My Profile</button>
     <ul>
       <li v-for="p in profiles" :key="p.id">
@@ -53,10 +53,9 @@ main {
 
 /* 標題 */
 h1 {
-  font-size: 20px;
+  font-size: 14px;
   font-weight: 700;
   text-align: center;
-  margin: 20px 0;
   color: #2a4166;
 }
 
@@ -89,11 +88,11 @@ button {
   padding: 10px 14px;
   font-size: 14px;
   border: none;
-  border-radius: 6px;
-  background: rgb(42, 65, 102);
-  color: white;
+  border-radius: 25px;
+  color: rgb(44, 52, 70);
+  background-color: white;
   cursor: pointer;
-  transition: background 0.2s ease, transform 0.1s ease;
+  transition: transform 0.1s ease;
 }
 
 button:hover {
@@ -106,6 +105,16 @@ main > button {
   display: block;
   margin: 10px auto;
   font-weight: 600;
+  background: white;  /* 改成白色背景 */
+  color: #2a4166;     /* 深藍字色，避免跟背景同色 */
+  border: 1px solid #ccc; /* 給邊框讓它不會看起來消失 */
+  border-width: 1.5px;
+  border-color: #2a4166;
+}
+
+main > button:hover {
+  background: #2a4166; /* hover 時變成深藍 */
+  color: white;        /* 文字改成白色 */
 }
 
 /* Profile 列表 */
@@ -142,10 +151,6 @@ li button:hover {
 main > button:last-of-type {
   margin-top: 20px;
   width: 100%;
-  background: #bbb;
 }
 
-main > button:last-of-type:hover {
-  background: #999;
-}
 </style>
