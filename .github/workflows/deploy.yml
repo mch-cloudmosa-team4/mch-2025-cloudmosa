@@ -38,11 +38,17 @@ jobs:
         env:
           NODE_ENV: production
 
+      # 4.1️⃣ 列出 build 產生的資料夾
+      - name: List frontend folder
+        run: ls -R frontend
+
       # 5️⃣ 部署到 GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./frontend/dist
-          # 可選：自動清理舊檔
+          # 根據專案自動選擇 build output
+          publish_dir: ./frontend/dist  # Vite 預設
+          # publish_dir: ./frontend/build  # 如果是 React CRA，請改成這個
+          publish_branch: gh-pages       # 確保與 GitHub Pages 設定一致
           clean: true
