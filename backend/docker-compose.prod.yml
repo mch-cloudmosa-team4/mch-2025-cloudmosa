@@ -81,7 +81,7 @@ services:
       - "5050:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-      - ./pgadmin-config/servers-prod.json:/pgadmin4/servers.json:ro
+      - ./pgadmin-config/servers-prod.json:/var/lib/pgadmin/servers.json:ro
     depends_on:
       postgres:
         condition: service_healthy
