@@ -6,6 +6,7 @@ from datetime import datetime, date
 from typing import Optional, List
 from pydantic import BaseModel, Field, field_validator
 from uuid import UUID
+import re
 
 
 class ProfileResponse(BaseModel):
@@ -16,7 +17,7 @@ class ProfileResponse(BaseModel):
     display_name: str = Field(description="User's display name")
     avatar_file_id: Optional[int] = Field(None, description="Avatar file ID")
     birthday: Optional[date] = Field(None, description="User's birthday")
-    gender: int = Field(description="Gender: 0=NULL, 1=male, 2=female")
+    gender: str = Field(description="Gender")
     location_id: Optional[int] = Field(None, description="Location ID")
     bio: Optional[str] = Field(None, description="User's biography")
     primary_language_code: str = Field(description="Primary language code")
@@ -30,7 +31,7 @@ class ProfileUpdateRequest(BaseModel):
     email: Optional[str] = Field(None, description="User's email")
     avatar_file_id: Optional[int] = Field(None, description="Avatar file ID")
     birthday: Optional[date] = Field(None, description="User's birthday")
-    gender: Optional[int] = Field(None, description="Gender: 0=NULL, 1=male, 2=female")
+    gender: Optional[str] = Field(None, description="Gender")
     location_id: Optional[int] = Field(None, description="Location ID")
     bio: Optional[str] = Field(None, description="User's biography")
     primary_language_code: Optional[str] = Field(None, description="Primary language code")
@@ -38,18 +39,15 @@ class ProfileUpdateRequest(BaseModel):
     @field_validator("gender")
     @classmethod
     def validate_gender(cls, v):
-        if v is not None and v not in [0, 1, 2]:
-            raise ValueError("Gender must be 0 (NULL), 1 (male), or 2 (female)")
+        if v not in ["male", "female", "other", "prefer_not_to_say"]:
+            raise ValueError("Invalid gender value")
         return v
     
     @field_validator("email")
     @classmethod
     def validate_email(cls, v):
-        if v is not None and v:
-            # Basic email validation
-            import re
-            if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', v):
-                raise ValueError("Invalid email format")
+        if v and not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', v):
+            raise ValueError("Invalid email format")
         return v
 
 

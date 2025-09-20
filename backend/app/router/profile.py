@@ -92,7 +92,7 @@ async def get_my_profile(
         )
     
     # Get current profile
-    current_profile = profile.get_with_user(db, str(current_user.id))
+    current_profile = profile.get(db, str(current_user.id))
     if not current_profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -126,7 +126,7 @@ async def update_my_profile(
         HTTPException: If user not authorized or profile not found
     """
     # Get current profile
-    current_profile = profile.get_with_user(db, str(current_user.id))
+    current_profile = profile.get(db, str(current_user.id))
     if not current_profile:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
