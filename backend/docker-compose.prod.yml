@@ -30,9 +30,9 @@ services:
     container_name: mch_postgres_prod
     restart: unless-stopped
     environment:
-      POSTGRES_DB: backend_db
-      POSTGRES_USER: backend_user
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      - POSTGRES_DB=backend_db
+      - POSTGRES_USER=backend_user
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres-init:/docker-entrypoint-initdb.d
@@ -51,9 +51,9 @@ services:
     container_name: mch_minio_prod
     restart: unless-stopped
     environment:
-      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
-      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
-      MINIO_REGION: us-east-1
+      - MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
+      - MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY}
+      - MINIO_REGION=us-east-1
     ports:
       - "9000:9000"
       - "9001:9001"
