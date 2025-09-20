@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from fastapi.security import HTTPBearer
 from sqlalchemy.orm import Session
 from datetime import datetime, timezone
+from jose.exceptions import JWTError
 
 from app.database import get_db
 from app.dependencies import get_current_user
@@ -41,6 +42,13 @@ async def login_with_phone(
     existing_user = user.get_by_phone(db, request.phone)
     
     if existing_user:
+        # Verify password
+        if request.passwd_hash != existing_user.passwd_hash:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid phone number or password"
+            )
+
         # Get user profile
         profile = db.query(Profile).filter(Profile.user_id == existing_user.id).first()
         user_obj = existing_user
@@ -49,7 +57,7 @@ async def login_with_phone(
         user_obj = user.create_user_with_profile(
             db=db,
             phone=request.phone,
-            password="temp_password",  # In production, handle password differently
+            passwd_hash=request.passwd_hash,
             display_name=f"User {request.phone[-4:]}",
             primary_language_code="en"
         )

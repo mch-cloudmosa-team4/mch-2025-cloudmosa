@@ -10,10 +10,10 @@ import re
 from app.utils import logger
 
 
-
 class PhoneLoginRequest(BaseModel):
     """Schema for phone login/register request"""
     phone: str = Field(description="Phone number with country code (e.g., +2348012345678)")
+    passwd_hash: str = Field(description="Password for authentication")
     
     @field_validator("phone")
     @classmethod

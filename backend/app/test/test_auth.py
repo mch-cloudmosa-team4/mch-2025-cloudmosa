@@ -8,8 +8,13 @@ import requests
 import time
 from datetime import datetime, timedelta, timezone
 from jose import jwt
+import hashlib
 
 BASE_URL = "http://localhost:8000"
+PHONE = "+2348012345679"
+PASSWD = "testpassword"
+PASSWD_HASH = hashlib.sha256(PASSWD.encode('utf-8')).hexdigest()
+
 
 def test_login():
     """測試登錄功能"""
@@ -17,7 +22,8 @@ def test_login():
     
     # 測試數據
     login_data = {
-        "phone": "+2348012345678"
+        "phone": PHONE,
+        "passwd_hash": PASSWD_HASH
     }
     
     try:
@@ -39,6 +45,34 @@ def test_login():
     except Exception as e:
         print(f"Error: {e}")
         return None, None
+
+def test_wrong_password():
+    """測試錯誤密碼登錄"""
+    print("\n🔐 測試錯誤密碼登錄...")
+    
+    # 錯誤密碼測試數據
+    wrong_login_data = {
+        "phone": PHONE,
+        "passwd_hash": "wrongpasswordhash"
+    }
+    
+    try:
+        response = requests.post(
+            f"{BASE_URL}/api/v1/auth/login",
+            json=wrong_login_data,
+            headers={"Content-Type": "application/json"}
+        )
+        
+        print(f"Status Code: {response.status_code}")
+        print(f"Response: {json.dumps(response.json(), indent=2, ensure_ascii=False)}")
+        
+        if response.status_code == 401:
+            print("✅ 正確處理錯誤密碼")
+        else:
+            print("❌ 未正確處理錯誤密碼")
+            
+    except Exception as e:
+        print(f"Error: {e}")
 
 def test_profile(access_token):
     """測試獲取個人資料"""
@@ -298,7 +332,9 @@ if __name__ == "__main__":
     
     # 測試登錄
     access_token, refresh_token = test_login()
-    
+    # 測試錯誤密碼
+    test_wrong_password()
+
     # 測試其他功能
     test_health()
     test_profile(access_token)

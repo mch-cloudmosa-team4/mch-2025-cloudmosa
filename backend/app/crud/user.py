@@ -95,7 +95,7 @@ class UserCRUD:
         self, 
         db: Session, 
         phone: str,
-        password: str,
+        passwd_hash: str,
         display_name: str,
         email: Optional[str] = None,
         primary_language_code: str = "en"
@@ -106,7 +106,7 @@ class UserCRUD:
         Args:
             db: Database session
             phone: Phone number
-            password: Plain text password (will be hashed)
+            passwd_hash: Hashed password
             display_name: Display name for profile
             email: Optional email
             primary_language_code: Language code
@@ -114,13 +114,10 @@ class UserCRUD:
         Returns:
             Created user with profile
         """
-        # Hash password
-        hashed_password = get_password_hash(password)
-        
         # Create user
         user = User(
             phone=phone,
-            passwd_hash=hashed_password,
+            passwd_hash=passwd_hash,
             email=email,
             role=UserRole.USER,
             is_active=True
@@ -141,25 +138,6 @@ class UserCRUD:
         db.commit()
         db.refresh(user)
         
-        return user
-    
-    def authenticate(self, db: Session, phone: str, password: str) -> Optional[User]:
-        """
-        Authenticate user by phone and password
-        
-        Args:
-            db: Database session
-            phone: Phone number
-            password: Plain text password
-            
-        Returns:
-            User if authentication successful, None otherwise
-        """
-        user = self.get_by_phone(db, phone)
-        if not user or not getattr(user, 'is_active', True):
-            return None
-        if not verify_password(password, getattr(user, 'passwd_hash', '')):
-            return None
         return user
     
     def update_last_login(self, db: Session, user: User) -> User:
