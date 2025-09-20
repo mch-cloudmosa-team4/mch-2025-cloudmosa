@@ -15,6 +15,7 @@ export default defineConfig({
   plugins: [
     vue(),
     vueJsx(),
+    // test
     // vueDevTools(), // 移除 Vue DevTools 以隱藏開發者工具圖標
   ],
   resolve: {
