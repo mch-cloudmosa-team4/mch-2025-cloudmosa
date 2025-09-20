@@ -111,19 +111,26 @@ class SkillCRUD:
         name: str
     ) -> Skill:
         """
-        Create skill if it doesn't exist, otherwise return existing one
+        Create a new skill
         
         Args:
             db: Database session
             name: Skill name
             
         Returns:
-            Existing or newly created skill
+            Newly created skill
         """
-        existing_skill = self.get_by_name(db, name)
-        if existing_skill:
-            return existing_skill
-        return self.create(db, name)
+        new_skill = Skill(
+            id=uuid.uuid4(),
+            name=name.strip(),
+            created_at=datetime.now(timezone.utc)
+        )
+        
+        db.add(new_skill)
+        db.commit()
+        db.refresh(new_skill)
+        
+        return new_skill
     
     def update(self, db: Session, skill_id: str, **kwargs) -> Optional[Skill]:
         """
