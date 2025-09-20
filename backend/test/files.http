@@ -1,0 +1,40 @@
+@host = http://localhost:8000
+@api = /api/v1
+# update this to the actual object key
+# @objectKey = docs/2de44c5ed7154f62b51a455d0a5e8bf8.txt
+@objectKey = images/098cef875e2b45ce8db643d510ca2065.jpeg
+
+### Upload a file to MinIO (uses local test file)
+# @name upload
+POST {{host}}{{api}}/files/upload?folder=docs
+Content-Type: multipart/form-data; boundary=MyBoundary
+
+--MyBoundary
+Content-Disposition: form-data; name="file"; filename="test.txt"
+Content-Type: text/plain
+
+< ./backend/test/test.txt
+--MyBoundary--
+
+
+### Get a presigned download URL for the uploaded object
+GET {{host}}{{api}}/files/presign?key={{objectKey}}&expires=60
+
+### Redirect directly to a presigned URL (good for <img src=...>)
+GET {{host}}{{api}}/files/presign-redirect?key={{objectKey}}&expires=60
+
+### Delete the uploaded object
+DELETE {{host}}{{api}}/files/?key={{objectKey}}
+
+
+### Upload an image to MinIO
+# @name upload_image
+POST {{host}}{{api}}/files/upload?folder=images
+Content-Type: multipart/form-data; boundary=ImgBoundary
+
+--ImgBoundary
+Content-Disposition: form-data; name="file"; filename="sample.jpeg"
+Content-Type: image/jpeg
+
+< ./backend/test/sample.jpeg
+--ImgBoundary--
