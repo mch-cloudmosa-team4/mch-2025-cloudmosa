@@ -1,6 +1,19 @@
 <template>
   <main class="chat-list">
-    <h1 class="title">Messages</h1>
+    <div class="tab-bar">
+      <button
+        :class="{ active: activeTab === 'employer' }"
+        @click="activeTab = 'employer'"
+      >
+        Employer
+      </button>
+      <button
+        :class="{ active: activeTab === 'applicant' }"
+        @click="activeTab = 'applicant'"
+      >
+        Applicant
+      </button>
+    </div>
     <ul>
       <li v-for="c in myConversations" :key="c.id" class="chat-item">
         <button class="chat-btn" @click="goChat(c.id)">
@@ -44,12 +57,16 @@ function goChat(id) {
 function getOtherUser(c) {
   return c.user_1_id === myId ? c.user_2_id : c.user_1_id
 }
+
+const activeTab = ref<'employer' | 'applicant'>('employer')
 </script>
 
 <style scoped>
 .chat-list {
-  padding: 12px;
-  font-family: Roboto, sans-serif;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .title {
@@ -105,5 +122,33 @@ ul {
 .chat-arrow {
   font-size: 18px;
   color: #aaa;
+}
+.tab-bar {
+  height: 35px;
+  display: flex;
+  justify-content: space-around;
+  background: #f5f5f5;
+  padding: 6px;
+  border-bottom: 1px solid #ccc;
+}
+
+.tab-bar button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background: none;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.tab-bar button.active {
+  border-bottom: 2px solid rgb(42, 65, 102);
+  color: rgb(42, 65, 102);
+}
+
+.tab-content {
+  flex: 1;
+  overflow-y: auto;
 }
 </style>

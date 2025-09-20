@@ -16,7 +16,6 @@
       </button>
     </div>
 
-    <!-- 內容區塊 -->
     <div class="tab-content">
       <ApplicationList v-if="activeTab === 'applications'" />
       <MyJobList v-else />
