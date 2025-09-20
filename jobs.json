@@ -1,0 +1,36 @@
+{
+    "jobs": [
+        {
+            "id": 1,
+            "employer_id": 1,
+            "title": "Software Engineer",
+            "description": "Python development",
+            "reward": "NTD 10,000",
+            "location_id": 1,
+            "address": "Hsinchu city",
+            "work_type": 0,
+            "required_people": 3,
+            "status": 1,
+            "start_date": "2024-07-01",
+            "end_date": "2024-12-31",
+            "created_at": "2024-06-15",
+            "updated_at": "2024-06-15"
+        },
+        {
+            "id": 2,
+            "employer_id": 2,
+            "title": "Data Analyst",
+            "description": "Data analysis and visualization",
+            "reward": "NTD 8,000",
+            "location_id": 2,
+            "address": "Taipei city",
+            "work_type": 1,
+            "required_people": 2,
+            "status": 1,
+            "start_date": "2024-08-01",
+            "end_date": "2024-11-30",
+            "created_at": "2024-06-20",
+            "updated_at": "2024-06-20"
+        }
+    ]
+}

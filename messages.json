@@ -1,0 +1,16 @@
+{
+    "messages": [
+        {
+            "conversation_id": 1,
+            "sender_id": 1,
+            "message": "Hello, how are you?",
+            "sent_at": "2024-06-25T10:00:00Z"
+        },
+        {
+            "conversation_id": 1,
+            "sender_id": 2,
+            "message": "I'm good, thanks! How about you?",
+            "sent_at": "2024-06-25T10:05:00Z"
+        }
+    ]
+}
