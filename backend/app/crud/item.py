@@ -6,7 +6,7 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 
-from app.models.items import Item
+from app.models import Item
 from app.schemas.item import ItemCreate, ItemUpdate
 
 

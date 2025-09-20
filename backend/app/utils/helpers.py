@@ -5,7 +5,7 @@ Utility functions for the application
 import logging
 import hashlib
 import secrets
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, BinaryIO
 from datetime import datetime, timezone
 from functools import wraps
 
@@ -58,6 +58,38 @@ def hash_string(text: str, salt: Optional[str] = None) -> str:
         text = text + salt
     
     return hashlib.sha256(text.encode()).hexdigest()
+
+
+def compute_sha256_and_size(data: BinaryIO, chunk_size: int = 1024 * 1024) -> tuple[str, int]:
+    """
+    Compute SHA-256 hex digest and total size (bytes) for a binary stream.
+    The stream position will be restored to its original offset if possible.
+    """
+    hasher = hashlib.sha256()
+    total_size = 0
+    # Remember current position to restore later
+    try:
+        original_pos = data.tell()
+    except Exception:
+        original_pos = None
+    try:
+        # Ensure we start from current position
+        while True:
+            chunk = data.read(chunk_size)
+            if not chunk:
+                break
+            hasher.update(chunk)
+            total_size += len(chunk)
+    finally:
+        # Restore position for subsequent readers (e.g., uploader)
+        try:
+            if original_pos is not None:
+                data.seek(original_pos)
+            else:
+                data.seek(0)
+        except Exception:
+            pass
+    return hasher.hexdigest(), total_size
 
 
 def calculate_pagination(page: int, size: int, total: int) -> Dict[str, Any]:

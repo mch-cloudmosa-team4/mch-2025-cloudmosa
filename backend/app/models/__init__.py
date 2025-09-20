@@ -14,6 +14,7 @@ from .job_pictures import JobPicture
 from .conversations import Conversation
 from .conversation_participants import ConversationParticipant
 from .messages import Message, MessageType
+from .item import Item
 
 __all__ = [
     "BaseResponse",
@@ -38,5 +39,6 @@ __all__ = [
     "Conversation",
     "ConversationParticipant",
     "Message",
-    "MessageType"
+    "MessageType",
+    "Item" # temporary
 ]
