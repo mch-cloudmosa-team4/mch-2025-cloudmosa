@@ -49,6 +49,8 @@ def get_minio_client():
     Dependency that yields a MinIO client instance for request scope.
     """
     client = create_minio_client()
+    if client is None:
+        raise ImportError("MinIO client is not available because the minio package is not installed.")
     ensure_bucket_exists(client, settings.minio_bucket)
     try:
         yield client
