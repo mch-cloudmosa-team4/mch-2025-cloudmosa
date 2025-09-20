@@ -1,0 +1,17 @@
+@font-face {
+    font-family: 'RobotoMono';
+    src: url('/RobotoMono.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body {
+    font-family: 'RobotoMono', sans-serif !important;
+}
+
+button,
+input,
+textarea,   
+select {
+    font-family: inherit !important;
+}
