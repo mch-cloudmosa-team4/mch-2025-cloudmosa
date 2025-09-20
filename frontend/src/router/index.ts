@@ -10,6 +10,7 @@ import JobDetail from '../views/JobDetail.vue'
 import Menu from '../views/Menu.vue'
 import ApplicationList from '../views/ApplicationList.vue'
 import ApplicationDetail from '@/views/ApplicationDetail.vue'
+import NotificationView from '../views/NotificationView.vue'
 
 const routes = [
   { path: '/', redirect: '/login' },
@@ -24,6 +25,7 @@ const routes = [
   { path: '/menu', component: Menu },
   { path: '/application', component: ApplicationList },
   { path: '/application/:id', component: ApplicationDetail },
+  { path: '/notification', component: NotificationView },
 ]
 
 const router = createRouter({

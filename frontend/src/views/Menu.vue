@@ -4,6 +4,7 @@
     <button class="btn" @click="$router.push('/application')">My Application</button>
     <button class="btn" @click="$router.push('/job')">Find Jobs</button>
     <button class="btn" @click="$router.push('/profile')">Who</button>
+    <button class="btn" @click="$router.push('/notification')">Notifications</button>
     <button class="btn logout" @click="handleLogout">Logout</button>
   </main>
 </template>
