@@ -318,10 +318,7 @@ function handleKeyPress(event: KeyboardEvent) {
     const inBottomBar = isInBottomBar()
     console.log(inBottomBar)
     // 沒有選單開啟 → 全域 scroll
-    if (event.key === 'ArrowUp' && inBottomBar) {
-      event.preventDefault()
-      scrollByStep(-50)
-    } else if (event.key === 'ArrowDown' && inBottomBar) {
+    if (event.key === 'ArrowDown' && inBottomBar) {
       event.preventDefault()
       scrollByStep(50)
     }
