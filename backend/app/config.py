@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     
     # App Basic Settings
     app_name: str = "[Project name] Backend"
-    debug: bool = Field(default=False, description="Debug mode")
+    debug: bool = Field(default=True, description="Debug mode")
     version: str = "0.1.0"
     description: str = "[Project name] Backend API"
     
@@ -47,6 +47,20 @@ class Settings(BaseSettings):
     secret_key: str = Field(
         default="your-secret-key-change-this-in-production",
         description="Secret key for JWT and other cryptographic operations"
+    )
+    
+    # JWT Settings
+    jwt_algorithm: str = Field(
+        default="HS256",
+        description="JWT algorithm for token encoding/decoding"
+    )
+    access_token_expire_minutes: int = Field(
+        default=30,
+        description="Access token expiration time in minutes"
+    )
+    refresh_token_expire_days: int = Field(
+        default=30,
+        description="Refresh token expiration time in days"
     )
     
     # API Settings
