@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <button v-if="!isLoginPage" class="menu-btn" @click="$router.push('/menu')">☰</button>
+    <button v-if="!isLoginPage" class="menu-btn" @click="toggleMenu">☰</button>
     <router-view class="main-content" />
     <nav v-if="!isLoginPage" class="bottom-bar">
       <button @click="$router.push('/home')">Home</button>
@@ -11,18 +11,40 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getUserId } from './services/auth'
 
 const router = useRouter()
 const route = useRoute()
+const previousPage = ref<string>('')
+
+// 監聽路由變化，記錄非menu頁面
+watch(route, (newRoute) => {
+  if (newRoute.path !== '/menu' && newRoute.path !== '/login') {
+    previousPage.value = newRoute.path
+  }
+}, { immediate: true })
 
 function goMyProfile() {
   if (getUserId()) {
     router.push(`/profile/${getUserId()}`)
   } else {
     alert('Please login first')
+  }
+}
+
+function toggleMenu() {
+  if (route.path === '/menu') {
+    // 如果當前在menu頁面，返回之前的頁面
+    if (previousPage.value) {
+      router.push(previousPage.value)
+    } else {
+      router.push('/home') // 如果沒有記錄，默認回到home
+    }
+  } else {
+    // 如果不在menu頁面，去menu
+    router.push('/menu')
   }
 }
 

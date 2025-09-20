@@ -1,6 +1,9 @@
 <template>
   <main class="menu">
-    <h1 class="title">Menu</h1>
+    <div class="menu-header">
+      <button class="back-btn" @click="goBack">←</button>
+      <h1 class="title">Menu</h1>
+    </div>
     <button class="btn" @click="$router.push('/application')">My Application</button>
     <button class="btn" @click="$router.push('/job')">Find Jobs</button>
     <button class="btn" @click="$router.push('/profile')">Who</button>
@@ -19,6 +22,11 @@ function handleLogout() {
   logout()
   router.replace('/login')
 }
+
+function goBack() {
+  // 使用瀏覽器的回退功能
+  router.go(-1)
+}
 </script>
 
 <style scoped>
@@ -31,9 +39,33 @@ function handleLogout() {
   text-align: center;
 }
 
+.menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.back-btn {
+  position: absolute;
+  left: 0;
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: rgb(42, 65, 102);
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.back-btn:hover {
+  background: rgba(42, 65, 102, 0.1);
+  border-radius: 4px;
+}
+
 .title {
   font-size: 18px;
-  margin-bottom: 16px;
+  margin: 0;
 }
 
 .btn {
