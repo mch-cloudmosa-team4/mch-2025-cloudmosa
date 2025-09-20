@@ -1,19 +1,19 @@
 <template>
   <div class="app-container">
     <router-view class="main-content" />
-
+    
     <!-- 新的底部導航欄 -->
     <nav v-if="!isLoginPage" class="bottom-nav">
       <!-- Home展開選單 - 圓弧形浮動選單 -->
-      <div
-        v-if="showHomeMenu"
+      <div 
+        v-if="showHomeMenu" 
         class="home-menu-overlay"
         @mouseenter="cancelHideTimer"
         @mouseleave="startHideTimer"
       >
         <div class="circular-menu">
-          <div
-            class="menu-item item-1"
+          <div 
+            class="menu-item item-1" 
             @click="goToPage('/profile/' + getUserId())"
             @mouseenter="showProfileLabel = true"
             @mouseleave="showProfileLabel = false"
@@ -21,8 +21,8 @@
             <span class="material-icons-round">account_circle</span>
             <span v-if="showProfileLabel" class="item-label">Profile</span>
           </div>
-          <div
-            class="menu-item item-2"
+          <div 
+            class="menu-item item-2" 
             @click="goToPage('/job')"
             @mouseenter="showJobsLabel = true"
             @mouseleave="showJobsLabel = false"
@@ -30,8 +30,8 @@
             <span v-if="showJobsLabel" class="item-label">Jobs</span>
             <span class="material-icons-round">work</span>
           </div>
-          <div
-            class="menu-item item-3"
+          <div 
+            class="menu-item item-3" 
             @click="goToPage('/dashboard')"
             @mouseenter="showDashboardLabel = true"
             @mouseleave="showDashboardLabel = false"
@@ -39,8 +39,8 @@
             <span v-if="showDashboardLabel" class="item-label">Dashboard</span>
             <span class="material-icons-round">dashboard</span>
           </div>
-          <div
-            class="menu-item item-4"
+          <div 
+            class="menu-item item-4" 
             @click="goToPage('/profile')"
             @mouseenter="showCommunityLabel = true"
             @mouseleave="showCommunityLabel = false"
@@ -50,13 +50,13 @@
           </div>
         </div>
       </div>
-
+      
       <!-- 底部三個主要按鈕 -->
       <div class="nav-container">
         <!-- Chat按鈕 -->
-        <div
-          class="nav-item"
-          :class="{ active: activeTab === 'chat' }"
+        <div 
+          class="nav-item" 
+          :class="{ active: activeTab === 'chat' }" 
           @click="goToChat"
           @mouseenter="showChatLabel = true"
           @mouseleave="showChatLabel = false"
@@ -66,11 +66,11 @@
           </span>
           <span v-if="showChatLabel" class="nav-label">Chat</span>
         </div>
-
+        
         <!-- Home按鈕 -->
-        <div
-          class="nav-item home-item"
-          :class="{ active: activeTab === 'home' }"
+        <div 
+          class="nav-item home-item" 
+          :class="{ active: activeTab === 'home' }" 
           @click="goToHome"
           @mouseenter="showMenu"
           @mouseleave="startHideTimer"
@@ -78,11 +78,11 @@
           <span class="material-icons-round">home</span>
           <span v-if="showHomeMenu" class="nav-label">Home</span>
         </div>
-
+        
         <!-- News按鈕 -->
-        <div
-          class="nav-item"
-          :class="{ active: activeTab === 'news' }"
+        <div 
+          class="nav-item" 
+          :class="{ active: activeTab === 'news' }" 
           @click="goToNews"
           @mouseenter="showNewsLabel = true"
           @mouseleave="showNewsLabel = false"
@@ -119,7 +119,7 @@ const isLoginPage = computed(() => route.path === '/login')
 const activeTab = computed(() => {
   const currentRoute = route.name as string
   if (!currentRoute) return 'home'
-
+  
   if (['chat', 'chatroom'].includes(currentRoute)) return 'chat'
   if (['home'].includes(currentRoute)) return 'home'
   if (['news'].includes(currentRoute)) return 'news'
@@ -333,8 +333,7 @@ watch(route, () => {
   height: 130px;
   left: 50%;
   transform: translateX(-50%);
-  animation: fadeIn 0.3s ease-out;
-  pointer-events: auto; /* 恢復選單的鼠標事件 */
+  pointer-events: auto; /* 恢復選單的鼠標事件 */ 
   z-index: 1002; /* 確保在導航欄之上 */
 }
 
@@ -351,8 +350,9 @@ watch(route, () => {
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
-  animation: scaleIn 0.4s ease-out;
   z-index: 1003; /* 確保選單項目在最上層 */
+  opacity: 0;
+  transform: scale(0);
 }
 
 .menu-item:hover {
@@ -403,25 +403,25 @@ watch(route, () => {
 .item-1 {
   bottom: 5px;   /* Profile - 左下角，提高位置避免與導航欄重疊 */
   left: 15px;
-  animation-delay: 0.1s;
+  animation: menuItemAppear 0.4s ease-out 0.1s forwards;
 }
 
 .item-2 {
   bottom: 37px;   /* Jobs - 左上角 */
   left: 51px;
-  animation-delay: 0.2s;
+  animation: menuItemAppear 0.4s ease-out 0.2s forwards;
 }
 
 .item-3 {
   bottom: 37px;   /* Dashboard - 右上角 */
   right: 51px;
-  animation-delay: 0.3s;
+  animation: menuItemAppear 0.4s ease-out 0.3s forwards;
 }
 
 .item-4 {
   bottom: 5px;   /* Community - 右下角，提高位置避免與導航欄重疊 */
   right: 15px;
-  animation-delay: 0.4s;
+  animation: menuItemAppear 0.4s ease-out 0.4s forwards;
 }
 
 @keyframes labelFadeIn {
@@ -432,6 +432,17 @@ watch(route, () => {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes menuItemAppear {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
