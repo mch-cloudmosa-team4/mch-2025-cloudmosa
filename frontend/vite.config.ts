@@ -7,7 +7,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/cloud-phone-frontend-demo/' : '/',
+  base: process.env.NODE_ENV === 'production' ? '/mch-2025-cloudmosa/' : '/',
   plugins: [
     vue(),
     vueJsx(),
