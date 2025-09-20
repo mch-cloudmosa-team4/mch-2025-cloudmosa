@@ -3,7 +3,7 @@ Jobs API router with database integration
 """
 
 from typing import List
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, HTTPException, Query, status, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -40,12 +40,13 @@ async def list_jobs(
 
 @router.get("/{job_id}", response_model=JobResponse, summary="Get job by ID")
 async def get_job(
-    job_id: int,
+    job_id: str,
     db: Session = Depends(get_db)
 ) -> JobResponse:
     job = jobs.get(db, job_id=job_id)
     if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
+
     skills = job_requirements.get(db, job_id=job.id)
     skills = [skill.skill_id for skill in skills]
     job["skills"] = skills
@@ -55,7 +56,7 @@ async def get_job(
     return JobResponse.model_validate(job)
 
 
-@router.post("/", response_model=JobResponse, status_code=201, summary="Create new job")
+@router.post("/", response_model=JobResponse, status_code=status.HTTP_201_CREATED, summary="Create new job")
 async def create_job(
     job_data: JobCreate,
     db: Session = Depends(get_db)
@@ -78,7 +79,7 @@ async def create_job(
 
 @router.put("/{job_id}", response_model=JobResponse, summary="Update job")
 async def update_job(
-    job_id: int,
+    job_id: str,
     job_update: JobUpdate,
     db: Session = Depends(get_db)
 ) -> JobResponse:
@@ -92,7 +93,7 @@ async def update_job(
 
     job_obj = jobs.get(db, job_id=job_id)
     if not job_obj:
-        raise HTTPException(status_code=404, detail="Job not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
 
     updated_job = jobs.update(db=db, db_obj=job_obj, obj_in=job_update)
     job_pictures.delete(db, job_id=updated_job.id)
@@ -106,12 +107,12 @@ async def update_job(
 
 @router.delete("/{job_id}", response_model=BaseResponse, summary="Delete job")
 async def delete_job(
-    job_id: int,
+    job_id: str,
     db: Session = Depends(get_db)
 ) -> BaseResponse:
     job_obj = jobs.delete(db=db, job_id=job_id)
     if not job_obj:
-        raise HTTPException(status_code=404, detail="Job not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
 
     job_pictures.delete(db, job_id=job_id)
     job_requirements.delete(db, job_id=job_id)

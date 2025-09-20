@@ -13,7 +13,7 @@ class JobRequirementCRUD:
     CRUD operations for Job model
     """
 
-    def get(self, db: Session, job_id: int) -> List[JobRequirement]:
+    def get(self, db: Session, job_id: str) -> List[JobRequirement]:
         """
         Get job pictures by job ID
 
@@ -26,7 +26,7 @@ class JobRequirementCRUD:
         """
         return db.query(JobRequirement).filter(JobRequirement.job_id == job_id).all()
 
-    def create(self, db: Session, job_id: int, skill_id: int, min_level: Optional[int]) -> JobRequirement:
+    def create(self, db: Session, job_id: str, skill_id: str, min_level: Optional[int]) -> JobRequirement:
         """
         Create new jobs
 
@@ -47,7 +47,7 @@ class JobRequirementCRUD:
         db.refresh(db_obj)
         return db_obj
 
-    def delete(self, db: Session, job_id: int) -> Optional[JobRequirement]:
+    def delete(self, db: Session, job_id: str) -> Optional[JobRequirement]:
         """
         Delete jobs by ID
 

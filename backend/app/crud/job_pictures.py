@@ -13,7 +13,7 @@ class JobPictureCRUD:
     CRUD operations for Job model
     """
 
-    def get(self, db: Session, job_id: int) -> List[JobPicture]:
+    def get(self, db: Session, job_id: str) -> List[JobPicture]:
         """
         Get job pictures by job ID
 
@@ -26,7 +26,7 @@ class JobPictureCRUD:
         """
         return db.query(JobPicture).filter(JobPicture.job_id == job_id).all()
 
-    def create(self, db: Session, job_id: int, picture_id: int) -> JobPicture:
+    def create(self, db: Session, job_id: str, picture_id: str) -> JobPicture:
         """
         Create new jobs
 
@@ -44,7 +44,7 @@ class JobPictureCRUD:
         db.refresh(db_obj)
         return db_obj
 
-    def delete(self, db: Session, job_id: int) -> Optional[JobPicture]:
+    def delete(self, db: Session, job_id: str) -> Optional[JobPicture]:
         """
         Delete jobs by ID
 
