@@ -2,7 +2,7 @@ name: Deploy to Production
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, feat/cicd ]  # 添加測試分支
   pull_request:
     branches: [ main ]
 
@@ -58,7 +58,7 @@ jobs:
   build-and-push:
     needs: test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/cicd') && github.event_name == 'push'
 
     steps:
     - name: Checkout code
@@ -97,7 +97,7 @@ jobs:
   deploy:
     needs: build-and-push
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/cicd') && github.event_name == 'push'
 
     steps:
     - name: Checkout code
