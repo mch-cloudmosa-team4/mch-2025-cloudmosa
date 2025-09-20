@@ -20,7 +20,7 @@ import RegisterVIew from '@/views/RegisterVIew.vue'
 import ProfileEdit from '@/views/ProfileEdit.vue'
 
 const routes = [
-  { path: '/', redirect: '/chat' },
+  { path: '/', redirect: '/home' },
   { path: '/login', component: LoginView },
   { path: '/home', component: HomeView },
   { path: '/profile', component: ProfileList },

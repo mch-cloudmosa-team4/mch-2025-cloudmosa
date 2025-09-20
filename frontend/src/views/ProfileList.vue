@@ -16,7 +16,6 @@
         </button>
       </li>
     </ul>
-    <button @click="$router.push('/')">Back to Home</button>
   </main>
 </template>
 
@@ -43,34 +42,110 @@ function goMe() {
   router.push(`/profile/${getUserId()}`)
 }
 </script>
-
 <style scoped>
+main {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 16px;
+  font-family: "Helvetica Neue", Arial, sans-serif;
+  background: #ffffff;
+}
+
+/* 標題 */
+h1 {
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  margin: 20px 0;
+  color: #2a4166;
+}
+
+/* 搜尋列區塊 */
 .filters {
   position: sticky;
   top: 0;
-  background: none;
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  background: #fff;
+  padding: 8px 0;
   z-index: 10;
 }
 
 .search-box {
-  padding: 6px;
+  padding: 10px 14px;
   border: 1px solid #ccc;
-  border-radius: 50px;
-  font-size: 13px;
+  border-radius: 25px;
+  font-size: 14px;
   width: 80%;
+  transition: all 0.2s ease;
 }
 
-.filter-select {
-  width: 85%;
-  padding: 6px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 13px;
+.search-box:focus {
+  border-color: #2a4166;
+  outline: none;
+  box-shadow: 0 0 5px rgba(42, 65, 102, 0.3);
+}
+
+/* 全域按鈕樣式 */
+button {
+  padding: 10px 14px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  background: rgb(42, 65, 102);
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+button:hover {
+  background: rgb(80, 110, 160);
+  transform: scale(1.02);
+}
+
+/* 「我的 Profile」按鈕 */
+main > button {
+  display: block;
+  margin: 10px auto;
+  font-weight: 600;
+}
+
+/* Profile 列表 */
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 每一個 Profile 卡片 */
+li button {
+  width: 100%;
+  text-align: left;
   background: #f9f9f9;
+  color: #222;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 14px 16px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: all 0.2s ease;
 }
 
+li button:hover {
+  background: #eef3fb;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(42, 65, 102, 0.15);
+}
+
+/* Back to Home 按鈕 */
+main > button:last-of-type {
+  margin-top: 20px;
+  width: 100%;
+  background: #bbb;
+}
+
+main > button:last-of-type:hover {
+  background: #999;
+}
 </style>

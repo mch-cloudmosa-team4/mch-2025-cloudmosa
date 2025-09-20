@@ -56,6 +56,7 @@ if (!isAuthed()) router.replace('/login')
 
 .title {
   font-size: 18px;
+  padding-top: 16px;
   margin: 0;
   color: #222;
   flex: 1;
