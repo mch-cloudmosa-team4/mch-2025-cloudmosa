@@ -77,10 +77,14 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
       - PGADMIN_CONFIG_SERVER_MODE=True
       - PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED=False
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
       - "5050:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin-config/servers-prod.json:/tmp/servers-prod.json:ro
+      - ./pgadmin-config/init-pgadmin.sh:/tmp/init-pgadmin.sh:ro
+    entrypoint: ["/tmp/init-pgadmin.sh"]
     depends_on:
       postgres:
         condition: service_healthy
