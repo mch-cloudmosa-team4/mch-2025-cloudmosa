@@ -344,8 +344,9 @@ if (!isAuthed()) router.replace('/login')
 /* 登出確認對話框樣式 */
 .logout-dialog-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 240px;
   height: 320px;
   background: rgba(0, 0, 0, 0.5);

@@ -3,7 +3,6 @@ import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueJsx from '@vitejs/plugin-vue-jsx'
-// import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -13,11 +12,21 @@ export default defineConfig({
     port: 5173,      // 可選：指定端口
   },
   plugins: [
-    vue(),
+    vue({
+      template: {
+        compilerOptions: {
+          // 禁用開發工具
+          isCustomElement: () => false
+        }
+      }
+    }),
     vueJsx(),
-    // test
-    // vueDevTools(), // 移除 Vue DevTools 以隱藏開發者工具圖標
   ],
+  define: {
+    // 禁用 Vue DevTools
+    __VUE_OPTIONS_API__: true,
+    __VUE_PROD_DEVTOOLS__: false,
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
