@@ -2,7 +2,7 @@
   <main class="notification-view">
     <div class="top-bar">
       <button class="back-btn" @click="$router.push('/home')">←</button>
-      <h1 class="title">Notifications</h1>
+      <h1 class="title">News</h1>
     </div>
     
     <div class="notification-list">
@@ -23,7 +23,7 @@
     </div>
 
     <div v-if="notifications.length === 0" class="empty-state">
-      <p>No notifications yet</p>
+      <p>No news yet</p>
     </div>
   </main>
 </template>

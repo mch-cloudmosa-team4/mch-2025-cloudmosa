@@ -5,7 +5,12 @@
     <!-- 新的底部導航欄 -->
     <nav v-if="!isLoginPage" class="bottom-nav">
       <!-- Home展開選單 - 圓弧形浮動選單 -->
-      <div v-if="showHomeMenu" class="home-menu-overlay" @click="closeHomeMenu">
+      <div 
+        v-if="showHomeMenu" 
+        class="home-menu-overlay"
+        @mouseenter="keepMenuOpen"
+        @mouseleave="hideMenu"
+      >
         <div class="circular-menu">
           <div class="menu-item item-1" @click="goToPage('/profile/' + getUserId())">
             <span class="material-icons-round">account_circle</span>
@@ -37,17 +42,23 @@
         </div>
         
         <!-- Home按鈕 -->
-        <div class="nav-item home-item" :class="{ active: showHomeMenu }" @click="toggleHome">
+        <div 
+          class="nav-item home-item" 
+          :class="{ active: activeTab === 'home' || showHomeMenu }" 
+          @click="goToHome"
+          @mouseenter="showMenu"
+          @mouseleave="hideMenu"
+        >
           <span class="material-icons-round">home</span>
-          <span v-if="showHomeMenu" class="nav-label">Home</span>
+          <span v-if="activeTab === 'home' || showHomeMenu" class="nav-label">Home</span>
         </div>
         
-        <!-- Notification按鈕 -->
-        <div class="nav-item" :class="{ active: activeTab === 'notification' }" @click="goToNotification">
+        <!-- News按鈕 -->
+        <div class="nav-item" :class="{ active: activeTab === 'news' }" @click="goToNews">
           <span class="material-icons-round">
-            {{ hasUnreadNotification ? 'notifications_active' : 'notifications' }}
+            {{ hasUnreadNews ? 'notifications_active' : 'notifications' }}
           </span>
-          <span v-if="activeTab === 'notification'" class="nav-label">Notification</span>
+          <span v-if="activeTab === 'news'" class="nav-label">News</span>
         </div>
       </div>
     </nav>
@@ -64,15 +75,17 @@ const route = useRoute()
 const showHomeMenu = ref(false)
 const activeTab = ref('')
 const hasUnreadChat = ref(false) // 模擬未讀聊天
-const hasUnreadNotification = ref(true) // 模擬未讀通知
+const hasUnreadNews = ref(true) // 模擬未讀新聞
 
 // 監聽路由變化，設置活動標籤
 watch(route, (newRoute) => {
   const path = newRoute.path
   if (path.startsWith('/chat')) {
     activeTab.value = 'chat'
-  } else if (path === '/notification') {
-    activeTab.value = 'notification'
+  } else if (path === '/home') {
+    activeTab.value = 'home'
+  } else if (path === '/news') {
+    activeTab.value = 'news'
   } else {
     activeTab.value = ''
   }
@@ -86,21 +99,33 @@ function goToChat() {
   hasUnreadChat.value = false // 標記為已讀
 }
 
-function goToNotification() {
-  router.push('/notification')
-  hasUnreadNotification.value = false // 標記為已讀
+function goToNews() {
+  router.push('/news')
+  hasUnreadNews.value = false // 標記為已讀
 }
 
-function toggleHome() {
-  showHomeMenu.value = !showHomeMenu.value
+function goToHome() {
+  router.push('/home')
+  showHomeMenu.value = false
+}
+
+function showMenu() {
+  showHomeMenu.value = true
+}
+
+function hideMenu() {
+  // 添加小延遲，避免鼠標快速移動時選單閃爍
+  setTimeout(() => {
+    showHomeMenu.value = false
+  }, 100)
+}
+
+function keepMenuOpen() {
+  showHomeMenu.value = true
 }
 
 function goToPage(path: string) {
   router.push(path)
-  showHomeMenu.value = false
-}
-
-function closeHomeMenu() {
   showHomeMenu.value = false
 }
 
@@ -189,11 +214,12 @@ const isLoginPage = computed(() => route.path === '/login')
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.2);
   z-index: 1000;
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  pointer-events: none; /* 讓背景不攔截鼠標事件 */
 }
 
 .circular-menu {
@@ -202,6 +228,7 @@ const isLoginPage = computed(() => route.path === '/login')
   width: 220px;
   height: 120px;
   animation: fadeIn 0.3s ease-out;
+  pointer-events: auto; /* 恢復選單的鼠標事件 */
 }
 
 .menu-item {

@@ -28,7 +28,7 @@ const routes = [
   { path: '/menu', component: Menu },
   { path: '/application', component: ApplicationList },
   { path: '/application/:id', component: ApplicationDetail },
-  { path: '/notification', component: NotificationView },
+  { path: '/news', component: NotificationView },
   { path: '/job/:id/edit', component: JobEdit },
   { path: '/job/create', component: JobCreate },
   { path: '/job/:id/application', component: JobApplication },
