@@ -49,6 +49,20 @@ class Settings(BaseSettings):
         description="Secret key for JWT and other cryptographic operations"
     )
     
+    # JWT Settings
+    jwt_algorithm: str = Field(
+        default="HS256",
+        description="JWT algorithm for token encoding/decoding"
+    )
+    access_token_expire_minutes: int = Field(
+        default=30,
+        description="Access token expiration time in minutes"
+    )
+    refresh_token_expire_days: int = Field(
+        default=30,
+        description="Refresh token expiration time in days"
+    )
+    
     # API Settings
     api_prefix: str = Field(default="/api/v1", description="API prefix")
     

@@ -16,11 +16,6 @@ from app.models import User
 # Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# JWT settings
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1
-REFRESH_TOKEN_EXPIRE_DAYS = 30
-
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
@@ -64,10 +59,10 @@ def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta]
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expire = datetime.now(timezone.utc) + timedelta(minutes=settings.access_token_expire_minutes)
     
     to_encode.update({"exp": expire, "type": "access"})
-    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.jwt_algorithm)
     return encoded_jwt
 
 
@@ -86,10 +81,10 @@ def create_refresh_token(data: Dict[str, Any], expires_delta: Optional[timedelta
     if expires_delta:
         expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+        expire = datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days)
     
     to_encode.update({"exp": expire, "type": "refresh"})
-    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.jwt_algorithm)
     return encoded_jwt
 
 
@@ -108,7 +103,7 @@ def verify_token(token: str, token_type: str = "access") -> Optional[Dict[str, A
         JWTError: If token is expired (with "token expired" message)
     """
     try:
-        payload = jwt.decode(token, settings.secret_key, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, settings.secret_key, algorithms=[settings.jwt_algorithm])
 
         # Check token type
         if payload.get("type") != token_type:
@@ -209,7 +204,7 @@ def create_tokens(user: User) -> Dict[str, str]:
     _refresh_tokens[refresh_token] = {
         "user_id": str(user.id),
         "created_at": datetime.now(timezone.utc),
-        "expires_at": datetime.now(timezone.utc) + timedelta(days=30)  # 30-day expiry
+        "expires_at": datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days)
     }
     
     return {
