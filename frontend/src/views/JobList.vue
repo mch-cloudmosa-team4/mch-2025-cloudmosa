@@ -26,6 +26,9 @@
         </button>
       </li>
     </ul>
+    <button class="create-btn" @click="goToCreate">
+      +
+    </button>
     <button @click="$router.push('/')">Back to Home</button>
   </main>
 </template>
@@ -45,6 +48,10 @@ onMounted(async () => {
 
 const goJob = (id) => {
   router.push(`/job/${id}`)
+}
+
+function goToCreate() {
+  router.push(`/job/create`)
 }
 </script>
 
@@ -99,5 +106,29 @@ const goJob = (id) => {
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
+}
+
+.create-btn {
+  position: sticky;
+  bottom: 10px;
+  left: 175px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgb(255, 193, 7);
+  color: black;
+  font-size: 20px;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  flex-shrink: 0;       /* ⭐ 避免被 flex 壓扁 */
+}
+.create-btn:hover {
+  background: rgb(255, 170, 0);
 }
 </style>

@@ -25,7 +25,6 @@
       Apply
     </button>
 
-    <!-- 固定右下角的 Edit 圓形按鈕 -->
     <button class="edit-btn" @click="goToEdit">
       ✎
     </button>
@@ -126,8 +125,8 @@ function goToApplications() {
   align-items: center;
   justify-content: center;
 
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: none;
   background: rgb(255, 193, 7);
