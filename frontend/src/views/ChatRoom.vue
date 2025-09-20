@@ -184,16 +184,16 @@ function scrollToBottom() {
   background: #f9f9f9;
 }
 .input-bar input {
-  flex: 1;
+  width: 65%;
   padding: 6px;
-  border-radius: 4px;
+  border-radius: 8px;
   border: 1px solid #ccc;
 }
 .send-btn {
   margin-left: 8px;
   padding: 6px 12px;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   background: rgb(42, 65, 102);
   color: white;
   font-weight: bold;
