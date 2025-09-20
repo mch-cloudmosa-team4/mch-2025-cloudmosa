@@ -1,6 +1,6 @@
 <template>
   <main>
-    <ul>
+    <ul class="job-list">
       <li v-for="j in jobs" :key="j.id">
         <button class="job-btn" @click="goJob(j.id)">
           <div class="job-info">
@@ -116,5 +116,10 @@ function goToCreate() {
 }
 .create-btn:hover {
   background: rgb(255, 170, 0);
+}
+.job-list {
+  list-style-type: none;
+  padding-left: 6px;
+  margin-right: 6px;
 }
 </style>
