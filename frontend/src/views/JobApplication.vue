@@ -1,6 +1,6 @@
 <template>
   <main class="job-application">
-    <h1 class="title">Applications for Job {{ route.params.id }}</h1>
+    <h1 class="title">Job {{ route.params.id }}</h1>
 
     <div v-if="applications.length > 0" class="applications-list">
       <button
@@ -44,19 +44,21 @@ function goToApplication(id: number) {
   display: flex;
   flex-direction: column;
   font-size: 12px;
-  padding: 16px;
 }
 
 .title {
   font-size: 16px;
   font-weight: bold;
   margin-bottom: 16px;
+  margin-left: 16px;
 }
 
 .applications-list {
+  width: 75%;
   display: flex;
   flex-direction: column;
   gap: 12px;
+  margin-left: 16px;
 }
 
 .application-btn {
