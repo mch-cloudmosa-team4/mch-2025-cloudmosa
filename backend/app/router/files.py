@@ -40,7 +40,7 @@ async def upload_file(
     # Create file record first to get the UUID
     obj_in = FileCreate(
         mime_type=file.content_type or "application/octet-stream",
-        size_bytes=file.size
+        size_bytes=file.size if file.size is not None else 0
     )
     file_obj = file_db.create(db=db, obj_in=obj_in)
     
