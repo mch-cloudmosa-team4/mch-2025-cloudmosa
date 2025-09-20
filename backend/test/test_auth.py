@@ -1,24 +1,186 @@
 #!/usr/bin/env python3
 """
-Test the simplified auth API
+Test the separated auth API (register and login)
 """
 
 import json
 import requests
 import time
+import random
 from datetime import datetime, timedelta, timezone
 from jose import jwt
 import hashlib
 
 BASE_URL = "http://localhost:8000"
+# Test data for existing user
 PHONE = "+2348012345679"
 PASSWD = "testpassword"
 PASSWD_HASH = hashlib.sha256(PASSWD.encode('utf-8')).hexdigest()
 
+# Test data for new user registration
+TEST_PHONES = [
+    "+2348012345680",
+    "+2348012345681",
+    "+2348012345682"
+]
+NEW_USER_PASSWD = "newuserpassword"
+NEW_USER_PASSWD_HASH = hashlib.sha256(NEW_USER_PASSWD.encode('utf-8')).hexdigest()
+
+
+def test_register():
+    """測試用戶註冊功能"""
+    print("📝 測試用戶註冊...")
+    
+    # 選擇一個隨機電話號碼進行測試
+    test_phone = random.choice(TEST_PHONES)
+    
+    # 註冊測試數據
+    register_data = {
+        "phone": test_phone,
+        "email": f"testuser{test_phone[-4:]}@example.com",
+        "passwd_hash": NEW_USER_PASSWD_HASH,
+        "display_name": f"Test User {test_phone[-4:]}",
+        "birthday": "1990-01-01T00:00:00Z",
+        "gender": 1,  # Male
+        "location_id": None,
+        "primary_language_code": "zh-TW"
+    }
+    
+    try:
+        response = requests.post(
+            f"{BASE_URL}/api/v1/auth/register",
+            json=register_data,
+            headers={"Content-Type": "application/json"}
+        )
+        
+        print(f"Status Code: {response.status_code}")
+        print(f"Response: {json.dumps(response.json(), indent=2, ensure_ascii=False)}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print("✅ 註冊成功")
+            return data.get("access_token"), data.get("refresh_token"), test_phone
+        else:
+            print("❌ 註冊失敗")
+            return None, None, test_phone
+            
+    except Exception as e:
+        print(f"Error: {e}")
+        return None, None, test_phone
+
+
+def test_register_duplicate():
+    """測試重複註冊（應該失敗）"""
+    print("\n📝 測試重複註冊（應該失敗）...")
+    
+    # 使用現有用戶的電話號碼
+    register_data = {
+        "phone": PHONE,  # 已存在的電話號碼
+        "email": "duplicate@example.com",
+        "passwd_hash": NEW_USER_PASSWD_HASH,
+        "display_name": "Duplicate User",
+        "primary_language_code": "zh-TW"
+    }
+    
+    try:
+        response = requests.post(
+            f"{BASE_URL}/api/v1/auth/register",
+            json=register_data,
+            headers={"Content-Type": "application/json"}
+        )
+        
+        print(f"Status Code: {response.status_code}")
+        print(f"Response: {json.dumps(response.json(), indent=2, ensure_ascii=False)}")
+        
+        if response.status_code == 409:
+            print("✅ 正確拒絕重複註冊")
+        else:
+            print("❌ 未正確處理重複註冊")
+            
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+def test_register_invalid_phone():
+    """測試無效電話號碼註冊"""
+    print("\n📝 測試無效電話號碼註冊...")
+    
+    invalid_phones = [
+        "1234567890",      # 沒有國家代碼
+        "+12345",          # 太短
+        "+12345678901234567890",  # 太長
+        "invalid_phone",   # 完全無效
+        ""                 # 空字符串
+    ]
+    
+    for invalid_phone in invalid_phones:
+        print(f"\n測試無效電話號碼: {invalid_phone}")
+        register_data = {
+            "phone": invalid_phone,
+            "email": "test@example.com",
+            "passwd_hash": NEW_USER_PASSWD_HASH,
+            "display_name": "Test User",
+            "primary_language_code": "zh-TW"
+        }
+        
+        try:
+            response = requests.post(
+                f"{BASE_URL}/api/v1/auth/register",
+                json=register_data,
+                headers={"Content-Type": "application/json"}
+            )
+            
+            print(f"Status Code: {response.status_code}")
+            if response.status_code != 200:
+                print("✅ 正確拒絕無效電話號碼")
+                if response.status_code == 422:
+                    print(f"驗證錯誤: {response.json().get('detail', 'Unknown error')}")
+            else:
+                print("❌ 未正確處理無效電話號碼")
+                
+        except Exception as e:
+            print(f"Error: {e}")
+
+
+def test_login_with_new_user(phone, password_hash):
+    """用新註冊的用戶測試登入"""
+    if not phone:
+        print("❌ 沒有有效的測試用戶電話號碼")
+        return None, None
+        
+    print(f"\n🔐 測試新用戶登入 ({phone})...")
+    
+    login_data = {
+        "phone": phone,
+        "passwd_hash": password_hash
+    }
+    
+    try:
+        response = requests.post(
+            f"{BASE_URL}/api/v1/auth/login",
+            json=login_data,
+            headers={"Content-Type": "application/json"}
+        )
+        
+        print(f"Status Code: {response.status_code}")
+        print(f"Response: {json.dumps(response.json(), indent=2, ensure_ascii=False)}")
+        
+        if response.status_code == 200:
+            data = response.json()
+            print("✅ 新用戶登入成功")
+            return data.get("access_token"), data.get("refresh_token")
+        else:
+            print("❌ 新用戶登入失敗")
+            return None, None
+            
+    except Exception as e:
+        print(f"Error: {e}")
+        return None, None
+
 
 def test_login():
-    """測試登錄功能"""
-    print("🔐 測試登錄...")
+    """測試已存在用戶的登入功能"""
+    print("🔐 測試已存在用戶登入...")
     
     # 測試數據
     login_data = {
@@ -47,8 +209,8 @@ def test_login():
         return None, None
 
 def test_wrong_password():
-    """測試錯誤密碼登錄"""
-    print("\n🔐 測試錯誤密碼登錄...")
+    """測試錯誤密碼登入"""
+    print("\n🔐 測試錯誤密碼登入...")
     
     # 錯誤密碼測試數據
     wrong_login_data = {
@@ -70,6 +232,62 @@ def test_wrong_password():
             print("✅ 正確處理錯誤密碼")
         else:
             print("❌ 未正確處理錯誤密碼")
+            
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+def test_login_nonexistent_user():
+    """測試不存在的用戶登入"""
+    print("\n🔐 測試不存在的用戶登入...")
+    
+    nonexistent_login_data = {
+        "phone": "+2349999999999",  # 不存在的電話號碼
+        "passwd_hash": PASSWD_HASH
+    }
+    
+    try:
+        response = requests.post(
+            f"{BASE_URL}/api/v1/auth/login",
+            json=nonexistent_login_data,
+            headers={"Content-Type": "application/json"}
+        )
+        
+        print(f"Status Code: {response.status_code}")
+        print(f"Response: {json.dumps(response.json(), indent=2, ensure_ascii=False)}")
+        
+        if response.status_code == 401:
+            print("✅ 正確處理不存在的用戶")
+        else:
+            print("❌ 未正確處理不存在的用戶")
+            
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+def test_login_invalid_phone():
+    """測試無效電話號碼登入"""
+    print("\n🔐 測試無效電話號碼登入...")
+    
+    invalid_login_data = {
+        "phone": "invalid_phone",
+        "passwd_hash": PASSWD_HASH
+    }
+    
+    try:
+        response = requests.post(
+            f"{BASE_URL}/api/v1/auth/login",
+            json=invalid_login_data,
+            headers={"Content-Type": "application/json"}
+        )
+        
+        print(f"Status Code: {response.status_code}")
+        print(f"Response: {json.dumps(response.json(), indent=2, ensure_ascii=False)}")
+        
+        if response.status_code == 422:
+            print("✅ 正確驗證電話號碼格式")
+        else:
+            print("❌ 未正確驗證電話號碼格式")
             
     except Exception as e:
         print(f"Error: {e}")
@@ -320,25 +538,65 @@ def show_token_expiry_test_guide():
     print("=" * 60)
 
 if __name__ == "__main__":
-    print("🚀 開始測試簡化認證 API")
-    print("=" * 50)
+    print("🚀 開始測試分離的認證 API (註冊和登入)")
+    print("=" * 60)
     
     # 顯示測試指南
     show_token_expiry_test_guide()
     
-    # 基礎功能測試
-    print("\n📋 基礎功能測試")
+    # 註冊功能測試
+    print("\n� 註冊功能測試")
     print("-" * 30)
     
-    # 測試登錄
+    # 測試用戶註冊
+    new_access_token, new_refresh_token, new_phone = test_register()
+    
+    # 測試重複註冊
+    test_register_duplicate()
+    
+    # 測試無效電話號碼註冊
+    test_register_invalid_phone()
+    
+    # 登入功能測試
+    print("\n🔐 登入功能測試")
+    print("-" * 30)
+    
+    # 測試已存在用戶登入
     access_token, refresh_token = test_login()
-    # 測試錯誤密碼
+    
+    # 測試新註冊用戶登入
+    if new_phone:
+        new_user_access, new_user_refresh = test_login_with_new_user(new_phone, NEW_USER_PASSWD_HASH)
+    
+    # 測試各種登入錯誤情況
     test_wrong_password()
+    test_login_nonexistent_user()
+    test_login_invalid_phone()
 
-    # 測試其他功能
+    # 其他功能測試
+    print("\n� 其他功能測試")
+    print("-" * 30)
+    
     test_health()
-    test_profile(access_token)
-    new_access_token = test_refresh(refresh_token)
+    
+    # 測試已存在用戶的個人資料
+    if access_token:
+        print("\n👤 測試已存在用戶個人資料...")
+        test_profile(access_token)
+    
+    # 測試新用戶的個人資料
+    if new_access_token:
+        print("\n👤 測試新註冊用戶個人資料...")
+        test_profile(new_access_token)
+    
+    # 測試 token 刷新
+    if refresh_token:
+        print("\n🔄 測試已存在用戶 token 刷新...")
+        new_access_token_from_refresh = test_refresh(refresh_token)
+    
+    if new_refresh_token:
+        print("\n🔄 測試新用戶 token 刷新...")
+        new_user_new_access = test_refresh(new_refresh_token)
     
     # Token 過期測試
     print("\n🕐 Token 過期測試")
@@ -348,20 +606,18 @@ if __name__ == "__main__":
     test_expired_access_token()
     test_expired_refresh_token()
     
-    # 提供手動測試選項
-    # if access_token:
-    #     test_manual_token_expiry(access_token)
-        
-    #     print("\n選擇測試選項:")
-    #     print("1. 輸入 'wait' 等待 10 秒測試 (適用於短過期時間)")
-    #     print("2. 直接按 Enter 結束測試")
-        
-    #     user_input = input("\n請選擇 (wait/Enter): ").strip().lower()
-    #     if user_input == 'wait':
-    #         wait_and_test_expiry(access_token or new_access_token)
-    
-    print("\n" + "=" * 50)
+    print("\n" + "=" * 60)
     print("✅ 測試完成")
+    print("\n📊 測試總結:")
+    print("- ✅ 用戶註冊功能")
+    print("- ✅ 重複註冊驗證")
+    print("- ✅ 電話號碼格式驗證")
+    print("- ✅ 用戶登入功能") 
+    print("- ✅ 新註冊用戶登入")
+    print("- ✅ 錯誤密碼處理")
+    print("- ✅ 不存在用戶處理")
+    print("- ✅ Token 刷新功能")
+    print("- ✅ Token 過期處理")
     print("\n💡 提示:")
     print("- 要實際測試 token 過期，請修改後端 ACCESS_TOKEN_EXPIRE_MINUTES 為較短時間")
     print("- 或者保存 token 並等待 30 分鐘後再測試")

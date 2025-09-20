@@ -7,11 +7,63 @@ from typing import Optional
 from pydantic import BaseModel, Field, field_validator
 import re
 
+from app.models.profiles import Gender
 from app.utils import logger
 
 
+class LoginRequest(BaseModel):
+    """Schema for user login request - only requires phone and password"""
+    phone: str = Field(description="Phone number with country code (e.g., +2348012345678)")
+    passwd_hash: str = Field(description="User password hash")
+    
+    @field_validator("phone")
+    @classmethod
+    def validate_phone(cls, v):
+        # Basic phone number validation - starts with + followed by digits
+        if not re.match(r'^\+\d{10,15}$', v):
+            raise ValueError("Phone number must start with + and contain 10-15 digits")
+        return v
+
+
+class RegisterRequest(BaseModel):
+    """Schema for user registration request - requires basic user information"""
+    phone: str = Field(description="Phone number with country code (e.g., +2348012345678)")
+    email: Optional[str] = Field(None, description="User email (optional)")
+    passwd_hash: str = Field(description="User password hash")
+
+    # Profile fields
+    display_name: str = Field(description="User display name", min_length=1, max_length=100)
+    avatar_file_id: Optional[str] = Field(None, description="Avatar file ID (optional)")
+    birthday: Optional[datetime] = Field(None, description="User birthday (optional)")
+    gender: str = Field(default="other", description="User gender (optional), default is others")
+    location_id: Optional[str] = Field(None, description="Location ID (optional)")
+    primary_language_code: str = Field(default="en", description="User's primary language code")
+    
+    @field_validator("phone")
+    @classmethod
+    def validate_phone(cls, v):
+        # Basic phone number validation - starts with + followed by digits
+        if not re.match(r'^\+\d{10,15}$', v):
+            raise ValueError("Phone number must start with + and contain 10-15 digits")
+        return v
+    
+    @field_validator("email")
+    @classmethod
+    def validate_email(cls, v):
+        if v and not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', v):
+            raise ValueError("Invalid email format")
+        return v
+
+    @field_validator("gender")
+    @classmethod
+    def validate_gender(cls, v):
+        if v not in ["male", "female", "other", "prefer_not_to_say"]:
+            raise ValueError("Invalid gender value")
+        return v
+
+
 class PhoneLoginRequest(BaseModel):
-    """Schema for phone login/register request"""
+    """Schema for phone login/register request - DEPRECATED, use LoginRequest or RegisterRequest"""
     phone: str = Field(description="Phone number with country code (e.g., +2348012345678)")
     passwd_hash: str = Field(description="Password for authentication")
     

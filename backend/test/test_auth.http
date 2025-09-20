@@ -1,0 +1,128 @@
+### 認證系統測試
+
+# 設定全域變數
+@host = http://localhost:8000
+@access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2N2M5NWZhNy0xMzE0LTQyMTMtYmU2ZC0yZWY4YmE2NmQwNDkiLCJleHAiOjE3NTgzNzIyODIsInR5cGUiOiJhY2Nlc3MifQ.ON9nhhvkafmApVIMvL_8qNM63102JynEOI-TEO1bXXM
+@refresh_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2N2M5NWZhNy0xMzE0LTQyMTMtYmU2ZC0yZWY4YmE2NmQwNDkiLCJleHAiOjE3NjA5NjI0ODIsInR5cGUiOiJyZWZyZXNoIn0.kzonz6X6-kv-5JFX5sdKkjPpueM845zMk_1k_f5G5e8
+@user_id = 67c95fa7-1314-4213-be6d-2ef8ba66d049
+
+### 註冊新用戶（最基本資訊）
+POST {{host}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+    "phone": "+886000000000",
+    "passwd_hash": "ca6ee54120465533d367b4cac5cd2f12ee75234225130dd89470de546ab9ca46",
+    "display_name": "張三"
+}
+
+### 註冊新用戶（所有資訊）
+POST {{host}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+    "phone": "+886000000003",
+    "email": "example2@gmail.com",
+    "passwd_hash": "ca6ee54120465533d367b4cac5cd2f12ee75234225130dd89470de546ab9ca46",
+    "display_name": "張三",
+    "birthday": "1990-01-01T00:00:00",
+    "gender": "male",
+    "primary_language_code": "en"
+}
+
+### 測試重複註冊（應該失敗）
+POST {{host}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+    "phone": "+886000000000",
+    "passwd_hash": "somePassword789",
+    "display_name": "王五"
+}
+
+### 用戶登入（電話 + 密碼）
+POST {{host}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+    "phone": "+886000000000",
+    "passwd_hash": "ca6ee54120465533d367b4cac5cd2f12ee75234225130dd89470de546ab9ca46"
+}
+
+### 測試錯誤密碼登入（應該失敗）
+POST {{host}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+    "phone": "+886000000000",
+    "passwd_hash": "wrongPassword"
+}
+
+### 測試不存在用戶登入（應該失敗）
+POST {{host}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+    "phone": "+886999999999",
+    "passwd_hash": "somePassword"
+}
+
+### 刷新 Access Token
+POST {{host}}/api/v1/auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "{{refresh_token}}"
+}
+
+### 取得個人資料 (需要認證)
+GET {{host}}/api/v1/profile/me
+Authorization: Bearer {{access_token}}
+
+### 更新個人資料（部分）
+PUT {{host}}/api/v1/profile/me
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "display_name": "John Doe Updated",
+  "birth_date": "1990-01-01",
+  "gender": "female",
+  "bio": "Updated bio - Software developer"
+}
+
+### 更新個人資料（所有）
+PUT {{host}}/api/v1/profile/me
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+  "display_name": "John Doe Updated",
+  "birth_date": "1990-01-01",
+  "gender": "female",
+  "bio": "Updated bio - Software developer",
+  "primary_language_code": "en"
+}
+
+### 查詢用戶資料
+GET {{host}}/api/v1/profile?user_ids={{user_id}}
+Authorization: Bearer {{access_token}}
+
+### 登出
+POST {{host}}/api/v1/auth/logout
+Content-Type: application/json
+
+{
+  "refresh_token": "{{refresh_token}}"
+}
+
+### 健康檢查
+GET {{host}}/api/v1/health
+
+### 測試無效的 refresh token
+POST {{host}}/api/v1/auth/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "invalid_token"
+}

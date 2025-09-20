@@ -215,9 +215,6 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 
-# REST Client
-*.rest
-
 # Databases
 *.db
 

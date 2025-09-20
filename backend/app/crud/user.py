@@ -90,54 +90,66 @@ class UserCRUD:
                 return []
                 
         return query.offset(skip).limit(limit).all()
-    
-    def create_user_with_profile(
+
+    def create(
         self, 
         db: Session, 
         phone: str,
         passwd_hash: str,
-        display_name: str,
         email: Optional[str] = None,
-        primary_language_code: str = "en"
+        role: UserRole = UserRole.USER,
+        is_active: bool = True
     ) -> User:
         """
-        Create new user with associated profile
+        Create new user
         
         Args:
             db: Database session
             phone: Phone number
             passwd_hash: Hashed password
-            display_name: Display name for profile
             email: Optional email
-            primary_language_code: Language code
+            role: User role
+            is_active: Active status
             
         Returns:
-            Created user with profile
+            Created user
         """
-        # Create user
         user = User(
             phone=phone,
             passwd_hash=passwd_hash,
             email=email,
-            role=UserRole.USER,
-            is_active=True
+            role=role,
+            is_active=is_active
         )
         
         db.add(user)
-        db.flush()  # Flush to get the user ID
-        
-        # Create profile
-        profile = Profile(
-            user_id=user.id,
-            display_name=display_name,
-            gender=Gender.PREFER_NOT_TO_SAY,
-            primary_language_code=primary_language_code
-        )
-        
-        db.add(profile)
         db.commit()
         db.refresh(user)
         
+        return user
+    
+    def update(self, db: Session, user_id: str, **kwargs) -> Optional[User]:
+        """
+        Update user details
+        
+        Args:
+            db: Database session
+            user_id: User ID
+            kwargs: Fields to update
+            
+        Returns:
+            Updated user or None if not found
+        """
+        user = self.get(db, user_id)
+        if not user:
+            return None
+        
+        for key, value in kwargs.items():
+            if hasattr(user, key) and value is not None:
+                setattr(user, key, value)
+        
+        db.commit()
+        db.refresh(user)
         return user
     
     def update_last_login(self, db: Session, user: User) -> User:
@@ -173,6 +185,24 @@ class UserCRUD:
             db.commit()
             db.refresh(user)
         return user
+    
+    def delete(self, db: Session, user_id: str) -> bool:
+        """
+        Permanently delete user
+        
+        Args:
+            db: Database session
+            user_id: User ID
+            
+        Returns:
+            True if deleted, False if not found
+        """
+        user = self.get(db, user_id)
+        if user:
+            db.delete(user)
+            db.commit()
+            return True
+        return False
     
     def exists_by_phone(self, db: Session, phone: str) -> bool:
         """
