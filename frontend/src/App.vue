@@ -79,6 +79,7 @@
         <div
           class="nav-item"
           :class="{ active: activeTab === 'chat' }"
+          tabindex="0"
           @click="goToChat"
           @mouseenter="showChatLabel = true"
           @mouseleave="showChatLabel = false"
@@ -96,6 +97,7 @@
             active: activeTab === 'home',
             selected: selectedMenuIndex === -1 && showHomeMenu
           }"
+          tabindex="0"
           @click="handleHomeClick"
         >
           <span class="material-icons-round">home</span>
@@ -106,6 +108,7 @@
         <div
           class="nav-item"
           :class="{ active: activeTab === 'news' }"
+          tabindex="0"
           @click="goToNews"
           @mouseenter="showNewsLabel = true"
           @mouseleave="showNewsLabel = false"
@@ -273,6 +276,7 @@ function handleTouchEnd() {
 }
 
 function scrollByStep(amount: number) {
+  console.log('Scrolling by', amount)
   const content = document.querySelector('.main-content') as HTMLElement
   if (content) {
     content.scrollBy({
@@ -280,6 +284,13 @@ function scrollByStep(amount: number) {
       behavior: 'smooth'
     })
   }
+}
+
+function isInBottomBar(): boolean {
+  const active = document.activeElement as HTMLElement
+  console.log('Active element:', active)
+  if (!active) return false
+  return active.closest('.bottom-nav') !== null
 }
 
 // 鍵盤導航函數
@@ -304,11 +315,13 @@ function handleKeyPress(event: KeyboardEvent) {
         break
     }
   } else {
+    const inBottomBar = isInBottomBar()
+    console.log(inBottomBar)
     // 沒有選單開啟 → 全域 scroll
-    if (event.key === 'ArrowUp') {
+    if (event.key === 'ArrowUp' && inBottomBar) {
       event.preventDefault()
       scrollByStep(-50)
-    } else if (event.key === 'ArrowDown') {
+    } else if (event.key === 'ArrowDown' && inBottomBar) {
       event.preventDefault()
       scrollByStep(50)
     }
