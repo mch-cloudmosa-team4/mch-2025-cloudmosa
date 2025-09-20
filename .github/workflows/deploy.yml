@@ -55,6 +55,9 @@ jobs:
         sudo rm -rf "$AGENT_TOOLSDIRECTORY"
         docker system prune -af
 
+    - name: Sanitize branch name for Docker tag
+      run: echo "SAFE_BRANCH_NAME=$(echo '${{ github.ref_name }}' | sed 's/\//-/g')" >> $GITHUB_ENV
+
     - name: Build and push Docker image (Simple)
       uses: docker/build-push-action@v5
       timeout-minutes: 15
@@ -63,7 +66,7 @@ jobs:
         push: true
         tags: |
           ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+          ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.SAFE_BRANCH_NAME }}
         labels: ${{ steps.meta.outputs.labels }}
         platforms: linux/amd64
         no-cache: true
