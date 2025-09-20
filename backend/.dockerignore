@@ -26,6 +26,9 @@ venv/
 ENV/
 env/
 
+# uv cache and lock files (regenerate in container)
+.uv/
+
 # IDEs
 .vscode/
 .idea/
