@@ -1,20 +1,19 @@
 {
   "Servers": {
     "1": {
-      "Name": "Backend PostgreSQL Production",
+      "Name": "MCH Production Database",
       "Group": "Production",
       "Host": "postgres",
       "Port": 5432,
       "MaintenanceDB": "backend_db",
       "Username": "backend_user",
-      "PassFile": "/var/lib/pgadmin/.pgpass",
-      "SSLMode": "prefer",
+      "SSLMode": "disable",
       "SSLCompression": 0,
       "Timeout": 0,
       "UseSSHTunnel": 0,
       "KerberosAuthentication": false,
       "ConnectionParameters": {
-        "sslmode": "prefer",
+        "sslmode": "disable",
         "connect_timeout": "10"
       }
     }
