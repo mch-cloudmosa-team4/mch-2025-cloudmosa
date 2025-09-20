@@ -22,15 +22,57 @@ fi
 echo "📦 更新系統套件..."
 apt update && apt upgrade -y
 
+# 檢查是否需要重啟
+if [ -f /var/run/reboot-required ]; then
+    echo "⚠️  系統更新需要重啟才能生效"
+    echo "建議執行: sudo reboot"
+    echo "重啟後再次運行此腳本繼續安裝"
+    read -p "是否現在重啟？(y/N): " -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo "🔄 正在重啟系統..."
+        reboot
+        exit 0
+    else
+        echo "⏭️  跳過重啟，繼續安裝 (可能會有警告)"
+    fi
+fi
+
 # 安裝必要套件
 echo "🔧 安裝必要套件..."
+
+# 先安裝基本套件
 apt install -y \
     curl \
     git \
     ufw \
     fail2ban \
-    docker.io \
-    docker-compose \
+    ca-certificates \
+    gnupg \
+    lsb-release
+
+# 處理 Docker 安裝 (解決 containerd 衝突)
+echo "🐳 安裝 Docker..."
+
+# 移除可能衝突的舊版本
+apt remove -y docker docker-engine docker.io containerd runc || true
+
+# 添加 Docker 官方 GPG 金鑰
+mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+# 添加 Docker repository
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+# 更新套件清單並安裝 Docker
+apt update
+apt install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# 安裝 docker-compose (standalone)
+curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
 
 # 啟動並啟用 Docker
 systemctl start docker
@@ -51,7 +93,7 @@ chown $SERVICE_USER:$SERVICE_USER $PROJECT_DIR
 # 克隆或更新代碼庫
 echo "📥 設置代碼庫..."
 if [ ! -d "$PROJECT_DIR/.git" ]; then
-    sudo -u $SERVICE_USER git clone https://github.com/Sean20405/mch-2025-cloudmosa.git $PROJECT_DIR
+    sudo -u $SERVICE_USER git clone git@github.com:mch-cloudmosa-team4/mch-2025-cloudmosa.git -b feat/cicd $PROJECT_DIR
 else
     cd $PROJECT_DIR
     sudo -u $SERVICE_USER git pull origin main
@@ -59,7 +101,21 @@ fi
 
 # 設置環境變數文件
 echo "⚙️  設置環境變數..."
+
+# 檢測 GitHub repository 名稱
+REPO_URL=$(cd $PROJECT_DIR && git remote get-url origin)
+if [[ $REPO_URL == *"github.com"* ]]; then
+    # 從 git remote URL 提取 repository 名稱
+    GITHUB_REPO=$(echo $REPO_URL | sed 's/.*github\.com[:/]\([^/]*\/[^/]*\)\.git.*/\1/' | sed 's/\.git$//')
+else
+    # 如果無法檢測，使用預設值
+    GITHUB_REPO="your-username/mch-2025-cloudmosa"
+fi
+
 cat > $PROJECT_DIR/.env << EOF
+# GitHub 設定
+GITHUB_REPOSITORY=$GITHUB_REPO
+
 # 資料庫設定
 POSTGRES_PASSWORD=$(openssl rand -base64 32)
 
@@ -88,16 +144,28 @@ echo "🛡️  設置 fail2ban..."
 systemctl start fail2ban
 systemctl enable fail2ban
 
-# 注意: Nginx 已被移除，請確保你的前端服務器有以下配置：
-# - 反向代理到 localhost:8000 (FastAPI)
-# - 反向代理到 localhost:9000 (MinIO)
-# - 反向代理到 localhost:9001 (MinIO Console)
-echo "📝 Nginx 已移除，請在你的前端服務器配置反向代理"
-
 # 啟動服務
 echo "🚀 啟動服務..."
 cd $PROJECT_DIR/backend
-sudo -u $SERVICE_USER docker-compose -f docker-compose.prod.yml up -d
+
+# 載入環境變數
+echo "📋 載入環境變數..."
+set -a  # 自動導出所有變數
+source $PROJECT_DIR/.env
+set +a  # 停止自動導出
+
+echo "使用的 GitHub Repository: $GITHUB_REPOSITORY"
+
+# 檢查是否有預構建的映像，如果沒有就在本地構建
+if docker pull ghcr.io/$GITHUB_REPOSITORY/backend:latest 2>/dev/null; then
+    echo "✅ 使用預構建的映像"
+    sudo -u $SERVICE_USER docker-compose -f docker-compose.prod.yml up -d
+else
+    echo "⚠️  預構建映像不存在，使用本地構建..."
+    # 暫時修改 docker-compose 使用本地構建
+    sed 's|image: ghcr.io/${GITHUB_REPOSITORY}/backend:latest|build: .|' docker-compose.prod.yml > docker-compose.local.yml
+    sudo -u $SERVICE_USER docker-compose -f docker-compose.local.yml up -d --build
+fi
 
 # 等待服務啟動
 echo "⏳ 等待服務啟動..."

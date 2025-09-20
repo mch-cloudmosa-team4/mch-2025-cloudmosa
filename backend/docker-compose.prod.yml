@@ -1,5 +1,4 @@
 # Production Docker Compose configuration
-version: '3.8'
 
 services:
   backend:
