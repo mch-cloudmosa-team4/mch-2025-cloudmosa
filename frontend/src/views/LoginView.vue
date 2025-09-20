@@ -1,6 +1,6 @@
 <!-- TODO: input form order -->
 <template>
-  <main class="screen" @keydown="handleKeys">
+  <main class="screen">
     <h1 class="title">Sign in</h1>
 
     <label class="field">
@@ -11,8 +11,8 @@
         type="text"
         inputmode="text"
         autocomplete="username"
-        :autofocus="true"
         @focus="focusedIndex = 0"
+        @keydown="handleKeys"
       />
     </label>
 
@@ -24,6 +24,7 @@
         type="password"
         autocomplete="current-password"
         @focus="focusedIndex = 1"
+        @keydown="handleKeys"
       />
     </label>
 
@@ -33,6 +34,7 @@
       :disabled="loading"
       @focus="focusedIndex = 2"
       @click="submit"
+      @keydown="handleKeys"
     >
       {{ loading ? 'Signing in...' : 'Login (Enter)' }}
     </button>
@@ -65,19 +67,40 @@ const focusedIndex = ref(0)
 onMounted(() => {
   if (isAuthed()) router.replace('/home')
   window.addEventListener('keydown', handleKeys)
+  // Ensure initial focus is correctly set
+  nextTick(() => {
+    focusAt(0)
+  })
 })
 onUnmounted(() => window.removeEventListener('keydown', handleKeys))
 
 function focusAt(i) {
-  focusedIndex.value = (i + focusables.length) % focusables.length
-  const el = focusables[focusedIndex.value]?.value
-  nextTick(() => el && el.focus())
+  const newIndex = ((i % focusables.length) + focusables.length) % focusables.length
+  focusedIndex.value = newIndex
+  const el = focusables[newIndex]?.value
+  nextTick(() => {
+    if (el && el.focus) {
+      el.focus()
+    }
+  })
 }
 
 function handleKeys(e) {
   if (['ArrowDown', 'ArrowUp'].includes(e.key)) {
     e.preventDefault()
-    focusAt(focusedIndex.value + (e.key === 'ArrowDown' ? 1 : -1))
+    
+    // Find current focused element index
+    const currentElement = document.activeElement
+    let currentIndex = focusedIndex.value
+    
+    // Double check the current index by comparing with refs
+    if (currentElement === userRef.value) currentIndex = 0
+    else if (currentElement === passRef.value) currentIndex = 1
+    else if (currentElement === btnRef.value) currentIndex = 2
+    
+    const direction = e.key === 'ArrowDown' ? 1 : -1
+    const newIndex = currentIndex + direction
+    focusAt(newIndex)
   }
   if (e.key === 'Enter') {
     e.preventDefault()
