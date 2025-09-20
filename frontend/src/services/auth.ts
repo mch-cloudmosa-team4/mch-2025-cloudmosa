@@ -24,12 +24,23 @@ interface LoginError {
 
 // 將密碼轉換為 SHA-256 hash
 async function hashPassword(password: string): Promise<string> {
-  const encoder = new TextEncoder()
-  const data = encoder.encode(password)
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
-  return hashHex
+  // 檢查是否有 crypto.subtle 可用（HTTPS 環境）
+  if (window.crypto && window.crypto.subtle) {
+    try {
+      const encoder = new TextEncoder()
+      const data = encoder.encode(password)
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+      const hashArray = Array.from(new Uint8Array(hashBuffer))
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+      return hashHex
+    } catch (error) {
+      console.warn('⚠️ crypto.subtle failed, falling back to simple hash:', error)
+    }
+  }
+  
+  // 備用方案：簡單的字符串 hash (僅用於開發/測試環境)
+  console.warn('⚠️ Using fallback hash function (not secure for production)')
+  return btoa(password) // 簡單的 base64 編碼作為備用
 }
 
 export async function login(phone: string, password: string): Promise<void> {
