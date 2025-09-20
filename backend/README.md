@@ -64,8 +64,8 @@ MinIO Console is available at [http://localhost:9001](http://localhost:9001) (de
 - **Items CRUD**: `http://127.0.0.1:8000/api/v1/items` - Complete CRUD operations
 - **Files**: `http://127.0.0.1:8000/api/v1/files`
   - `POST /upload` - Upload a file (form-data key: `file`, optional `folder` query)
-  - `GET /presign?key=...` - Get presigned download URL
-  - `DELETE /?key=...` - Delete an object
+  - `GET /presign?id=...` - Get presigned download URL
+  - `DELETE /?id=...` - Delete an object
 
 ### Items API Examples
 
