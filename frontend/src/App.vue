@@ -12,7 +12,7 @@
         <div class="circular-menu">
           <div
             class="menu-item item-1"
-            :class="{ 
+            :class="{
               hover: hoveredItem === 'profile',
               selected: selectedMenuIndex === 0 && showHomeMenu
             }"
@@ -27,7 +27,7 @@
           </div>
           <div
             class="menu-item item-2"
-            :class="{ 
+            :class="{
               hover: hoveredItem === 'jobs',
               selected: selectedMenuIndex === 1 && showHomeMenu
             }"
@@ -42,7 +42,7 @@
           </div>
           <div
             class="menu-item item-3"
-            :class="{ 
+            :class="{
               hover: hoveredItem === 'dashboard',
               selected: selectedMenuIndex === 2 && showHomeMenu
             }"
@@ -57,7 +57,7 @@
           </div>
           <div
             class="menu-item item-4"
-            :class="{ 
+            :class="{
               hover: hoveredItem === 'community',
               selected: selectedMenuIndex === 3 && showHomeMenu
             }"
@@ -271,7 +271,24 @@ function handleTouchEnd() {
 
 // 鍵盤導航函數
 function handleKeyPress(event: KeyboardEvent) {
-  if (!showHomeMenu.value) return
+  if (!showHomeMenu.value) {
+    // 當選單沒開時才處理上下滾動
+    const content = document.querySelector('.main-content') as HTMLElement
+    if (content) {
+      if (event.key === 'ArrowUp' && content.scrollTop === 0) {
+        event.preventDefault()
+        content.scrollBy({ top: -50, behavior: 'smooth' })
+      } else if (
+        event.key === 'ArrowDown' &&
+        content.scrollTop + content.clientHeight >= content.scrollHeight
+      ) {
+        event.preventDefault()
+        content.scrollBy({ top: 50, behavior: 'smooth' })
+      }
+    }
+    return
+  }
+
 
   switch (event.key) {
     case 'ArrowLeft':
@@ -324,7 +341,7 @@ function updateSelection() {
   // 設置當前選中項目
   const currentItem = menuItems[selectedMenuIndex.value]
   hoveredItem.value = currentItem
-  
+
   switch (currentItem) {
     case 'profile':
       showProfileLabel.value = true
