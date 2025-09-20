@@ -20,8 +20,8 @@ class LoginRequest(BaseModel):
     @classmethod
     def validate_phone(cls, v):
         # Basic phone number validation - starts with + followed by digits
-        if not re.match(r'^\+\d{10,15}$', v):
-            raise ValueError("Phone number must start with + and contain 10-15 digits")
+        if not re.match(r'^\+\d+$', v):
+            raise ValueError("Phone number must start with +")
         return v
 
 
@@ -43,8 +43,8 @@ class RegisterRequest(BaseModel):
     @classmethod
     def validate_phone(cls, v):
         # Basic phone number validation - starts with + followed by digits
-        if not re.match(r'^\+\d{10,15}$', v):
-            raise ValueError("Phone number must start with + and contain 10-15 digits")
+        if not re.match(r'^\+\d+$', v):
+            raise ValueError("Phone number must start with +")
         return v
     
     @field_validator("email")
@@ -71,8 +71,8 @@ class PhoneLoginRequest(BaseModel):
     @classmethod
     def validate_phone(cls, v):
         # Basic phone number validation - starts with + followed by digits
-        if not re.match(r'^\+\d{10,15}$', v):
-            raise ValueError("Phone number must start with + and contain 10-15 digits")
+        if not re.match(r'^\+\d+$', v):
+            raise ValueError("Phone number must start with + and contain digits")
         return v
 
 
