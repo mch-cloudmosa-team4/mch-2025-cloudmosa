@@ -19,10 +19,8 @@ class File(Base):
     __tablename__ = "files"
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    url = Column(Text, nullable=False)  # Storage URL (e.g., S3)
     mime_type = Column(Text, nullable=False)  # MIME type (e.g., image/jpeg, application/pdf)
     size_bytes = Column(BigInteger, nullable=False)  # File size in bytes
-    sha256 = Column(Text, nullable=False, unique=True, index=True)  # SHA256 hash for deduplication and integrity
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # Relationships

@@ -66,6 +66,14 @@ class Settings(BaseSettings):
     # API Settings
     api_prefix: str = Field(default="/api/v1", description="API prefix")
     
+    # Object Storage (MinIO/S3-compatible)
+    minio_endpoint: str = Field(default="localhost:9000", description="MinIO endpoint host:port")
+    minio_access_key: str = Field(default="minioadmin", description="MinIO access key")
+    minio_secret_key: str = Field(default="minioadmin", description="MinIO secret key")
+    minio_region: str = Field(default="us-east-1", description="MinIO region")
+    minio_secure: bool = Field(default=False, description="Use HTTPS to access MinIO")
+    minio_bucket: str = Field(default="files", description="Default bucket for file storage")
+    
     @field_validator("secret_key")
     @classmethod
     def validate_secret_key(cls, v):

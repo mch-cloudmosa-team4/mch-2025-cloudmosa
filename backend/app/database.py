@@ -3,7 +3,8 @@ Database configuration and connection management
 """
 
 from typing import Generator
-from sqlalchemy import create_engine
+import logging
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
 
 from app.config import settings
@@ -56,3 +57,18 @@ def drop_tables():
     Drop all database tables
     """
     Base.metadata.drop_all(bind=engine)
+
+
+def ensure_extensions() -> None:
+    """
+    Ensure required PostgreSQL extensions are available.
+    """
+    try:
+        with engine.connect() as connection:
+            connection.execute(text('CREATE EXTENSION IF NOT EXISTS "citext"'))
+            connection.execute(text('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"'))
+            connection.commit()
+    except Exception as exc:
+        logging.getLogger("[Project name]-backend").warning(
+            f"Failed to ensure PostgreSQL extensions: {exc}"
+        )
