@@ -44,7 +44,6 @@ if (!isAuthed()) router.replace('/login')
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 16px;
 }
 
 .header {
@@ -110,7 +109,7 @@ if (!isAuthed()) router.replace('/login')
   width: 80%;
   max-height: 120px;
   object-fit: contain;
-  margin: 8px 0;
+  margin-top: 30px;
 }
 
 .video {
@@ -123,7 +122,10 @@ if (!isAuthed()) router.replace('/login')
 .level-container {
   width: 100%;
   text-align: center;
-  margin-top: auto; /* 貼近底部 */
+  margin-top: 16px;
+  align-self: center;
+  align-items: center;
+  flex-direction: column;
 }
 
 .level-label {
@@ -133,12 +135,14 @@ if (!isAuthed()) router.replace('/login')
 }
 
 .level-bar {
-  width: 100%;
+  width: 80%;
   height: 10px;
   background: #ddd;
   border-radius: 6px;
   margin: 6px 0;
   overflow: hidden;
+  align-self: center;
+  margin-left: 25px;
 }
 
 .level-progress {
