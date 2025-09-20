@@ -1,7 +1,7 @@
 # Data models module
 
 from .base import BaseResponse, ErrorResponse, HealthCheck, PaginatedResponse
-from .items import Item
+from .item import Item
 from .users import User, UserRole
 from .profiles import Profile, Gender
 from .skills import Skill
@@ -15,7 +15,6 @@ from .job_pictures import JobPicture
 from .conversations import Conversation
 from .conversation_participants import ConversationParticipant
 from .messages import Message, MessageType
-from .item import Item
 
 __all__ = [
     "BaseResponse",
@@ -41,6 +40,5 @@ __all__ = [
     "Conversation",
     "ConversationParticipant",
     "Message",
-    "MessageType",
-    "Item" # temporary
+    "MessageType"
 ]
