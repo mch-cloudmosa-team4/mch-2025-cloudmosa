@@ -42,6 +42,10 @@ class Settings(BaseSettings):
         default=False,
         description="Enable SQLAlchemy query logging"
     )
+    database_auto_create: bool = Field(
+        default=False,
+        description="Automatically create database tables on startup (development only)"
+    )
     
     # Security Settings
     secret_key: str = Field(
@@ -93,6 +97,7 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = False
+        extra = "ignore"  # 忽略額外的環境變數字段
 
 
 # Create settings instance
