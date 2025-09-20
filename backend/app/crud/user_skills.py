@@ -66,14 +66,18 @@ class UserSkillCRUD:
             List of UserSkill records
         """
         try:
+            print("Getting user skills for user_id:", user_id)
             user_uuid = uuid.UUID(user_id) if isinstance(user_id, str) else user_id
+            print("User UUID:", user_uuid)
             query = db.query(UserSkill).filter(UserSkill.user_id == user_uuid)
-            
+            print("User skills count:", query.count())
+
             if include_skill_details:
                 query = query.options(joinedload(UserSkill.skill))
             
             return query.order_by(UserSkill.created_at).all()
         except ValueError:
+            print(f"Invalid UUID format for user_id: {user_id}")
             return []
     
     def get_by_skill(

@@ -32,6 +32,16 @@ from .skills import (
     SkillStatisticsResponse,
     PopularSkillResponse
 )
+from .user_skills import (
+    UserSkillBase,
+    UserSkillCreate,
+    UserSkillUpdate,
+    UserSkillResponse,
+    UserSkillsRequest,
+    UserSkillSummary,
+    UserSkillsResponse,
+    MultipleUserSkillsResponse
+)
 
 __all__ = [
     "PaginationMeta",
@@ -64,5 +74,13 @@ __all__ = [
     "SkillSearchResponse",
     "SkillListResponse",
     "SkillStatisticsResponse",
-    "PopularSkillResponse"
+    "PopularSkillResponse",
+    "UserSkillBase",
+    "UserSkillCreate",
+    "UserSkillUpdate",
+    "UserSkillResponse",
+    "UserSkillsRequest",
+    "UserSkillSummary",
+    "UserSkillsResponse",
+    "MultipleUserSkillsResponse"
 ]
