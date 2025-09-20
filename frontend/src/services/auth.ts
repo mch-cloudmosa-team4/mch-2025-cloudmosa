@@ -79,13 +79,20 @@ export async function login(phone: string, password: string): Promise<void> {
 
     if (!response.ok) {
       let errorMessage = 'Login failed'
-      try {
-        const errorData: LoginError = await response.json()
-        console.log('❌ Error response data:', errorData)
-        errorMessage = errorData.detail || errorMessage
-      } catch {
-        errorMessage = `HTTP ${response.status}: ${response.statusText}`
+      
+      // 處理特定的 HTTP 狀態碼
+      if (response.status === 401) {
+        errorMessage = 'Invalid phone number or password'
+      } else {
+        try {
+          const errorData: LoginError = await response.json()
+          console.log('❌ Error response data:', errorData)
+          errorMessage = errorData.detail || errorMessage
+        } catch {
+          errorMessage = `HTTP ${response.status}: ${response.statusText}`
+        }
       }
+      
       throw new Error(errorMessage)
     }
 

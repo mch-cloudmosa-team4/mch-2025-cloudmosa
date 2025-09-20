@@ -49,6 +49,15 @@
     </div>
 
     <p v-if="error" class="error" role="alert">{{ error }}</p>
+    
+    <!-- 全螢幕錯誤提示 -->
+    <div v-if="showFullscreenError" class="fullscreen-error" @click="hideFullscreenError">
+      <div class="error-content">
+        <div class="error-icon">❌</div>
+        <div class="error-message">{{ fullscreenErrorMessage }}</div>
+        <div class="error-hint">Tap to dismiss</div>
+      </div>
+    </div>
   </main>
 </template>
 
@@ -63,6 +72,11 @@ const password = ref('')
 const loading = ref(false)
 const error = ref('')
 const locationStatus = ref<{ type: 'info' | 'warning' | 'error'; message: string } | null>(null)
+
+// 全螢幕錯誤提示
+const showFullscreenError = ref(false)
+const fullscreenErrorMessage = ref('')
+let errorTimeout: NodeJS.Timeout | null = null
 
 const userRef = ref(null)
 const passRef = ref(null)
@@ -82,7 +96,39 @@ onMounted(() => {
     focusAt(0)
   })
 })
-onUnmounted(() => window.removeEventListener('keydown', handleKeys))
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeys)
+  // 清理定時器
+  if (errorTimeout) {
+    clearTimeout(errorTimeout)
+  }
+})
+
+// 顯示全螢幕錯誤
+function showFullscreenErrorMessage(message: string) {
+  fullscreenErrorMessage.value = message
+  showFullscreenError.value = true
+  
+  // 清除之前的定時器
+  if (errorTimeout) {
+    clearTimeout(errorTimeout)
+  }
+  
+  // 2秒後自動隱藏
+  errorTimeout = setTimeout(() => {
+    hideFullscreenError()
+  }, 2000)
+}
+
+// 隱藏全螢幕錯誤
+function hideFullscreenError() {
+  showFullscreenError.value = false
+  fullscreenErrorMessage.value = ''
+  if (errorTimeout) {
+    clearTimeout(errorTimeout)
+    errorTimeout = null
+  }
+}
 
 function focusAt(i) {
   const newIndex = ((i % focusables.length) + focusables.length) % focusables.length
@@ -150,9 +196,20 @@ async function submit() {
     router.replace('/home')
   } catch (err: any) {
     console.error('❌ Login failed:', err)
-    locationStatus.value = { type: 'warning', message: '⚠️ Location unavailable, but login attempted' }
-    // 顯示服務器返回的錯誤訊息
-    error.value = err.message || 'Login failed. Please try again.'
+    
+    // 根據錯誤類型設置不同的狀態和訊息
+    if (err.message === 'Invalid phone number or password') {
+      locationStatus.value = { type: 'error', message: '❌ Authentication failed' }
+      // 使用全螢幕錯誤提示
+      showFullscreenErrorMessage('Invalid phone number or password')
+    } else if (err.message.includes('Location') || err.message.includes('Geolocation')) {
+      locationStatus.value = { type: 'warning', message: '⚠️ Location unavailable' }
+      error.value = err.message
+    } else {
+      locationStatus.value = { type: 'error', message: '❌ Login failed' }
+      // 其他錯誤也使用全螢幕提示
+      showFullscreenErrorMessage(err.message || 'Login failed. Please try again.')
+    }
   } finally {
     loading.value = false
   }
@@ -250,5 +307,60 @@ input {
 
 .location-status .error {
   color: #d32f2f;
+}
+
+/* 全螢幕錯誤提示 */
+.fullscreen-error {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.error-content {
+  background: white;
+  padding: 20px 16px; /* 減少內邊距 */
+  border-radius: 8px; /* 稍微減少圓角 */
+  text-align: center;
+  max-width: 220px; /* 減少最大寬度 */
+  margin: 0 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25); /* 稍微減少陰影 */
+}
+
+.error-icon {
+  font-size: 32px; /* 縮小圖示 */
+  margin-bottom: 12px; /* 減少底部邊距 */
+}
+
+.error-message {
+  font-size: 14px; /* 縮小字體 */
+  color: #b00020;
+  font-weight: 600;
+  margin-bottom: 8px; /* 減少底部邊距 */
+  line-height: 1.3;
+}
+
+.error-hint {
+  font-size: 10px; /* 縮小提示文字 */
+  color: #666;
+  opacity: 0.8;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 </style>
