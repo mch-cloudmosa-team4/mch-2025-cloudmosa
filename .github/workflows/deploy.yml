@@ -24,6 +24,22 @@ jobs:
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
+      with:
+        driver-opts: |
+          network=host
+
+    - name: Cache Docker layers
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+
+    - name: Clear Docker cache (if needed)
+      run: |
+        docker buildx prune -f --filter until=24h
+        docker system prune -f
 
     - name: Log in to Container Registry
       uses: docker/login-action@v3
@@ -42,15 +58,47 @@ jobs:
           type=sha,prefix={{branch}}-
           type=raw,value=latest,enable={{is_default_branch}}
 
+    - name: Debug build information
+      run: |
+        echo "Building image: ${{ env.DOCKER_REGISTRY }}/${{ env.IMAGE_NAME }}"
+        echo "Tags: ${{ steps.meta.outputs.tags }}"
+        echo "Context: ./backend"
+        ls -la ./backend/
+
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
+      timeout-minutes: 20
+      continue-on-error: false
       with:
         context: ./backend
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+        platforms: linux/amd64
+        provenance: false
+        build-args: |
+          BUILDKIT_INLINE_CACHE=1
+
+    - name: Fallback build without cache (if previous failed)
+      if: failure()
+      uses: docker/build-push-action@v5
+      timeout-minutes: 15
+      with:
+        context: ./backend
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        platforms: linux/amd64
+        provenance: false
+        no-cache: true
+
+    - name: Move cache
+      if: success()
+      run: |
+        rm -rf /tmp/.buildx-cache
+        mv /tmp/.buildx-cache-new /tmp/.buildx-cache || true
 
   deploy:
     needs: build-and-push
