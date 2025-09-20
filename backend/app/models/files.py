@@ -19,7 +19,6 @@ class File(Base):
     __tablename__ = "files"
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    object_key = Column(Text, nullable=False)  # Object key (e.g., images/1234567890.jpg)
     mime_type = Column(Text, nullable=False)  # MIME type (e.g., image/jpeg, application/pdf)
     size_bytes = Column(BigInteger, nullable=False)  # File size in bytes
     created_at = Column(DateTime(timezone=True), server_default=func.now())

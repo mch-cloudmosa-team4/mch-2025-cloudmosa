@@ -31,80 +31,77 @@ router = APIRouter(
 @router.post("/upload", response_model=FileUploadResponse, summary="Upload a file")
 async def upload_file(
     file: UploadFile = File(...),
-    folder: Optional[str] = Query(None, description="Optional folder/prefix"),
     client: Minio = Depends(get_minio_client),
     db: Session = Depends(get_db)
 ) -> FileUploadResponse:
     """
-    Upload a file to the default MinIO bucket.
+    Upload a file to the default MinIO bucket using file ID as object key.
     """
-    suffix = file.filename.split(".")[-1] if "." in file.filename else "bin"
-    object_name = f"{folder.strip('/') + '/' if folder else ''}{uuid4().hex}.{suffix}"
+    # Create file record first to get the UUID
+    obj_in = FileCreate(
+        mime_type=file.content_type or "application/octet-stream",
+        size_bytes=file.size
+    )
+    file_obj = file_db.create(db=db, obj_in=obj_in)
     
+    # Use the file ID as the object key in MinIO
+    object_key = str(file_obj.id)
     
-    # Upload the file stream
+    # Upload the file stream using file ID as object key
     client.put_object(
         bucket_name=settings.minio_bucket,
-        object_name=object_name,
+        object_name=object_key,
         data=file.file,
         length=-1,
         part_size=5 * 1024 * 1024,
         content_type=file.content_type or "application/octet-stream",
     )
     
-    # Create file record
-    obj_in = FileCreate(
-        object_key=object_name,
-        mime_type=file.content_type or "application/octet-stream",
-        size_bytes=file.size
-    )
-    
-    file_obj = file_db.create(db=db, obj_in=obj_in)
-    
-    return FileUploadResponse(
-        id=file_obj.id,
-        object_key=file_obj.object_key,
-        mime_type=file_obj.mime_type,
-        size_bytes=file_obj.size_bytes,
-    )
+    return FileUploadResponse.model_validate(file_obj)
 
 
 @router.delete("/", response_model=BaseResponse, summary="Delete a file")
 async def delete_file(
-    key: str = Query(..., description="Object key to delete"),
+    id: str = Query(..., description="File ID to delete"),
     client: Minio = Depends(get_minio_client),
     db: Session = Depends(get_db)
 ) -> BaseResponse:
     """
-    Delete an object from the default bucket.
+    Delete a file from MinIO and database using file ID.
     """
-    # Delete file from MinIO
-    client.remove_object(
-        bucket_name=settings.minio_bucket,
-        object_name=key,
-    )
-    
-    # Delete file record
-    file_obj = file_db.delete(db=db, file_id=key)
+    # Delete file record first (to validate it exists)
+    file_obj = file_db.delete(db=db, file_id=id)
     if not file_obj:
         raise HTTPException(status_code=404, detail="File not found")
     
-    return BaseResponse(message=f"File {file_obj.id} with object key {key} deleted successfully")
+    # Delete file from MinIO using file ID as object key
+    client.remove_object(
+        bucket_name=settings.minio_bucket,
+        object_name=id,
+    )
+    
+    return BaseResponse(message=f"File {id} deleted successfully")
 
 
 @router.get("/presign", response_model=FilePresignResponse, summary="Get a presigned download URL")
 async def presign_download(
-    key: str = Query(..., description="Object key to download"),
+    id: str = Query(..., description="File ID to download"),
     expires: int = Query(3600, ge=1, le=7 * 24 * 3600, description="Expiry seconds"),
-    client: Minio = Depends(get_minio_client)
+    client: Minio = Depends(get_minio_client),
+    db: Session = Depends(get_db)
 ):
     """
-    Generate a presigned URL for downloading an object.
+    Generate a presigned URL for downloading a file using file ID.
     """
+    # Verify file exists in database
+    file_obj = file_db.get(db=db, file_id=id)
+    if not file_obj:
+        raise HTTPException(status_code=404, detail="File not found")
+    
     try:
         url = client.presigned_get_object(
             bucket_name=settings.minio_bucket,
-            object_name=key,
+            object_name=id,
             expires=timedelta(seconds=expires),
         )
         return FilePresignResponse(url=url)
@@ -114,17 +111,23 @@ async def presign_download(
 
 @router.get("/presign-redirect", summary="Redirect to a presigned URL")
 async def presign_redirect(
-    key: str = Query(..., description="Object key to download"),
+    id: str = Query(..., description="File ID to download"),
     expires: int = Query(3600, ge=1, le=7 * 24 * 3600, description="Expiry seconds"),
-    client: Minio = Depends(get_minio_client)
+    client: Minio = Depends(get_minio_client),
+    db: Session = Depends(get_db)
 ):
     """
-    Generate a presigned URL and redirect to it. Useful for <img src=...> and direct downloads.
+    Generate a presigned URL and redirect to it using file ID. Useful for <img src=...> and direct downloads.
     """
+    # Verify file exists in database
+    file_obj = file_db.get(db=db, file_id=id)
+    if not file_obj:
+        raise HTTPException(status_code=404, detail="File not found")
+    
     try:
         url = client.presigned_get_object(
             bucket_name=settings.minio_bucket,
-            object_name=key,
+            object_name=id,
             expires=timedelta(seconds=expires),
         )
         return RedirectResponse(url=url, status_code=307)

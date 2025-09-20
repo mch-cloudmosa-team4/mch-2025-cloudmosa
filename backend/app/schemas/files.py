@@ -10,24 +10,24 @@ from pydantic import BaseModel, Field, ConfigDict, HttpUrl
 
 class FileCreate(BaseModel):
     """Base file schema"""
-    object_key: str = Field(description="Object key in bucket, e.g., images/abc123.jpg")
     mime_type: str = Field(description="MIME type")
     size_bytes: int = Field(ge=0, description="File size in bytes")
 
 
 class FileUpdate(BaseModel):
     """Payload for updating a File record (partial)"""
-    object_key: Optional[str] = Field(default=None, description="Object key in bucket, e.g., images/abc123.jpg")
     mime_type: Optional[str] = Field(default=None, description="MIME type")
     size_bytes: Optional[int] = Field(default=None, ge=0, description="File size in bytes")
 
 
 class FileUploadResponse(BaseModel):
     """Schema for returning File ORM objects (matches DB fields)"""
-    id: UUID = Field(description="File ID")
-    object_key: str = Field(description="Object key in bucket")
+    id: UUID = Field(description="File ID (also used as MinIO object key)")
     mime_type: str = Field(description="MIME type")
     size_bytes: int = Field(ge=0, description="File size in bytes")
+    created_at: datetime = Field(description="Creation timestamp")
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class FilePresignResponse(BaseModel):
