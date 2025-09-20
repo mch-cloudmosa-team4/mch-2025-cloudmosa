@@ -2,7 +2,9 @@
   <main v-if="job" class="job-detail">
     <h1 class="title">{{ job.title }}</h1>
 
-    <button class="applications-btn" @click="goToApplications">
+    <button
+      v-if="job.employer_id == myId"
+      class="applications-btn" @click="goToApplications">
       View Applications
     </button>
 
@@ -21,11 +23,15 @@
     <p class="description"><strong>Updated At:</strong> {{ job.updated_at }}</p>
 
     <!-- TODO: Do not show this button if employer -->
-    <button class="apply-btn" @click="applyJob">
+    <button
+      v-if="job.employer_id !== myId"
+      class="apply-btn" @click="applyJob">
       Apply
     </button>
     <!-- TODO: Show this only if token is authenticated -->
-    <button class="edit-btn" @click="goToEdit">
+    <button
+      v-if="job.employer_id == myId"
+      class="edit-btn" @click="goToEdit">
       ✎
     </button>
   </main>
@@ -37,6 +43,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { getUserId } from '../services/auth'
+const myId = getUserId()
 
 const route = useRoute()
 const router = useRouter()
@@ -86,6 +94,7 @@ function goToApplications() {
 
 .apply-btn {
   margin-top: 16px;
+  margin-bottom: 16px;
   padding: 8px;
   border: none;
   border-radius: 6px;

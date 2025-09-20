@@ -11,9 +11,14 @@
     <p class="description"><strong>Updated At:</strong> {{ application.updated_at }}</p>
 
     <!-- Approve 按鈕 -->
-    <button class="approve-btn" @click="approveApplication">
+    <button
+      v-if="application.applicant_id !== myId"
+      class="approve-btn"
+      @click="approveApplication"
+    >
       Approve Application
     </button>
+
 
     <!-- Back 按鈕 -->
     <button class="back-btn" @click="goBack">← Back</button>
@@ -27,10 +32,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { getUserId} from '../services/auth'
 
 const route = useRoute()
 const router = useRouter()
 const application = ref(null)
+const myId = getUserId()
 
 onMounted(async () => {
   const res = await fetch(import.meta.env.BASE_URL + 'applications.json')
