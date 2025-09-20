@@ -49,7 +49,7 @@ onMounted(async () => {
 })
 
 function applyJob() {
-  alert('Application submitted for job: ' + job.value.title)
+  router.push(`/job/${job.value.id}/apply`)
 }
 
 function goToEdit() {
