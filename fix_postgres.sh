@@ -126,7 +126,8 @@ fi
 
 echo
 echo "🔄 Running database migrations..."
-sudo -u ubuntu env GITHUB_REPOSITORY="$GITHUB_REPOSITORY" POSTGRES_PASSWORD="$POSTGRES_PASS" MINIO_ACCESS_KEY="$MINIO_ACCESS" MINIO_SECRET_KEY="$MINIO_SECRET" docker-compose -f docker-compose.prod.yml exec -T backend uv run alembic upgrade head
+DATABASE_URL_FOR_MIGRATION="postgresql://backend_user:${POSTGRES_PASS}@postgres:5432/backend_db"
+sudo -u ubuntu env GITHUB_REPOSITORY="$GITHUB_REPOSITORY" POSTGRES_PASSWORD="$POSTGRES_PASS" MINIO_ACCESS_KEY="$MINIO_ACCESS" MINIO_SECRET_KEY="$MINIO_SECRET" DATABASE_URL="$DATABASE_URL_FOR_MIGRATION" docker-compose -f docker-compose.prod.yml exec -T backend uv run alembic upgrade head
 
 echo
 echo "🏥 Final health check..."

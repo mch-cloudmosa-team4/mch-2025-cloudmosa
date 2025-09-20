@@ -219,10 +219,12 @@ done
 
 # 運行資料庫遷移
 echo "🗄️  運行資料庫遷移..."
+DATABASE_URL_FOR_MIGRATION="postgresql://backend_user:${POSTGRES_PASS}@postgres:5432/backend_db"
+
 if [ -f docker-compose.local.yml ]; then
-    sudo -u $SERVICE_USER env GITHUB_REPOSITORY="$GITHUB_REPOSITORY" POSTGRES_PASSWORD="$POSTGRES_PASS" MINIO_ACCESS_KEY="$MINIO_ACCESS" MINIO_SECRET_KEY="$MINIO_SECRET" docker-compose -f docker-compose.local.yml exec -T backend uv run alembic upgrade head
+    sudo -u $SERVICE_USER env GITHUB_REPOSITORY="$GITHUB_REPOSITORY" POSTGRES_PASSWORD="$POSTGRES_PASS" MINIO_ACCESS_KEY="$MINIO_ACCESS" MINIO_SECRET_KEY="$MINIO_SECRET" DATABASE_URL="$DATABASE_URL_FOR_MIGRATION" docker-compose -f docker-compose.local.yml exec -T backend uv run alembic upgrade head
 else
-    sudo -u $SERVICE_USER env GITHUB_REPOSITORY="$GITHUB_REPOSITORY" POSTGRES_PASSWORD="$POSTGRES_PASS" MINIO_ACCESS_KEY="$MINIO_ACCESS" MINIO_SECRET_KEY="$MINIO_SECRET" docker-compose -f docker-compose.prod.yml exec -T backend uv run alembic upgrade head
+    sudo -u $SERVICE_USER env GITHUB_REPOSITORY="$GITHUB_REPOSITORY" POSTGRES_PASSWORD="$POSTGRES_PASS" MINIO_ACCESS_KEY="$MINIO_ACCESS" MINIO_SECRET_KEY="$MINIO_SECRET" DATABASE_URL="$DATABASE_URL_FOR_MIGRATION" docker-compose -f docker-compose.prod.yml exec -T backend uv run alembic upgrade head
 fi
 
 
