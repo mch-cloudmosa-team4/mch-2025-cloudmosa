@@ -118,9 +118,9 @@ const activeTab = computed(() => {
   const currentRoute = route.name as string
   if (!currentRoute) return 'home'
 
-  if (['chat', 'chatroom'].includes(currentRoute)) return 'chat'
+  if (['ChatList', 'ChatRoom'].includes(currentRoute)) return 'chat'
   if (['home'].includes(currentRoute)) return 'home'
-  if (['news'].includes(currentRoute)) return 'news'
+  if (['News'].includes(currentRoute)) return 'news'
   return 'home'
 })
 
@@ -483,5 +483,12 @@ watch(route, () => {
   50% {
     transform: scale(1.1);
   }
+}
+
+.nav-item {
+  color: rgba(255, 255, 255, 0.7); /* 預設半透明白色 */
+}
+.nav-item.active {
+  color: white; /* 被選中的按鈕變白色 */
 }
 </style>
