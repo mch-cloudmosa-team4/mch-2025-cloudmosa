@@ -12,7 +12,10 @@
         <div class="circular-menu">
           <div
             class="menu-item item-1"
-            :class="{ hover: hoveredItem === 'profile' }"
+            :class="{ 
+              hover: hoveredItem === 'profile',
+              selected: selectedMenuIndex === 0 && showHomeMenu
+            }"
             @click="goToPage('/profile/' + getUserId())"
             @touchstart="handleTouchStart('profile')"
             @touchend="handleTouchEnd"
@@ -20,35 +23,44 @@
             @mouseleave="showProfileLabel = false; hoveredItem = null"
           >
             <span class="material-icons-round">account_circle</span>
-            <span v-if="showProfileLabel" class="item-label">Profile</span>
+            <span v-if="showProfileLabel || (selectedMenuIndex === 0 && showHomeMenu)" class="item-label">Profile</span>
           </div>
           <div
             class="menu-item item-2"
-            :class="{ hover: hoveredItem === 'jobs' }"
+            :class="{ 
+              hover: hoveredItem === 'jobs',
+              selected: selectedMenuIndex === 1 && showHomeMenu
+            }"
             @click="goToPage('/job')"
             @touchstart="handleTouchStart('jobs')"
             @touchend="handleTouchEnd"
             @mouseenter="showJobsLabel = true; hoveredItem = 'jobs'"
             @mouseleave="showJobsLabel = false; hoveredItem = null"
           >
-            <span v-if="showJobsLabel" class="item-label">Jobs</span>
+            <span v-if="showJobsLabel || (selectedMenuIndex === 1 && showHomeMenu)" class="item-label">Jobs</span>
             <span class="material-icons-round">work</span>
           </div>
           <div
             class="menu-item item-3"
-            :class="{ hover: hoveredItem === 'dashboard' }"
+            :class="{ 
+              hover: hoveredItem === 'dashboard',
+              selected: selectedMenuIndex === 2 && showHomeMenu
+            }"
             @click="goToPage('/dashboard')"
             @touchstart="handleTouchStart('dashboard')"
             @touchend="handleTouchEnd"
             @mouseenter="showDashboardLabel = true; hoveredItem = 'dashboard'"
             @mouseleave="showDashboardLabel = false; hoveredItem = null"
           >
-            <span v-if="showDashboardLabel" class="item-label">Dashboard</span>
+            <span v-if="showDashboardLabel || (selectedMenuIndex === 2 && showHomeMenu)" class="item-label">Dashboard</span>
             <span class="material-icons-round">dashboard</span>
           </div>
           <div
             class="menu-item item-4"
-            :class="{ hover: hoveredItem === 'community' }"
+            :class="{ 
+              hover: hoveredItem === 'community',
+              selected: selectedMenuIndex === 3 && showHomeMenu
+            }"
             @click="goToPage('/profile')"
             @touchstart="handleTouchStart('community')"
             @touchend="handleTouchEnd"
@@ -56,7 +68,7 @@
             @mouseleave="showCommunityLabel = false; hoveredItem = null"
           >
             <span class="material-icons-round">groups</span>
-            <span v-if="showCommunityLabel" class="item-label">Community</span>
+            <span v-if="showCommunityLabel || (selectedMenuIndex === 3 && showHomeMenu)" class="item-label">Community</span>
           </div>
         </div>
       </div>
@@ -106,7 +118,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getUserId } from './services/auth'
 
@@ -120,6 +132,8 @@ const showJobsLabel = ref(false)
 const showDashboardLabel = ref(false)
 const showCommunityLabel = ref(false)
 const hoveredItem = ref<string | null>(null)
+const selectedMenuIndex = ref(0) // 當前選中的選單項目索引
+const menuItems = ['profile', 'jobs', 'dashboard', 'community'] // 選單項目順序
 let hideTimer: number | null = null
 
 // 計算屬性
@@ -147,7 +161,9 @@ const hasUnreadNews = computed(() => {
 
 function handleHomeClick() {
   if (!showHomeMenu.value) {
+    selectedMenuIndex.value = 0 // 重置到第一個項目
     showHomeMenu.value = true
+    updateSelection() // 高亮第一個項目
   } else {
     hideMenu()
     router.push('/home')
@@ -187,6 +203,8 @@ function hideMenu() {
     hideTimer = null
   }
   showHomeMenu.value = false
+  selectedMenuIndex.value = 0 // 重置選中索引
+  hoveredItem.value = null
   // 重置所有標籤狀態
   showProfileLabel.value = false
   showJobsLabel.value = false
@@ -251,9 +269,111 @@ function handleTouchEnd() {
   }, 150)
 }
 
+// 鍵盤導航函數
+function handleKeyPress(event: KeyboardEvent) {
+  if (!showHomeMenu.value) return
+
+  switch (event.key) {
+    case 'ArrowLeft':
+      event.preventDefault()
+      navigateLeft()
+      break
+    case 'ArrowRight':
+      event.preventDefault()
+      navigateRight()
+      break
+    case 'Enter':
+      event.preventDefault()
+      selectCurrentItem()
+      break
+    case 'Escape':
+      event.preventDefault()
+      hideMenu()
+      break
+  }
+}
+
+function navigateLeft() {
+  if (selectedMenuIndex.value === 0) {
+    // 如果在 profile (第一個)，關閉選單
+    hideMenu()
+  } else {
+    selectedMenuIndex.value--
+    updateSelection()
+  }
+}
+
+function navigateRight() {
+  if (selectedMenuIndex.value === menuItems.length - 1) {
+    // 如果在 community (最後一個)，關閉選單
+    hideMenu()
+  } else {
+    selectedMenuIndex.value++
+    updateSelection()
+  }
+}
+
+function updateSelection() {
+  // 清除所有標籤
+  showProfileLabel.value = false
+  showJobsLabel.value = false
+  showDashboardLabel.value = false
+  showCommunityLabel.value = false
+  hoveredItem.value = null
+
+  // 設置當前選中項目
+  const currentItem = menuItems[selectedMenuIndex.value]
+  hoveredItem.value = currentItem
+  
+  switch (currentItem) {
+    case 'profile':
+      showProfileLabel.value = true
+      break
+    case 'jobs':
+      showJobsLabel.value = true
+      break
+    case 'dashboard':
+      showDashboardLabel.value = true
+      break
+    case 'community':
+      showCommunityLabel.value = true
+      break
+  }
+}
+
+function selectCurrentItem() {
+  const currentItem = menuItems[selectedMenuIndex.value]
+  switch (currentItem) {
+    case 'profile':
+      goToPage('/profile/' + getUserId())
+      break
+    case 'jobs':
+      goToPage('/job')
+      break
+    case 'dashboard':
+      goToPage('/dashboard')
+      break
+    case 'community':
+      goToPage('/profile')
+      break
+  }
+}
+
 // 監聽路由變化，關閉選單
 watch(route, () => {
   hideMenu()
+})
+
+// 生命週期鉤子
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyPress)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyPress)
+  if (hideTimer) {
+    clearTimeout(hideTimer)
+  }
 })
 </script>
 
@@ -411,7 +531,8 @@ watch(route, () => {
 }
 
 .menu-item:hover,
-.menu-item.hover {
+.menu-item.hover,
+.menu-item.selected {
   transform: scale(1.1);
   background: rgb(42, 65, 102);
   color: white;
@@ -431,15 +552,18 @@ watch(route, () => {
 }
 
 .menu-item:hover .material-icons-round,
-.menu-item.hover .material-icons-round {
+.menu-item.hover .material-icons-round,
+.menu-item.selected .material-icons-round {
   color: white;
 }
 
 /* 懸浮狀態下 Jobs 和 Dashboard 的圖示間距 */
 .item-2:hover .material-icons-round,
 .item-2.hover .material-icons-round,
+.item-2.selected .material-icons-round,
 .item-3:hover .material-icons-round,
-.item-3.hover .material-icons-round {
+.item-3.hover .material-icons-round,
+.item-3.selected .material-icons-round {
   margin-bottom: 0;
   margin-top: 2px;
 }
@@ -453,7 +577,8 @@ watch(route, () => {
 }
 
 .menu-item:hover .item-label,
-.menu-item.hover .item-label {
+.menu-item.hover .item-label,
+.menu-item.selected .item-label {
   color: white;
   animation: labelFadeIn 0.2s ease-in-out;
 }
