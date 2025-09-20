@@ -16,6 +16,9 @@
     <ul class="job-list">
       <li v-for="j in jobs" :key="j.id">
         <button class="job-btn" @click="goJob(j.id)">
+          <div class="job-header">
+            <span class="job-type">status</span>
+          </div>
           <div class="job-info">
             <p>
               <strong>{{ j.title }}</strong
@@ -84,14 +87,13 @@ function goToCreate() {
 
 .job-btn {
   width: 100%;
-  display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
   border: none;
   border-radius: 8px;
   background: #f5f5f5;
   cursor: pointer;
+  margin: 3px 0;
 }
 
 .job-btn:hover,
@@ -100,7 +102,6 @@ function goToCreate() {
 }
 
 .job-info {
-  margin-top: 16px;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -134,5 +135,20 @@ function goToCreate() {
   list-style-type: none;
   padding-left: 6px;
   margin-right: 6px;
+}
+.job-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.job-type {
+  margin-top: 8px;
+  font-size: 10px;
+  font-weight: bold;
+  color: rgb(42, 65, 102);
+  background: rgba(42, 65, 102, 0.1);
+  padding: 2px 6px;
+  border-radius: 12px;
 }
 </style>
