@@ -51,43 +51,28 @@ export async function login(phone: string, password: string): Promise<void> {
   }
   
   try {
-    // 準備表單數據
-    const formData = new URLSearchParams()
-    formData.append('phone', phone)
-    formData.append('passwd_hash', hashedPassword)
+    // 準備基本的登入資料（暫時不包含地理位置）
+    const requestData = {
+      phone: phone,
+      passwd_hash: hashedPassword
+    }
     
-    // 添加地理位置信息（如果可用）
+    // 地理位置資料先保留在本地，暫時不發送到後端
     if (locationData) {
-      formData.append('latitude', locationData.latitude.toString())
-      formData.append('longitude', locationData.longitude.toString())
-      
-      if (locationData.city) {
-        formData.append('city', locationData.city)
-      }
-      
-      if (locationData.country) {
-        formData.append('country', locationData.country)
-      }
-      
-      // 添加州/省份資訊（Nominatim 提供的）
-      if (locationData.state) {
-        formData.append('state', locationData.state)
-      }
-      
-      if (locationData.formatted_address) {
-        formData.append('address', locationData.formatted_address)
-      }
+      console.log('📍 Location data available (not sent to backend yet):', locationData)
+      // 儲存到 localStorage 供未來使用
+      localStorage.setItem('temp_location_data', JSON.stringify(locationData))
     }
     
     console.log('📤 Sending request to:', `${API_BASE_URL}/api/v1/auth/login`)
-    console.log('📤 Request body:', formData.toString())
+    console.log('📤 Request data:', requestData)
     
     const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
       },
-      body: formData
+      body: JSON.stringify(requestData)
     })
 
     console.log('📥 Response received:', response.status, response.statusText)
@@ -114,12 +99,13 @@ export async function login(phone: string, password: string): Promise<void> {
     localStorage.setItem('auth_user_id', data.user.user_id)
     localStorage.setItem('auth_phone', data.user.phone)
     
-    // 也儲存位置信息（如果有的話）
+    console.log('💾 User data saved to localStorage')
+    
+    // 如果之前有獲取到地理位置，也一併儲存（供未來功能使用）
     if (locationData) {
       localStorage.setItem('auth_location', JSON.stringify(locationData))
+      console.log('� Location data also saved for future use')
     }
-    
-    console.log('💾 User data saved to localStorage')
     
   } catch (error) {
     console.error('🚨 Login error:', error)
