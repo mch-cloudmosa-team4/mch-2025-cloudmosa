@@ -14,6 +14,8 @@ import NotificationView from '../views/NotificationView.vue'
 import JobEdit from '@/views/JobEdit.vue'
 import JobCreate from '@/views/JobCreate.vue'
 import JobApplication from '@/views/JobApplication.vue'
+import Dashboard from '@/views/Dashboard.vue'
+import MyJobList from '@/views/MyJobList.vue'
 
 const routes = [
   { path: '/', redirect: '/chat' },
@@ -32,6 +34,8 @@ const routes = [
   { path: '/job/:id/edit', component: JobEdit },
   { path: '/job/create', component: JobCreate },
   { path: '/job/:id/application', component: JobApplication },
+  { path: '/dashboard', component: Dashboard },
+  { path: '/myjob', component: MyJobList },
 ]
 
 const router = createRouter({

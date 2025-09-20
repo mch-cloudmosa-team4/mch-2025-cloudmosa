@@ -1,18 +1,5 @@
 <template>
   <main>
-    <div class="filters">
-      <input
-        type="text"
-        placeholder="Search jobs..."
-        class="search-box"
-      />
-      <select class="filter-select">
-        <option value="">Filter by skill</option>
-        <option value="skill_1">Skill 1</option>
-        <option value="skill_2">Skill 2</option>
-        <option value="skill_3">Skill 3</option>
-      </select>
-    </div>
     <ul>
       <li v-for="j in jobs" :key="j.id">
         <button class="job-btn" @click="goJob(j.id)">

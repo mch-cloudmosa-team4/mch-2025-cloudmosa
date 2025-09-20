@@ -1,6 +1,5 @@
 <template>
   <main>
-    <h1 class="title">My Applications</h1>
     <ul class="application-list">
       <li v-for="a in myApplications" :key="a.id">
         <button @click="goDetail(a.id)">Application #{{ a.id }} (Job {{ a.job_id }})</button>

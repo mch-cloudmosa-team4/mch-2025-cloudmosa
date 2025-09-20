@@ -24,7 +24,7 @@
     <button class="apply-btn" @click="applyJob">
       Apply
     </button>
-
+    <!-- TODO: Show this only if token is authenticated -->
     <button class="edit-btn" @click="goToEdit">
       ✎
     </button>
