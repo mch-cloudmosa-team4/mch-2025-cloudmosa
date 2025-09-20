@@ -10,6 +10,12 @@
     <p class="description"><strong>Created At:</strong> {{ application.created_at }}</p>
     <p class="description"><strong>Updated At:</strong> {{ application.updated_at }}</p>
 
+    <!-- Approve 按鈕 -->
+    <button class="approve-btn" @click="approveApplication">
+      Approve Application
+    </button>
+
+    <!-- Back 按鈕 -->
     <button class="back-btn" @click="goBack">← Back</button>
   </main>
 
@@ -40,6 +46,13 @@ function goBack() {
     router.back()
   }
 }
+
+// Approve -> 建立 conversation (假設 id=1) -> 跳轉 chat
+function approveApplication() {
+  // TODO: 真實情況應該要呼叫 API 建立 conversation
+  const conversationId = 1
+  router.push(`/chat/${conversationId}`)
+}
 </script>
 
 <style scoped>
@@ -64,8 +77,26 @@ function goBack() {
   padding-left: 16px;
 }
 
+/* Approve 按鈕 */
+.approve-btn {
+  margin-top: 12px;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  background: green;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  width: 80%;
+  align-self: center;
+}
+.approve-btn:hover {
+  background: darkgreen;
+}
+
+/* Back 按鈕 */
 .back-btn {
-  margin-top: 16px;
+  margin-top: 8px;
   padding: 8px;
   border: none;
   border-radius: 6px;

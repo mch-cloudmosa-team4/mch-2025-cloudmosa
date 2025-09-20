@@ -80,7 +80,7 @@ function saveProfile() {
   console.log('Saving profile:', profile.value)
   // 這裡可以呼叫 API 更新 (PUT /api/v1/profile/me)
   alert('Profile updated successfully!')
-  router.push('/profile')
+  router.push('/profile/' + profile.value.id)
 }
 </script>
 
