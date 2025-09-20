@@ -92,7 +92,7 @@
         <!-- Home按鈕 -->
         <div
           class="nav-item home-item"
-          :class="{ 
+          :class="{
             active: activeTab === 'home',
             selected: selectedMenuIndex === -1 && showHomeMenu
           }"
@@ -272,27 +272,46 @@ function handleTouchEnd() {
   }, 150)
 }
 
+function scrollByStep(amount: number) {
+  const content = document.querySelector('.main-content') as HTMLElement
+  if (content) {
+    content.scrollBy({
+      top: amount,
+      behavior: 'smooth'
+    })
+  }
+}
+
 // 鍵盤導航函數
 function handleKeyPress(event: KeyboardEvent) {
-  if (!showHomeMenu.value) return
-
-  switch (event.key) {
-    case 'ArrowLeft':
+  if (showHomeMenu.value) {
+    switch (event.key) {
+      case 'ArrowLeft':
+        event.preventDefault()
+        navigateLeft()
+        break
+      case 'ArrowRight':
+        event.preventDefault()
+        navigateRight()
+        break
+      case 'Enter':
+        event.preventDefault()
+        selectCurrentItem()
+        break
+      case 'Escape':
+        event.preventDefault()
+        hideMenu()
+        break
+    }
+  } else {
+    // 沒有選單開啟 → 全域 scroll
+    if (event.key === 'ArrowUp') {
       event.preventDefault()
-      navigateLeft()
-      break
-    case 'ArrowRight':
+      scrollByStep(-50)
+    } else if (event.key === 'ArrowDown') {
       event.preventDefault()
-      navigateRight()
-      break
-    case 'Enter':
-      event.preventDefault()
-      selectCurrentItem()
-      break
-    case 'Escape':
-      event.preventDefault()
-      hideMenu()
-      break
+      scrollByStep(50)
+    }
   }
 }
 
@@ -342,7 +361,7 @@ function updateSelection() {
   // 設置當前選中項目
   const currentItem = menuItems[selectedMenuIndex.value]
   hoveredItem.value = currentItem
-  
+
   switch (currentItem) {
     case 'profile':
       showProfileLabel.value = true
@@ -415,8 +434,8 @@ onUnmounted(() => {
   background: #f8f8f8;
   font-family: RobotoMono, sans-serif;
   position: relative;
-  max-width: 240px; /* 確保最大寬度 */
-  max-height: 320px; /* 確保最大高度 */
+  max-width: 240px;
+  max-height: 320px;
 }
 
 .main-content {
