@@ -119,23 +119,23 @@ MINIO_SECRET=$(openssl rand -base64 32)
 
 cat > $PROJECT_DIR/.env << EOF
 # Docker Compose 環境變數 (用於容器編排)
-GITHUB_REPOSITORY=$GITHUB_REPO
-POSTGRES_PASSWORD=$POSTGRES_PASS
-MINIO_ACCESS_KEY=$MINIO_ACCESS
-MINIO_SECRET_KEY=$MINIO_SECRET
+GITHUB_REPOSITORY=${GITHUB_REPO}
+POSTGRES_PASSWORD=${POSTGRES_PASS}
+MINIO_ACCESS_KEY=${MINIO_ACCESS}
+MINIO_SECRET_KEY=${MINIO_SECRET}
 EOF
 
 # 為應用程式創建單獨的配置文件
 cat > $PROJECT_DIR/backend/.env << EOF
 # FastAPI 應用程式環境變數
-DATABASE_URL=postgresql://backend_user:$POSTGRES_PASS@postgres:5432/backend_db
+DATABASE_URL=postgresql://backend_user:${POSTGRES_PASS}@postgres:5432/backend_db
 DATABASE_ECHO=false
 DATABASE_AUTO_CREATE=false
 DEBUG=false
-POSTGRES_PASSWORD=$POSTGRES_PASS
+POSTGRES_PASSWORD=${POSTGRES_PASS}
 MINIO_ENDPOINT=minio:9000
-MINIO_ACCESS_KEY=$MINIO_ACCESS
-MINIO_SECRET_KEY=$MINIO_SECRET
+MINIO_ACCESS_KEY=${MINIO_ACCESS}
+MINIO_SECRET_KEY=${MINIO_SECRET}
 MINIO_SECURE=false
 MINIO_BUCKET=files
 SECRET_KEY=$(openssl rand -base64 32)
@@ -172,32 +172,57 @@ source $PROJECT_DIR/.env
 set +a  # 停止自動導出
 
 echo "使用的 GitHub Repository: $GITHUB_REPOSITORY"
-echo "PostgreSQL 密碼已設定: ${POSTGRES_PASSWORD:0:8}..."
+echo "PostgreSQL 密碼已設定: ${POSTGRES_PASS:0:8}..."
 
 # .env 文件已經分別創建在正確的位置
 
 # 檢查是否有預構建的映像，如果沒有就在本地構建
 if docker pull ghcr.io/$GITHUB_REPOSITORY/backend:latest 2>/dev/null; then
     echo "✅ 使用預構建的映像"
-    sudo -u $SERVICE_USER docker-compose -f docker-compose.prod.yml up -d
+    sudo -u $SERVICE_USER env GITHUB_REPOSITORY="$GITHUB_REPOSITORY" POSTGRES_PASSWORD="$POSTGRES_PASS" MINIO_ACCESS_KEY="$MINIO_ACCESS" MINIO_SECRET_KEY="$MINIO_SECRET" docker-compose -f docker-compose.prod.yml up -d
 else
     echo "⚠️  預構建映像不存在，使用本地構建..."
     # 暫時修改 docker-compose 使用本地構建
     sed 's|image: ghcr.io/${GITHUB_REPOSITORY}/backend:latest|build: .|' docker-compose.prod.yml > docker-compose.local.yml
     chown $SERVICE_USER:$SERVICE_USER docker-compose.local.yml
-    sudo -u $SERVICE_USER docker-compose -f docker-compose.local.yml up -d --build
+    sudo -u $SERVICE_USER env GITHUB_REPOSITORY="$GITHUB_REPOSITORY" POSTGRES_PASSWORD="$POSTGRES_PASS" MINIO_ACCESS_KEY="$MINIO_ACCESS" MINIO_SECRET_KEY="$MINIO_SECRET" docker-compose -f docker-compose.local.yml up -d --build
 fi
 
 # 等待服務啟動
 echo "⏳ 等待服務啟動..."
-sleep 60
+sleep 30
+
+# 等待 PostgreSQL 準備就緒
+echo "⏳ 等待 PostgreSQL 準備就緒..."
+COMPOSE_FILE="docker-compose.prod.yml"
+if [ -f docker-compose.local.yml ]; then
+    COMPOSE_FILE="docker-compose.local.yml"
+fi
+
+for i in {1..30}; do
+    if sudo -u $SERVICE_USER env GITHUB_REPOSITORY="$GITHUB_REPOSITORY" POSTGRES_PASSWORD="$POSTGRES_PASS" MINIO_ACCESS_KEY="$MINIO_ACCESS" MINIO_SECRET_KEY="$MINIO_SECRET" docker-compose -f $COMPOSE_FILE exec -T postgres pg_isready -U backend_user -d backend_db >/dev/null 2>&1; then
+        # 測試實際連接和認證
+        if sudo -u $SERVICE_USER env GITHUB_REPOSITORY="$GITHUB_REPOSITORY" POSTGRES_PASSWORD="$POSTGRES_PASS" MINIO_ACCESS_KEY="$MINIO_ACCESS" MINIO_SECRET_KEY="$MINIO_SECRET" docker-compose -f $COMPOSE_FILE exec -T postgres psql -U backend_user -d backend_db -c "SELECT 1;" >/dev/null 2>&1; then
+            echo "✅ PostgreSQL 準備就緒且連接測試成功"
+            break
+        else
+            echo "⏳ PostgreSQL 服務就緒但連接測試失敗，繼續等待..."
+        fi
+    fi
+    if [ $i -eq 30 ]; then
+        echo "❌ PostgreSQL 準備逾時"
+        exit 1
+    fi
+    echo "⏳ 等待 PostgreSQL 準備就緒... ($i/30)"
+    sleep 2
+done
 
 # 運行資料庫遷移
 echo "🗄️  運行資料庫遷移..."
 if [ -f docker-compose.local.yml ]; then
-    sudo -u $SERVICE_USER docker-compose -f docker-compose.local.yml exec -T backend uv run alembic upgrade head
+    sudo -u $SERVICE_USER env GITHUB_REPOSITORY="$GITHUB_REPOSITORY" POSTGRES_PASSWORD="$POSTGRES_PASS" MINIO_ACCESS_KEY="$MINIO_ACCESS" MINIO_SECRET_KEY="$MINIO_SECRET" docker-compose -f docker-compose.local.yml exec -T backend uv run alembic upgrade head
 else
-    sudo -u $SERVICE_USER docker-compose -f docker-compose.prod.yml exec -T backend uv run alembic upgrade head
+    sudo -u $SERVICE_USER env GITHUB_REPOSITORY="$GITHUB_REPOSITORY" POSTGRES_PASSWORD="$POSTGRES_PASS" MINIO_ACCESS_KEY="$MINIO_ACCESS" MINIO_SECRET_KEY="$MINIO_SECRET" docker-compose -f docker-compose.prod.yml exec -T backend uv run alembic upgrade head
 fi
 
 
