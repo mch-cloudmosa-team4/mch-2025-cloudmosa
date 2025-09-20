@@ -15,13 +15,19 @@
       <p><strong>Updated:</strong> {{ profile.updated_at }}</p>
     </div>
 
-    <button class="edit-btn" @click="goToEdit">✎</button>
+    <button
+      v-if="profile.id == myId"
+      class="edit-btn" @click="goToEdit">
+      ✎
+    </button>
   </main>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { getUserId } from '../services/auth'
+const myId = getUserId()
 
 const route = useRoute()
 const router = useRouter()
