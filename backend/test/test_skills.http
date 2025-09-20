@@ -1,0 +1,239 @@
+# Skills API 測試文件
+
+# 設定全域變數
+@host = http://localhost:8000
+@api_prefix = /api/v1
+
+# 測試用的技能 ID（請在實際測試時替換為真實的 UUID）
+@skill_id = 5cd7237f-9baf-42f5-8375-aab257eec921
+@skill_id_2 = bf937d19-7b3c-417f-bac7-fbbf696850fa
+
+###############################################################################
+# 1. 創建技能
+###############################################################################
+
+### 創建新技能 - JavaScript
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": "JavaScript"
+}
+
+### 創建新技能 - Python
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": "Python Programming"
+}
+
+### 創建新技能 - 重複測試（應該返回現有技能）
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": "JavaScript"
+}
+
+### 創建新技能 - 木工
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": "Carpentry"
+}
+
+### 創建新技能 - 水管工程
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": "Plumbing"
+}
+
+###############################################################################
+# 2. 搜索技能
+###############################################################################
+
+### 搜索技能 - 關鍵字 "Java"
+GET {{host}}{{api_prefix}}/skills/search?keyword=Java
+
+### 搜索技能 - 關鍵字 "Python"，帶分頁
+GET {{host}}{{api_prefix}}/skills/search?keyword=Python&skip=0&limit=10
+
+### 搜索技能 - 關鍵字 "ing"（部分匹配測試）
+GET {{host}}{{api_prefix}}/skills/search?keyword=ing&skip=0&limit=20
+
+### 搜索技能 - 空結果測試
+GET {{host}}{{api_prefix}}/skills/search?keyword=NonexistentSkill
+
+###############################################################################
+# 3. 獲取技能 - 多個ID
+###############################################################################
+
+### 獲取技能 - 單個ID
+GET {{host}}{{api_prefix}}/skills/?skill_ids={{skill_id}}
+
+### 獲取技能 - 多個ID
+GET {{host}}{{api_prefix}}/skills/?skill_ids={{skill_id}}&skill_ids={{skill_id_2}}
+
+### 獲取技能 - 不存在的ID（應該返回空陣列）
+GET {{host}}{{api_prefix}}/skills/?skill_ids=00000000-0000-0000-0000-000000000000
+
+###############################################################################
+# 4. 獲取所有技能
+###############################################################################
+
+### 獲取所有技能 - 預設分頁
+GET {{host}}{{api_prefix}}/skills/all
+
+### 獲取所有技能 - 自定分頁
+GET {{host}}{{api_prefix}}/skills/all?skip=0&limit=2
+
+### 獲取所有技能 - 大分頁限制測試
+GET {{host}}{{api_prefix}}/skills/all?skip=0&limit=100
+
+###############################################################################
+# 5. 技能統計
+###############################################################################
+
+### 獲取技能統計
+GET {{host}}{{api_prefix}}/skills/statistics?skill_id={{skill_id}}
+
+### 獲取技能統計 - 不存在的技能（應該返回404）
+GET {{host}}{{api_prefix}}/skills/statistics?skill_id=00000000-0000-0000-0000-000000000000
+
+###############################################################################
+# 6. 熱門技能
+###############################################################################
+
+### 獲取熱門技能 - 預設限制
+GET {{host}}{{api_prefix}}/skills/popular
+
+### 獲取熱門技能 - 自定限制
+GET {{host}}{{api_prefix}}/skills/popular?limit=5
+
+### 獲取熱門技能 - 最大限制測試
+GET {{host}}{{api_prefix}}/skills/popular?limit=50
+
+###############################################################################
+# 7. 刪除技能
+###############################################################################
+
+### 刪除技能
+DELETE {{host}}{{api_prefix}}/skills/delete?skill_id={{skill_id}}
+
+### 刪除技能 - 不存在的技能（應該返回404）
+DELETE {{host}}{{api_prefix}}/skills/delete?skill_id=00000000-0000-0000-0000-000000000000
+
+###############################################################################
+# 8. 邊界測試
+###############################################################################
+
+### 創建技能 - 空白名稱（應該返回422）
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": ""
+}
+
+### 創建技能 - 只有空格的名稱（應該返回422）
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": "   "
+}
+
+### 創建技能 - 只有換行符的名稱（應該返回422）
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": "\n\t  \r"
+}
+
+### 創建技能 - null 值（應該返回422）
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": null
+}
+
+### 創建技能 - 缺少 name 字段（應該返回422）
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "description": "Missing name field"
+}
+
+### 創建技能 - 超長名稱（應該返回422）
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": "This is a very very very very very very very very very very very very very very long skill name that exceeds the maximum allowed length of 100 characters"
+}
+
+### 創建技能 - 邊界長度測試（正好100字符，應該成功）
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
+}
+
+### 創建技能 - 邊界長度測試（101字符，應該返回422）
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901"
+}
+
+### 搜索技能 - 無效的分頁參數（負數skip）
+GET {{host}}{{api_prefix}}/skills/search?keyword=test&skip=-1
+
+### 搜索技能 - 無效的分頁參數（超大limit）
+GET {{host}}{{api_prefix}}/skills/search?keyword=test&limit=1000
+
+### 獲取技能 - 無效的UUID格式
+GET {{host}}{{api_prefix}}/skills/?skill_ids=invalid-uuid-format
+
+### 獲取技能統計 - 無效的UUID格式
+GET {{host}}{{api_prefix}}/skills/statistics?skill_id=invalid-uuid-format
+
+###############################################################################
+# 11. 錯誤處理測試
+###############################################################################
+
+### 測試無效的HTTP方法
+PATCH {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": "Should not work"
+}
+
+### 測試錯誤的Content-Type
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: text/plain
+
+name=Should not work
+
+### 測試缺少請求體
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+### 測試無效的JSON
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": "Test",
+    "invalid": json
+}

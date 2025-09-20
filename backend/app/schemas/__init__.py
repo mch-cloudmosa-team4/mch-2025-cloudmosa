@@ -22,6 +22,26 @@ from .profile import (
     ProfileUpdateResponse
 )
 from .jobs import JobBase, JobCreate, JobUpdate, JobResponse
+from .skills import (
+    SkillBase,
+    SkillCreate,
+    SkillUpdate,
+    SkillResponse,
+    SkillSearchResponse,
+    SkillListResponse,
+    SkillStatisticsResponse,
+    PopularSkillResponse
+)
+from .user_skills import (
+    UserSkillBase,
+    UserSkillCreate,
+    UserSkillUpdate,
+    UserSkillResponse,
+    UserSkillsRequest,
+    UserSkillSummary,
+    UserSkillsResponse,
+    MultipleUserSkillsResponse
+)
 
 __all__ = [
     "PaginationMeta",
@@ -46,5 +66,21 @@ __all__ = [
     "JobBase",
     "JobCreate",
     "JobUpdate",
-    "JobResponse"
+    "JobResponse",
+    "SkillBase",
+    "SkillCreate",
+    "SkillUpdate",
+    "SkillResponse",
+    "SkillSearchResponse",
+    "SkillListResponse",
+    "SkillStatisticsResponse",
+    "PopularSkillResponse",
+    "UserSkillBase",
+    "UserSkillCreate",
+    "UserSkillUpdate",
+    "UserSkillResponse",
+    "UserSkillsRequest",
+    "UserSkillSummary",
+    "UserSkillsResponse",
+    "MultipleUserSkillsResponse"
 ]
