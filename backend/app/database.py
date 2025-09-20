@@ -67,6 +67,7 @@ def ensure_extensions() -> None:
         with engine.connect() as connection:
             connection.execute(text('CREATE EXTENSION IF NOT EXISTS "citext"'))
             connection.execute(text('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"'))
+            connection.execute(text('CREATE EXTENSION IF NOT EXISTS "vector"'))
             connection.commit()
     except Exception as exc:
         logging.getLogger("[Project name]-backend").warning(

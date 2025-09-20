@@ -10,8 +10,12 @@ from sqlalchemy import Column, String, Text, Integer, Date, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
+from pgvector.sqlalchemy import Vector
+from pydantic import model_validator
 
 from app.database import Base
+from app.config import settings
+from app.utils import embed_encode
 
 
 class WorkType(enum.Enum):
@@ -54,6 +58,7 @@ class Job(Base):
     status = Column(Enum(JobStatus), default=JobStatus.DRAFT, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    embedding = Column(Vector(settings.embedding_model_dimension), nullable=False)
     
     # Relationships
     employer = relationship("User", back_populates="employer_jobs")
@@ -64,3 +69,8 @@ class Job(Base):
 
     def __repr__(self):
         return f"<Job(id='{self.id}', title='{self.title}', employer_id='{self.employer_id}', status='{self.status.value}')>"
+
+    @model_validator(mode="after")
+    def calculate_embedding(cls, values):
+        values["embedding"] = embed_encode(values["title"] + " " + values["description"])
+        return values

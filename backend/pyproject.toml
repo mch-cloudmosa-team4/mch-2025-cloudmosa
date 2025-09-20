@@ -16,4 +16,6 @@ dependencies = [
     "passlib[bcrypt]>=1.7.4",
     "python-multipart>=0.0.6",
     "requests>=2.32.5",
+    "sentence-transformers>=5.1.0",
+    "pgvector>=0.4.1",
 ]
