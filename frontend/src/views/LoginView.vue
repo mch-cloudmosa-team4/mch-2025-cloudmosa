@@ -88,17 +88,17 @@ function focusAt(i) {
 function handleKeys(e) {
   if (['ArrowDown', 'ArrowUp'].includes(e.key)) {
     e.preventDefault()
-    
+
     // Find current focused element index
     const currentElement = document.activeElement
     let currentIndex = focusedIndex.value
-    
+
     // Double check the current index by comparing with refs
     if (currentElement === userRef.value) currentIndex = 0
     else if (currentElement === passRef.value) currentIndex = 1
     else if (currentElement === btnRef.value) currentIndex = 2
-    
-    const direction = e.key === 'ArrowDown' ? 1 : -1
+
+    const direction = e.key === 'ArrowDown' ? -1 : 1
     const newIndex = currentIndex + direction
     focusAt(newIndex)
   }
