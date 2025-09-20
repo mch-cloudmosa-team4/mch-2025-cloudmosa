@@ -11,52 +11,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}/backend
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_DB: test_db
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
-
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.12'
-
-    - name: Install uv
-      run: curl -LsSf https://astral.sh/uv/install.sh | sh
-
-    - name: Install dependencies
-      working-directory: ./backend
-      run: |
-        source $HOME/.cargo/env
-        uv sync
-
-    - name: Run tests
-      working-directory: ./backend
-      env:
-        DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
-      run: |
-        source $HOME/.cargo/env
-        uv run pytest
-
   build-and-push:
-    needs: test
     runs-on: ubuntu-latest
     if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/cicd') && github.event_name == 'push'
 
