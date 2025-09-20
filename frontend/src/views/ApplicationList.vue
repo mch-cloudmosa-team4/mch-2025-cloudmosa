@@ -40,6 +40,7 @@ function goDetail(id) {
 }
 
 .application-list {
+  align-items: center;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -49,6 +50,7 @@ function goDetail(id) {
 }
 
 .application-list button {
+  margin-top: 8px;
   width: 100%;
   padding: 8px;
   border: none;

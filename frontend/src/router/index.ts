@@ -17,6 +17,7 @@ import JobApplication from '@/views/JobApplication.vue'
 import Dashboard from '@/views/Dashboard.vue'
 import MyJobList from '@/views/MyJobList.vue'
 import RegisterVIew from '@/views/RegisterVIew.vue'
+import ProfileEdit from '@/views/ProfileEdit.vue'
 
 const routes = [
   { path: '/', redirect: '/chat' },
@@ -38,6 +39,7 @@ const routes = [
   { path: '/dashboard', component: Dashboard },
   { path: '/myjob', component: MyJobList },
   { path: '/register', component: RegisterVIew },
+  { path: '/profile/:id/edit', component: ProfileEdit },
 ]
 
 const router = createRouter({
