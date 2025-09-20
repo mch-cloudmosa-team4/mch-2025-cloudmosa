@@ -3,10 +3,18 @@ Dependency injection functions for FastAPI
 """
 
 from typing import Optional
-from fastapi import Header, HTTPException, Query, Depends
+from fastapi import Header, HTTPException, Query, Depends, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
+
 from app.config import settings
 from app.database import get_db
+from app.models.users import User
+from app.crud.user import user
+from app.utils.auth import get_user_id_from_token
+
+# HTTP Bearer security scheme
+security = HTTPBearer(auto_error=False)
 
 
 async def get_api_key(x_api_key: Optional[str] = Header(None)) -> Optional[str]:
@@ -27,24 +35,105 @@ async def get_api_key(x_api_key: Optional[str] = Header(None)) -> Optional[str]:
     return x_api_key
 
 
-async def get_current_user(api_key: Optional[str] = Depends(get_api_key)) -> Optional[dict]:
+async def get_current_user(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    db: Session = Depends(get_db)
+) -> Optional[User]:
     """
-    Get current user from API key (for future authentication)
+    Get current user from JWT token
     
     Args:
-        api_key: Validated API key
+        credentials: HTTP Bearer credentials
+        db: Database session
         
     Returns:
-        dict: User information
+        User: Current authenticated user
         
-    Note:
-        Currently returns a mock user.
-        Implement actual user lookup logic when needed.
+    Raises:
+        HTTPException: If token is invalid or user not found
     """
-    if api_key:
-        # TODO: Implement actual user lookup from database
-        return {"id": 1, "username": "user", "email": "user@example.com"}
-    return None
+    if not credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Extract user ID from token
+    try:
+        user_id = get_user_id_from_token(credentials.credentials)
+        
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    except Exception as e:
+        # Check if it's a token expired error
+        if "expired" in str(e).lower():
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token expired",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication credentials",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    
+    # Get user from database
+    current_user = user.get(db, user_id)
+    if not current_user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Check if user is active
+    if not getattr(current_user, 'is_active', True):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User account is deactivated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    return current_user
+
+
+async def get_current_user_optional(
+    credentials: Optional[HTTPAuthorizationCredentials] = Depends(security),
+    db: Session = Depends(get_db)
+) -> Optional[User]:
+    """
+    Get current user from JWT token (optional - doesn't raise exception if not provided)
+    
+    Args:
+        credentials: HTTP Bearer credentials
+        db: Database session
+        
+    Returns:
+        User or None if not authenticated
+    """
+    if not credentials:
+        return None
+    
+    try:
+        user_id = get_user_id_from_token(credentials.credentials)
+        if not user_id:
+            return None
+        
+        current_user = user.get(db, user_id)
+        if not current_user or not getattr(current_user, 'is_active', True):
+            return None
+            
+        return current_user
+    except Exception:
+        # For optional authentication, return None on any error (including token expired)
+        return None
 
 
 def get_pagination_params(
@@ -90,5 +179,6 @@ def validate_content_type(content_type: str = Header(...)) -> str:
 # Common dependencies for reuse
 CommonDeps = {
     "current_user": Depends(get_current_user),
+    "current_user_optional": Depends(get_current_user_optional),
     "pagination": Depends(get_pagination_params),
 }

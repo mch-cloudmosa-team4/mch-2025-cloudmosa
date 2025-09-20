@@ -1,6 +1,7 @@
 # Data models module
 
 from .base import BaseResponse, ErrorResponse, HealthCheck, PaginatedResponse
+from .items import Item
 from .users import User, UserRole
 from .profiles import Profile, Gender
 from .skills import Skill
@@ -20,6 +21,7 @@ __all__ = [
     "ErrorResponse", 
     "HealthCheck",
     "PaginatedResponse",
+    "Item",
     "User",
     "UserRole",
     "Profile",
