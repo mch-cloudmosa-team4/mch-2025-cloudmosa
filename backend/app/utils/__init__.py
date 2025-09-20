@@ -22,6 +22,11 @@ from .auth import (
     is_token_expired
 )
 
+from .embedding_model import (
+    embed_model,
+    embed_encode
+)
+
 __all__ = [
     "setup_logging",
     "generate_id", 
@@ -38,5 +43,7 @@ __all__ = [
     "verify_token",
     "get_user_id_from_token",
     "create_verification_code",
-    "is_token_expired"
+    "is_token_expired",
+    "embed_model",
+    "embed_encode"
 ]

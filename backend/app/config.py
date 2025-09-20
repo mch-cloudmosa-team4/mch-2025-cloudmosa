@@ -65,6 +65,15 @@ class Settings(BaseSettings):
     
     # API Settings
     api_prefix: str = Field(default="/api/v1", description="API prefix")
+
+    embedding_model: str = Field(
+        default="sentence-transformers/all-MiniLM-L6-v2",
+        description="Model used for calculating string embedding value"
+    )
+    embedding_model_dimension: int = Field(
+        default=384,
+        description="Embedding model dimension"
+    )
     
     # Object Storage (MinIO/S3-compatible)
     minio_endpoint: str = Field(default="localhost:9000", description="MinIO endpoint host:port")
