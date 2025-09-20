@@ -10,7 +10,7 @@
     <p class="description"><strong>Created At:</strong> {{ application.created_at }}</p>
     <p class="description"><strong>Updated At:</strong> {{ application.updated_at }}</p>
 
-    <button class="back-btn" @click="$router.push('/application')">← Back</button>
+    <button class="back-btn" @click="goBack">← Back</button>
   </main>
 
   <main v-else>
@@ -20,9 +20,10 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
+const router = useRouter()
 const application = ref(null)
 
 onMounted(async () => {
@@ -30,6 +31,10 @@ onMounted(async () => {
   const data = await res.json()
   application.value = data.applications.find((a) => a.id === parseInt(route.params.id))
 })
+
+function goBack() {
+  router.back()
+}
 </script>
 
 <style scoped>

@@ -57,7 +57,7 @@ function goToEdit() {
 }
 
 function goToApplications() {
-  router.push(`/job/${job.value.id}/applications`)
+  router.push(`/job/${job.value.id}/application`)
 }
 </script>
 
