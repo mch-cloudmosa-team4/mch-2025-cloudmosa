@@ -4,7 +4,6 @@ CRUD operations for Job model
 
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from sqlalchemy import and_
 
 from app.models import Job
 from app.schemas import JobCreate, JobUpdate
@@ -16,18 +15,18 @@ class JobCRUD:
     CRUD operations for Job model
     """
 
-    def get(self, db: Session, jobs_id: int) -> Optional[Job]:
+    def get(self, db: Session, job_id: int) -> Optional[Job]:
         """
-        Get jobs by ID
+        Get job by ID
 
         Args:
             db: Database session
-            jobs_id: Job ID
+            job_id: Job ID
 
         Returns:
             Job or None if not found
         """
-        return db.query(Job).filter(Job.id == jobs_id).first()
+        return db.query(Job).filter(Job.id == job_id).first()
 
     def get_multi(
         self,
@@ -37,16 +36,16 @@ class JobCRUD:
         active_only: bool = True
     ) -> List[Job]:
         """
-        Get multiple jobss with pagination
+        Get multiple job with pagination
 
         Args:
             db: Database session
             skip: Number of records to skip
             limit: Maximum number of records to return
-            active_only: Whether to return only active jobss
+            active_only: Whether to return only active jobs
 
         Returns:
-            List of jobss
+            List of jobs
         """
         query = db.query(Job)
         
@@ -87,14 +86,14 @@ class JobCRUD:
 
     def create(self, db: Session, obj_in: JobCreate) -> Job:
         """
-        Create new jobs
+        Create new job
 
         Args:
             db: Database session
             obj_in: Job creation data
 
         Returns:
-            Created jobs
+            Created job
         """
         db_obj = Job(**obj_in.model_dump())
         db.add(db_obj)
@@ -109,37 +108,37 @@ class JobCRUD:
         obj_in: JobUpdate
     ) -> Job:
         """
-        Update existing jobs
+        Update existing job
         
         Args:
             db: Database session
-            db_obj: Existing jobs from database
+            db_obj: Existing job from database
             obj_in: Update data
 
         Returns:
-            Updated jobs
+            Updated job
         """
         update_data = obj_in.model_dump(exclude_unset=True)
 
-        for field, value in update_data.jobss():
+        for field, value in update_data.items():
             setattr(db_obj, field, value)
  
         db.commit()
         db.refresh(db_obj)
         return db_obj
 
-    def delete(self, db: Session, jobs_id: int) -> Optional[Job]:
+    def delete(self, db: Session, job_id: int) -> Optional[Job]:
         """
-        Delete jobs by ID
+        Delete job by ID
 
         Args:
             db: Database session
-            jobs_id: Job ID
+            job_id: Job ID
   
         Returns:
-            Deleted jobs or None if not found
+            Deleted job or None if not found
         """
-        db_obj = self.get(db, jobs_id)
+        db_obj = self.get(db, job_id)
         if db_obj:
             db.delete(db_obj)
             db.commit()
@@ -147,11 +146,11 @@ class JobCRUD:
 
     def count(self, db: Session, active_only: bool = True) -> int:
         """
-        Count total jobss
+        Count total jobs
 
         Args:
             db: Database session
-            active_only: Whether to count only active jobss
+            active_only: Whether to count only active jobs
 
         Returns:
             Total count

@@ -22,6 +22,7 @@ from .profile import (
     ProfileUpdateResponse
 )
 from .jobs import JobBase, JobCreate, JobUpdate, JobResponse
+from .applications import ApplicationBase, ApplicationCreate, ApplicationUpdate, ApplicationResponse
 
 __all__ = [
     "PaginationMeta",
@@ -46,5 +47,9 @@ __all__ = [
     "JobBase",
     "JobCreate",
     "JobUpdate",
-    "JobResponse"
+    "JobResponse",
+    "ApplicationBase",
+    "ApplicationCreate",
+    "ApplicationUpdate",
+    "ApplicationResponse"
 ]

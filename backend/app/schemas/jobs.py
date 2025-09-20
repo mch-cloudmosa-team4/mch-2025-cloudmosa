@@ -1,5 +1,5 @@
 """
-Job-related request/response schemas
+Job API request/response schemas
 """
 
 from datetime import datetime

@@ -3,7 +3,7 @@ Jobs API router with database integration
 """
 
 from typing import List
-from fastapi import APIRouter, HTTPException, Query, Depends
+from fastapi import APIRouter, HTTPException, Query, status, Depends
 from sqlalchemy.orm import Session
 
 from app.database import get_db
@@ -38,7 +38,7 @@ async def get_job(
 ) -> JobResponse:
     job = jobs.get(db, job_id=job_id)
     if not job:
-        raise HTTPException(status_code=404, detail="Job not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
     return JobResponse.model_validate(job)
 
 
@@ -67,7 +67,7 @@ async def update_job(
 
     job_obj = jobs.get(db, job_id=job_id)
     if not job_obj:
-        raise HTTPException(status_code=404, detail="Job not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
 
     updated_job = jobs.update(db=db, db_obj=job_obj, obj_in=job_update)
     return JobResponse.model_validate(updated_job)
@@ -80,6 +80,6 @@ async def delete_job(
 ) -> BaseResponse:
     job_obj = jobs.delete(db=db, job_id=job_id)
     if not job_obj:
-        raise HTTPException(status_code=404, detail="Job not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
 
     return BaseResponse(message=f"Job {job_id} deleted successfully")
