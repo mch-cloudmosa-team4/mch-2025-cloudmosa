@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     
     # App Basic Settings
     app_name: str = "[Project name] Backend"
-    debug: bool = Field(default=False, description="Debug mode")
+    debug: bool = Field(default=True, description="Debug mode")
     version: str = "0.1.0"
     description: str = "[Project name] Backend API"
     
