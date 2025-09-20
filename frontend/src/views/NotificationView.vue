@@ -1,7 +1,7 @@
 <template>
   <main class="notification-view">
     <div class="top-bar">
-      <button class="back-btn" @click="$router.push('/menu')">←</button>
+      <button class="back-btn" @click="$router.push('/home')">←</button>
       <h1 class="title">Notifications</h1>
     </div>
     

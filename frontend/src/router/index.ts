@@ -15,7 +15,7 @@ import JobEdit from '@/views/JobEdit.vue'
 import JobCreate from '@/views/JobCreate.vue'
 
 const routes = [
-  { path: '/', redirect: '/login' },
+  { path: '/', redirect: '/chat' },
   { path: '/login', component: LoginView },
   { path: '/home', component: HomeView },
   { path: '/profile', component: ProfileList },
