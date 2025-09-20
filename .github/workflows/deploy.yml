@@ -14,6 +14,9 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/cicd') && github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: write
 
     steps:
     - name: Checkout code
@@ -53,6 +56,9 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feat/cicd') && github.event_name == 'push'
+    permissions:
+      contents: read
+      packages: read
 
     steps:
     - name: Checkout code
@@ -69,8 +75,8 @@ jobs:
           # Navigate to deployment directory
           cd /opt/mch-backend
 
-          # Pull latest changes
-          git pull origin main
+          # Pull latest changes from the current branch
+          git pull origin ${{ github.ref_name }}
 
           # Set environment variables
           export POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}"
@@ -82,13 +88,13 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
           # Pull latest images
-          docker-compose -f docker-compose.prod.yml pull
+          env GITHUB_REPOSITORY="${{ github.repository }}" POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}" MINIO_ACCESS_KEY="${{ secrets.MINIO_ACCESS_KEY }}" MINIO_SECRET_KEY="${{ secrets.MINIO_SECRET_KEY }}" docker-compose -f backend/docker-compose.prod.yml pull
 
           # Run database migrations
-          docker-compose -f docker-compose.prod.yml run --rm backend uv run alembic upgrade head
+          env GITHUB_REPOSITORY="${{ github.repository }}" POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}" MINIO_ACCESS_KEY="${{ secrets.MINIO_ACCESS_KEY }}" MINIO_SECRET_KEY="${{ secrets.MINIO_SECRET_KEY }}" docker-compose -f backend/docker-compose.prod.yml run --rm backend uv run alembic upgrade head
 
           # Deploy with zero downtime
-          docker-compose -f docker-compose.prod.yml up -d
+          env GITHUB_REPOSITORY="${{ github.repository }}" POSTGRES_PASSWORD="${{ secrets.POSTGRES_PASSWORD }}" MINIO_ACCESS_KEY="${{ secrets.MINIO_ACCESS_KEY }}" MINIO_SECRET_KEY="${{ secrets.MINIO_SECRET_KEY }}" docker-compose -f backend/docker-compose.prod.yml up -d
 
           # Clean up old images
           docker image prune -f

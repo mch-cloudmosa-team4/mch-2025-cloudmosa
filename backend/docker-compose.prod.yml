@@ -26,7 +26,7 @@ services:
       - mch_network
 
   postgres:
-    image: postgres:15-alpine
+    image: pgvector/pgvector:pg15
     container_name: mch_postgres_prod
     restart: unless-stopped
     environment:
