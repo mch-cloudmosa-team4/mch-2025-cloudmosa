@@ -90,7 +90,7 @@ function approveApplication() {
   padding: 8px;
   border: none;
   border-radius: 6px;
-  background: green;
+  background: rgb(103, 157, 103);
   color: white;
   font-weight: bold;
   cursor: pointer;

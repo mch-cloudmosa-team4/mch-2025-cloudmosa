@@ -115,7 +115,7 @@ function goToApplications() {
   padding: 6px 10px;
   border: none;
   border-radius: 6px;
-  background: rgb(0, 123, 255);
+  background: rgb(61, 114, 171);
   color: white;
   font-size: 12px;
   cursor: pointer;
