@@ -33,7 +33,12 @@ onMounted(async () => {
 })
 
 function goBack() {
-  router.back()
+  console.log(route.query.from)
+  if (route.query.from === 'apply') {
+    router.push('/dashboard')
+  } else {
+    router.back()
+  }
 }
 </script>
 

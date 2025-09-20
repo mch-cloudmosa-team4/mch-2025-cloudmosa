@@ -10,7 +10,7 @@
       <textarea
         id="coverLetter"
         v-model="coverLetter"
-        placeholder="Write your cover letter here..."
+        placeholder="Write your message here..."
         rows="5"
       ></textarea>
       <!-- TODO: (Backend) Check if submitted before -> alert -->
@@ -40,7 +40,7 @@ function submitApplication() {
   console.log('Expected Salary:', expectedSalary.value)
 
   // 模擬 API 回傳 application id = 1
-  router.push('/application/1')
+  router.push('/application/1?from=apply')
 }
 </script>
 
