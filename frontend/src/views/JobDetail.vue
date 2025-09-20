@@ -7,9 +7,12 @@
       class="applications-btn" @click="goToApplications">
       View Applications
     </button>
+    <div class="description">
+      <button class="applicant-btn" @click="goEmployerProfile">
+        Employer {{ job.employer_id }}
+      </button>
+    </div>
 
-    <p class="description"><strong>ID:</strong> {{ job.id }}</p>
-    <p class="description"><strong>Employer ID:</strong> {{ job.employer_id }}</p>
     <p class="description"><strong>Description:</strong> {{ job.description }}</p>
     <p class="description"><strong>Reward:</strong> {{ job.reward }}</p>
     <p class="description"><strong>Location:</strong> {{ job.location_id }}</p>
@@ -19,8 +22,6 @@
     <p class="description"><strong>Status:</strong> {{ job.status }}</p>
     <p class="description"><strong>Start Date:</strong> {{ job.start_date }}</p>
     <p class="description"><strong>End Date:</strong> {{ job.end_date }}</p>
-    <p class="description"><strong>Created At:</strong> {{ job.created_at }}</p>
-    <p class="description"><strong>Updated At:</strong> {{ job.updated_at }}</p>
 
     <!-- TODO: Do not show this button if employer -->
     <button
@@ -66,6 +67,10 @@ function goToEdit() {
 
 function goToApplications() {
   router.push(`/job/${job.value.id}/application`)
+}
+
+function goEmployerProfile() {
+  router.push(`/profile/${job.value.employer_id}`)
 }
 </script>
 
@@ -114,7 +119,7 @@ function goToApplications() {
   margin: 0 16px 12px 16px;
   padding: 6px 10px;
   border: none;
-  border-radius: 6px;
+  border-radius: 20px;
   background: rgb(61, 114, 171);
   color: white;
   font-size: 12px;
@@ -148,4 +153,46 @@ function goToApplications() {
 .edit-btn:hover {
   background: rgb(255, 170, 0);
 }
+
+.applicant-btn {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 20px;  /* ✅ 橢圓形 */
+  background: rgb(229, 227, 227);
+  color: rgb(44, 46, 60);
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.applicant-btn:hover {
+  background: rgb(80, 110, 160);
+}
+
+.status-btn {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 20px;  /* ✅ 橢圓形 */
+  background: rgb(53, 66, 118);
+  color: rgb(229, 227, 227);
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.status-btn:hover {
+  background: rgb(80, 110, 160);
+}
+
+.message-box {
+  align-self: center;
+  padding: 10px;
+  width: 80%;
+  border: none;
+  border-radius: 5px;  /* ✅ 橢圓形 */
+  color: #161620;
+  background-color: #e5e5e5;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
 </style>
