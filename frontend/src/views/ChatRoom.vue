@@ -2,7 +2,9 @@
   <main class="chat-room">
     <div class="top-bar">
       <button class="back-btn" @click="$router.push('/chat')">←</button>
-      <h1 class="title">User {{ otherUserId }}</h1>
+      <h1 class="title" @click="goToProfile">
+        User {{ otherUserId }}
+      </h1>
     </div>
     <div class="chat-box" ref="chatBox">
       <div
@@ -35,10 +37,11 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed, nextTick } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { getUserId } from '../services/auth'
 
 const route = useRoute()
+const router = useRouter()
 const myId = getUserId()
 const messages = ref([])
 const conversations = ref([])
@@ -80,6 +83,10 @@ function sendMessage() {
   nextTick(() => {
     scrollToBottom()
   })
+}
+
+function goToProfile() {
+  router.push(`/profile/${otherUserId.value}`)
 }
 
 function scrollToBottom() {
