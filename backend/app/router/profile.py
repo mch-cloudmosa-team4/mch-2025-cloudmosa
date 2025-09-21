@@ -67,6 +67,31 @@ async def get_profiles(
     return response_data
 
 
+@router.get("/all", response_model=ProfileListResponse, summary="List all profiles")
+async def list_all_profiles(
+    db: Session = Depends(get_db)
+) -> ProfileListResponse:
+    """
+    List all user profiles with pagination
+    
+    Args:
+        skip: Number of records to skip
+        limit: Maximum number of records to return
+        db: Database session
+        
+    Returns:
+        ProfileListResponse: Paginated list of user profiles
+    """
+    profiles = profile.get_all(db)
+    
+    # Convert to response format
+    profile_list = [ProfileResponse(**profile.to_response_dict(p)) for p in profiles]
+    
+    return ProfileListResponse(
+        profiles=profile_list,
+    )
+
+
 @router.get("/me", response_model=ProfileResponse, summary="Get my profile", dependencies=[Depends(bearer_scheme)])
 async def get_my_profile(
     current_user: User = Depends(get_current_user),
