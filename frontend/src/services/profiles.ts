@@ -56,7 +56,7 @@ export async function getMyProfile(token: string) {
   // 完整更新個人資料
   export async function updateMyProfileAll(token: string, payload: {
     display_name: string
-    birth_date: string
+    birthday: string
     gender: string
     bio: string
     primary_language_code: string

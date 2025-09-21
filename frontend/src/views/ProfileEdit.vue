@@ -52,12 +52,13 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { isAuthed } from '@/services/auth'
+import { isAuthed, getUserId } from '@/services/auth'
 import { getMyProfile, updateMyProfileAll } from '../services/profiles'
 
 const route = useRoute()
 const router = useRouter()
 const profile = ref<any>(null)
+const myId = getUserId()
 
 onMounted(async () => {
   // const res = await fetch(import.meta.env.BASE_URL + 'profiles.json')
@@ -80,13 +81,12 @@ async function saveProfile() {
     console.log("[updateMyProfileAll] token: ", token)
     await updateMyProfileAll(token, {
       display_name: profile.value.display_name,
-      birth_date: profile.value.birthday,
+      birthday: profile.value.birthday,
       gender: profile.value.gender,
       bio: profile.value.bio,
       primary_language_code: profile.value.primary_language_code,
     })
-    alert('Profile updated successfully!')
-    router.push('/profile')
+    router.push(`/profile/${myId}`)
   } catch (err) {
     console.error('Failed to update profile:', err)
     alert('Failed to update profile.')
