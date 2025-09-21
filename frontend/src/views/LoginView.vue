@@ -40,7 +40,7 @@
       {{ loading ? 'Signing in...' : 'Login (Enter)' }}
     </button>
 
-    <button class="btn" @click="$router.push('/register')">
+    <button class="btn" @click="$router.push('/register')" @focus="focusedIndex = 3">
       Register
     </button>
 
