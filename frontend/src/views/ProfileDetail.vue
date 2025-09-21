@@ -3,7 +3,7 @@
     <h1 class="title">Profile</h1>
 
     <div class="profile-card">
-      <h2 class="name">{{ profile.displayName }}</h2>
+      <h2 class="name">{{ profile.display_name }}</h2>
       <p><strong>Birthday:</strong> {{ profile.birthday }}</p>
       <p><strong>Gender:</strong> {{ profile.gender }}</p>
       <p><strong>Bio:</strong> {{ profile.bio }}</p>
@@ -94,7 +94,7 @@ function goToEdit() {
 .name {
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
   text-align: center;
 }
 
