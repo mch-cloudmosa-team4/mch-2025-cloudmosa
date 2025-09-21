@@ -215,7 +215,7 @@ export async function register(userData: {
     console.log('📤 Sending request to:', `${API_BASE_URL}/api/v1/auth/register`)
     console.log('📤 Request data:', requestData)
 
-    const response = await fetch(`/api/v1/auth/register`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/auth/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

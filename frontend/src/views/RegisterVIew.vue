@@ -9,16 +9,10 @@
         <input v-model="form.name" type="text" placeholder="Your preferred name" required />
       </label>
 
-      <!-- Email -->
-      <label>
-        Email
-        <input v-model="form.email" type="email" placeholder="example@mail.com" />
-      </label>
-
       <!-- Phone -->
       <label>
         Phone
-        <input v-model="form.phone" type="tel" placeholder="09xx-xxx-xxx" required />
+        <input v-model="form.phone" type="tel" placeholder="+886-900-000-000" required />
       </label>
 
       <!-- Password -->
@@ -42,7 +36,6 @@ const router = useRouter()
 // 表單資料
 const form = ref({
   name: '',
-  email: '',
   phone: '',
   password: '',
 })
@@ -73,9 +66,7 @@ async function handleRegister() {
     await register({
       phone: form.value.phone,
       password: form.value.password,
-      display_name: form.value.name,
-      email: form.value.email
-      // 這裡還可以加 birthday, gender, primary_language_code...
+      display_name: form.value.name
     })
 
     // alert(`🎉 Register success! Welcome ${form.value.name}`)
