@@ -43,6 +43,17 @@ from .user_skills import (
     UserSkillsResponse,
     MultipleUserSkillsResponse
 )
+from .locations import (
+    LocationResponse,
+    LocationCreateRequest,
+    LocationUpdateRequest,
+    LocationSearchRequest,
+    LocationListResponse,
+    CountryResponse,
+    CountryListResponse,
+    CityListResponse,
+    LocationStatsResponse
+)
 
 __all__ = [
     "PaginationMeta",
@@ -87,5 +98,14 @@ __all__ = [
     "UserSkillsRequest",
     "UserSkillSummary",
     "UserSkillsResponse",
-    "MultipleUserSkillsResponse"
+    "MultipleUserSkillsResponse",
+    "LocationResponse",
+    "LocationCreateRequest",
+    "LocationUpdateRequest",
+    "LocationSearchRequest",
+    "LocationListResponse",
+    "CountryResponse",
+    "CountryListResponse",
+    "CityListResponse",
+    "LocationStatsResponse"
 ]
