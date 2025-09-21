@@ -1,0 +1,384 @@
+# Skills & User Skills API 完整測試套件
+
+# 設定全域變數
+@host = http://localhost:8000
+@api_prefix = /api/v1
+
+# 測試用的授權 token（請替換為有效的 JWT token）
+@auth_token = Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ODk5Y2UyMy1jODdmLTRhYmQtYTFmOC0xYWUzNWEyNGFmMzQiLCJleHAiOjE3NTgzOTc1NjAsInR5cGUiOiJhY2Nlc3MifQ.3NaX7JeI48hIHlgEg4175pCTsdW6zo_1acysWdX0074
+
+# 測試用的技能和用戶 ID（請在實際測試時替換為真實的 UUID）
+@skill_id_1 = e8103cf8-72d0-494c-bac9-f243e326fa44
+@skill_id_2 = 7dbb5112-0a3e-4138-8a25-5a8ab075bc6e
+@skill_id_3 = bf937d19-7b3c-417f-bac7-fbbf696850fa
+@skill_id_4 = bc4776b7-8591-4724-8d99-672ef94c93f9
+@skill_id_5 = 8fd416fd-6839-49aa-9938-af683cff8268
+@user_id_1 = 8899ce23-c87f-4abd-a1f8-1ae35a24af34
+@user_id_2 = 3b8ee192-d9b8-44dd-8147-e64d6e3b819b
+
+###############################################################################
+# 📚 技能管理 (Skills API)
+###############################################################################
+
+### 1.1 創建基礎技能
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": "JavaScript"
+}
+
+### 1.2 創建多個技能
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": "Python Programming"
+}
+
+###
+
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": "React.js"
+}
+
+### 1.3 搜尋技能
+GET {{host}}{{api_prefix}}/skills/search?keyword=JavaScript
+
+### 1.4 獲取技能列表
+GET {{host}}{{api_prefix}}/skills/?skill_ids={{skill_id_1}}&skill_ids={{skill_id_2}}
+
+### 1.5 獲取所有技能（分頁）
+GET {{host}}{{api_prefix}}/skills/all?skip=0&limit=10
+
+### 1.6 獲取熱門技能
+GET {{host}}{{api_prefix}}/skills/popular?limit=5
+
+###############################################################################
+# 👤 用戶技能管理 (User Skills API)
+###############################################################################
+
+### 2.1 獲取我的技能
+GET {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+
+### 2.2 獲取其他用戶技能
+GET {{host}}{{api_prefix}}/user_skills/?user_ids={{user_id_1}}&user_ids={{user_id_2}}
+
+### 2.3 獲取我的技能統計
+GET {{host}}{{api_prefix}}/user_skills/stats/me
+Authorization: {{auth_token}}
+
+### 2.4 根據技能ID查找擁有該技能的用戶
+GET {{host}}{{api_prefix}}/user_skills/search/{{skill_id_1}}?min_level=1&skip=0&limit=10
+
+### 2.5 查找擁有特定技能且達到指定等級的用戶
+GET {{host}}{{api_prefix}}/user_skills/search/{{skill_id_2}}?min_level=3&skip=0&limit=20
+
+### 2.6 測試不存在的技能ID
+GET {{host}}{{api_prefix}}/user_skills/search/00000000-0000-0000-0000-000000000000?min_level=1
+
+###############################################################################
+# ✅ 技能新增操作
+###############################################################################
+
+### 3.1 新增單一技能
+POST {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+Content-Type: application/json
+
+{
+  "skills": [
+    {
+      "skill_id": "{{skill_id_4}}",
+      "level": 3
+    }
+  ]
+}
+
+### 3.2 批量新增多個技能
+POST {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+Content-Type: application/json
+
+{
+  "skills": [
+    {
+      "skill_id": "{{skill_id_4}}",
+      "level": 4
+    },
+    {
+      "skill_id": "{{skill_id_3}}",
+      "level": 2
+    }
+  ]
+}
+
+### 3.3 新增衝突測試（部分技能已存在）
+POST {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+Content-Type: application/json
+
+{
+  "skills": [
+    {
+      "skill_id": "{{skill_id_1}}",
+      "level": 5
+    },
+    {
+      "skill_id": "00000000-1111-2222-3333-444444444444",
+      "level": 3
+    }
+  ]
+}
+
+###############################################################################
+# 🔄 技能更新操作
+###############################################################################
+
+### 4.1 完整更新（PUT）- 替換所有技能
+PUT {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+Content-Type: application/json
+
+{
+    "skills": [
+        { "skill_id": "{{skill_id_1}}", "level": 4 },
+        { "skill_id": "{{skill_id_3}}", "level": 5 }
+    ]
+}
+
+### 4.2 部分更新（PATCH）- 只更新現有技能
+PATCH {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+Content-Type: application/json
+
+{
+    "skills": [
+        { "skill_id": "{{skill_id_1}}", "level": 5 }
+    ]
+}
+
+### 4.3 PATCH 測試 - 嘗試更新不存在的技能（會被忽略）
+PATCH {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+Content-Type: application/json
+
+{
+    "skills": [
+        { "skill_id": "00000000-1111-2222-3333-555555555555", "level": 3 }
+    ]
+}
+
+###############################################################################
+# ❌ 技能刪除操作
+###############################################################################
+
+### 5.1 刪除單一技能
+DELETE {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+Content-Type: application/json
+
+{
+  "skills": [
+    {
+      "skill_id": "{{skill_id_3}}",
+      "level": 1
+    }
+  ]
+}
+
+### 5.2 批量刪除多個技能
+DELETE {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+Content-Type: application/json
+
+{
+  "skills": [
+    {
+      "skill_id": "{{skill_id_1}}",
+      "level": 1
+    },
+    {
+      "skill_id": "{{skill_id_2}}",
+      "level": 1
+    }
+  ]
+}
+
+### 5.3 刪除不存在的技能測試
+DELETE {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+Content-Type: application/json
+
+{
+  "skills": [
+    {
+      "skill_id": "00000000-1111-2222-3333-999999999999",
+      "level": 1
+    }
+  ]
+}
+
+###############################################################################
+# 🧪 完整工作流程測試
+###############################################################################
+
+### 6.1 工作流程：設置初始技能
+PUT {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+Content-Type: application/json
+
+{
+    "skills": [
+        { "skill_id": "{{skill_id_1}}", "level": 2 },
+        { "skill_id": "{{skill_id_2}}", "level": 3 },
+        { "skill_id": "{{skill_id_3}}", "level": 1 }
+    ]
+}
+
+### 6.2 工作流程：檢查當前技能
+GET {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+
+### 6.3 工作流程：提升部分技能等級
+PATCH {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+Content-Type: application/json
+
+{
+    "skills": [
+        { "skill_id": "{{skill_id_1}}", "level": 4 },
+        { "skill_id": "{{skill_id_2}}", "level": 5 }
+    ]
+}
+
+### 6.4 工作流程：移除低等級技能
+DELETE {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+Content-Type: application/json
+
+{
+  "skills": [
+    {
+      "skill_id": "{{skill_id_3}}",
+      "level": 1
+    }
+  ]
+}
+
+### 6.5 工作流程：最終狀態檢查
+GET {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+
+### 6.6 工作流程：獲取統計資訊
+GET {{host}}{{api_prefix}}/user_skills/stats/me
+Authorization: {{auth_token}}
+
+### 6.7 工作流程：查看誰擁有我剛才設置的技能
+GET {{host}}{{api_prefix}}/user_skills/search/{{skill_id_1}}?min_level=1&skip=0&limit=50
+
+### 6.8 工作流程：查看高等級技能用戶
+GET {{host}}{{api_prefix}}/user_skills/search/{{skill_id_2}}?min_level=4&skip=0&limit=10
+
+###############################################################################
+# ⚠️ 錯誤處理測試
+###############################################################################
+
+### 7.1 無效的技能ID測試
+POST {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+Content-Type: application/json
+
+{
+  "skills": [
+    {
+      "skill_id": "00000000-0000-0000-0000-000000000000",
+      "level": 1
+    }
+  ]
+}
+
+### 7.2 無效的等級測試
+POST {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+Content-Type: application/json
+
+{
+  "skills": [
+    {
+      "skill_id": "{{skill_id_1}}",
+      "level": 6
+    }
+  ]
+}
+
+### 7.3 缺少授權測試
+GET {{host}}{{api_prefix}}/user_skills/me
+
+### 7.4 無效的用戶ID查詢測試
+GET {{host}}{{api_prefix}}/user_skills/?user_ids=invalid-uuid
+
+### 7.5 空技能列表測試
+PUT {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+Content-Type: application/json
+
+{
+    "skills": []
+}
+
+### 7.6 測試根據技能查找用戶 - 無效的技能ID格式
+GET {{host}}{{api_prefix}}/user_skills/search/invalid-uuid-format?min_level=1
+
+### 7.7 測試根據技能查找用戶 - 無效的等級參數
+GET {{host}}{{api_prefix}}/user_skills/search/{{skill_id_1}}?min_level=6
+
+### 7.8 測試根據技能查找用戶 - 無效的分頁參數
+GET {{host}}{{api_prefix}}/user_skills/search/{{skill_id_1}}?min_level=1&skip=-1&limit=1000
+
+###############################################################################
+# 🏗️ 技能管理邊界測試
+###############################################################################
+
+### 8.1 創建技能 - 空白名稱（應該失敗）
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": ""
+}
+
+### 8.2 創建技能 - 超長名稱（應該失敗）
+POST {{host}}{{api_prefix}}/skills/
+Content-Type: application/json
+
+{
+    "name": "This is a very very very very very very very very very very very very very very long skill name that exceeds the maximum allowed length"
+}
+
+### 8.3 搜尋技能 - 無結果
+GET {{host}}{{api_prefix}}/skills/search?keyword=NonexistentSkillXYZ123
+
+### 8.4 獲取技能統計 - 不存在的技能
+GET {{host}}{{api_prefix}}/skills/statistics?skill_id=00000000-0000-0000-0000-000000000000
+
+###############################################################################
+# 📋 最終清理
+###############################################################################
+
+### 9.1 清空所有用戶技能
+PUT {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}
+Content-Type: application/json
+
+{
+    "skills": []
+}
+
+### 9.2 確認清空結果
+GET {{host}}{{api_prefix}}/user_skills/me
+Authorization: {{auth_token}}

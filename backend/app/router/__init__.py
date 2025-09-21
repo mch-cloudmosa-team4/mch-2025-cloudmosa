@@ -8,5 +8,7 @@ from .profile import router as profile_router
 from .jobs import router as job_router
 from .applications import router as application_router
 from .search import router as search_router
+from .skills import router as skills_router
+from .user_skills import router as user_skills_router
 
-__all__ = ["health_router", "items_router", "auth_router", "profile_router", "files_router", "job_router", "application_router", "search_router"]
+__all__ = ["health_router", "items_router", "auth_router", "profile_router", "files_router", "job_router", "skills_router", "user_skills_router", "application_router", "search_router"]

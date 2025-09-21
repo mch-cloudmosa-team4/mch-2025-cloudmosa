@@ -7,7 +7,7 @@ A FastAPI-based backend server with modular architecture.
 from contextlib import asynccontextmanager
 from typing import Dict, Any
 
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request, status, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -16,6 +16,7 @@ from fastapi.openapi.utils import get_openapi
 
 from app.config import settings
 from app.router import health_router, items_router, auth_router, profile_router, files_router, job_router, application_router, search_router
+from app.router import health_router, items_router, auth_router, profile_router, files_router, job_router, skills_router, user_skills_router
 from app.utils import logger, format_error_response
 from app.database import create_tables, ensure_extensions
 
@@ -59,6 +60,22 @@ app.add_middleware(
 
 
 # Custom exception handlers
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """
+    Handle HTTPException with custom detail messages
+    """
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "success": False,
+            "message": exc.detail,
+            "error_code": f"HTTP_{exc.status_code}",
+            "path": str(request.url)
+        }
+    )
+
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     """
@@ -75,11 +92,17 @@ async def not_found_handler(request: Request, exc):
     """
     Handle 404 errors
     """
+    # Check if it's an HTTPException with custom detail
+    if hasattr(exc, 'detail') and exc.detail:
+        message = exc.detail
+    else:
+        message = "The requested resource was not found"
+    
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
         content={
             "success": False,
-            "message": "The requested resource was not found",
+            "message": message,
             "error_code": "NOT_FOUND",
             "path": str(request.url)
         }
@@ -125,6 +148,8 @@ app.include_router(profile_router, prefix=settings.api_prefix)
 app.include_router(job_router, prefix=settings.api_prefix)
 app.include_router(application_router, prefix=settings.api_prefix)
 app.include_router(search_router, prefix=settings.api_prefix)
+app.include_router(skills_router, prefix=settings.api_prefix)
+app.include_router(user_skills_router, prefix=settings.api_prefix)
 
 
 # Custom OpenAPI schema

@@ -7,5 +7,7 @@ from .jobs import jobs
 from .job_requirements import job_requirements
 from .job_pictures import job_pictures
 from .applications import applications
+from .skills import skills
+from .user_skills import user_skills
 
-__all__ = ["item", "user", "profile", "jobs", "job_requirements", "job_pictures", "applications"]
+__all__ = ["item", "user", "profile", "jobs", "job_requirements", "job_pictures", "applications", "skills", "user_skills"]
