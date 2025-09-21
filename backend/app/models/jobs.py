@@ -15,7 +15,6 @@ from pydantic import model_validator
 
 from app.database import Base
 from app.config import settings
-from app.utils import embed_encode
 
 
 class WorkType(enum.Enum):
@@ -70,7 +69,7 @@ class Job(Base):
     def __repr__(self):
         return f"<Job(id='{self.id}', title='{self.title}', employer_id='{self.employer_id}', status='{self.status.value}')>"
 
-    @model_validator(mode="after")
-    def calculate_embedding(cls, values):
-        values["embedding"] = embed_encode(values["title"] + " " + values["description"])
-        return values
+    # @model_validator(mode="after")
+    # def calculate_embedding(cls, values):
+    #     values["embedding"] = embed_encode(values["title"] + " " + values["description"])
+    #     return values

@@ -108,7 +108,8 @@ class JobCRUD:
             required_people = obj_in.required_people,
             start_date = obj_in.start_date,
             end_date = obj_in.end_date,
-            status = obj_in.status
+            status = obj_in.status,
+            embedding = embed_encode(obj_in.title + " " + obj_in.description)
         )
         db.add(db_obj)
         db.commit()
