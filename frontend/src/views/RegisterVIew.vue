@@ -78,7 +78,7 @@ async function handleRegister() {
       // 這裡還可以加 birthday, gender, primary_language_code...
     })
 
-    alert(`🎉 Register success! Welcome ${form.value.name}`)
+    // alert(`🎉 Register success! Welcome ${form.value.name}`)
     router.push('/login')
   } catch (err: any) {
     console.error('❌ Register error:', err)
