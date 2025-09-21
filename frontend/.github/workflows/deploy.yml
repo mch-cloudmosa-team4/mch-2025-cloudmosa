@@ -1,0 +1,48 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ frontend-dev ]  # 只在 frontend-dev branch push 時觸發
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
+    steps:
+      # 1️⃣ Checkout 代碼
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ 安裝 Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # 3️⃣ 安裝依賴（frontend 子資料夾）
+      - name: Install dependencies
+        run: npm ci
+        working-directory: frontend
+
+      # 4️⃣ Build frontend
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
+        env:
+          NODE_ENV: production
+
+      # 5️⃣ 部署到 GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend/dist
+          # 可選：如果希望自動設定 CNAME 或 branch，以下可加
+          # publish_branch: gh-pages
+          # cname: yourdomain.com

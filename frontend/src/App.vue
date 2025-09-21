@@ -1,0 +1,744 @@
+<template>
+  <div class="app-container">
+    <router-view class="main-content" />
+
+    <nav v-if="!isLoginPage" class="bottom-nav">
+      <div
+        v-if="showHomeMenu"
+        class="home-menu-overlay"
+        @mouseenter="cancelHideTimer"
+        @mouseleave="hideMenu"
+      >
+        <div class="circular-menu">
+          <div
+            class="menu-item item-1"
+            :class="{
+              hover: hoveredItem === 'profile',
+              selected: selectedMenuIndex === 0 && showHomeMenu
+            }"
+            @click="goToPage('/profile/' + getUserId())"
+            @touchstart="handleTouchStart('profile')"
+            @touchend="handleTouchEnd"
+            @mouseenter="showProfileLabel = true; hoveredItem = 'profile'"
+            @mouseleave="showProfileLabel = false; hoveredItem = null"
+          >
+            <span class="material-icons-round">account_circle</span>
+            <span v-if="showProfileLabel || (selectedMenuIndex === 0 && showHomeMenu)" class="item-label">Profile</span>
+          </div>
+          <div
+            class="menu-item item-2"
+            :class="{
+              hover: hoveredItem === 'jobs',
+              selected: selectedMenuIndex === 1 && showHomeMenu
+            }"
+            @click="goToPage('/job')"
+            @touchstart="handleTouchStart('jobs')"
+            @touchend="handleTouchEnd"
+            @mouseenter="showJobsLabel = true; hoveredItem = 'jobs'"
+            @mouseleave="showJobsLabel = false; hoveredItem = null"
+          >
+            <span v-if="showJobsLabel || (selectedMenuIndex === 1 && showHomeMenu)" class="item-label">Jobs</span>
+            <span class="material-icons-round">work</span>
+          </div>
+          <div
+            class="menu-item item-3"
+            :class="{
+              hover: hoveredItem === 'dashboard',
+              selected: selectedMenuIndex === 2 && showHomeMenu
+            }"
+            @click="goToPage('/dashboard')"
+            @touchstart="handleTouchStart('dashboard')"
+            @touchend="handleTouchEnd"
+            @mouseenter="showDashboardLabel = true; hoveredItem = 'dashboard'"
+            @mouseleave="showDashboardLabel = false; hoveredItem = null"
+          >
+            <span v-if="showDashboardLabel || (selectedMenuIndex === 2 && showHomeMenu)" class="item-label">Dashboard</span>
+            <span class="material-icons-round">dashboard</span>
+          </div>
+          <div
+            class="menu-item item-4"
+            :class="{
+              hover: hoveredItem === 'community',
+              selected: selectedMenuIndex === 3 && showHomeMenu
+            }"
+            @click="goToPage('/profile')"
+            @touchstart="handleTouchStart('community')"
+            @touchend="handleTouchEnd"
+            @mouseenter="showCommunityLabel = true; hoveredItem = 'community'"
+            @mouseleave="showCommunityLabel = false; hoveredItem = null"
+          >
+            <span class="material-icons-round">groups</span>
+            <span v-if="showCommunityLabel || (selectedMenuIndex === 3 && showHomeMenu)" class="item-label">Community</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部三個主要按鈕 -->
+      <div class="nav-container">
+        <!-- Chat按鈕 -->
+        <div
+          class="nav-item"
+          :class="{ active: activeTab === 'chat' }"
+          tabindex="0"
+          @click="goToChat"
+          @mouseenter="showChatLabel = true"
+          @mouseleave="showChatLabel = false"
+        >
+          <span class="material-icons-round">
+            {{ hasUnreadChat ? 'mark_unread_chat_alt' : 'chat' }}
+          </span>
+          <span v-if="showChatLabel" class="nav-label">Chat</span>
+        </div>
+
+        <!-- Home按鈕 -->
+        <div
+          class="nav-item home-item"
+          :class="{
+            active: activeTab === 'home',
+            selected: selectedMenuIndex === -1 && showHomeMenu
+          }"
+          tabindex="0"
+          @click="handleHomeClick"
+        >
+          <span class="material-icons-round">home</span>
+          <span v-if="showHomeMenu && selectedMenuIndex === -1" class="nav-label">Home</span>
+        </div>
+
+        <!-- News按鈕 -->
+        <div
+          class="nav-item"
+          :class="{ active: activeTab === 'news' }"
+          tabindex="0"
+          @click="goToNews"
+          @mouseenter="showNewsLabel = true"
+          @mouseleave="showNewsLabel = false"
+        >
+          <span class="material-icons-round">
+            {{ hasUnreadNews ? 'notifications_active' : 'notifications' }}
+          </span>
+          <span v-if="showNewsLabel" class="nav-label">News</span>
+        </div>
+      </div>
+    </nav>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { getUserId } from './services/auth'
+
+const router = useRouter()
+const route = useRoute()
+const showHomeMenu = ref(false)
+const showChatLabel = ref(false)
+const showNewsLabel = ref(false)
+const showProfileLabel = ref(false)
+const showJobsLabel = ref(false)
+const showDashboardLabel = ref(false)
+const showCommunityLabel = ref(false)
+const hoveredItem = ref<string | null>(null)
+const selectedMenuIndex = ref(-1) // -1 表示選中 Home，0-3 表示選中其他項目
+const menuItems = ['profile', 'jobs', 'dashboard', 'community'] // 選單項目順序
+let hideTimer: number | null = null
+
+// 計算屬性
+const isLoginPage = computed(() => route.path === '/login')
+
+const activeTab = computed(() => {
+  const currentRoute = route.name as string
+  if (!currentRoute) return 'home'
+
+  if (['ChatList', 'ChatRoom'].includes(currentRoute)) return 'chat'
+  if (['home'].includes(currentRoute)) return 'home'
+  if (['News'].includes(currentRoute)) return 'news'
+  return 'home'
+})
+
+const hasUnreadChat = computed(() => {
+  // 這裡可以根據實際需求來判斷是否有未讀聊天
+  return false
+})
+
+const hasUnreadNews = computed(() => {
+  // 這裡可以根據實際需求來判斷是否有未讀通知
+  return true
+})
+
+function handleHomeClick() {
+  if (!showHomeMenu.value) {
+    selectedMenuIndex.value = -1 // 重置到 Home 選中狀態
+    showHomeMenu.value = true
+    updateSelection() // 清除所有項目高亮
+  } else {
+    hideMenu()
+    router.push('/home')
+  }
+}
+
+// 方法
+function showMenu() {
+  // 清除任何現有的隱藏計時器
+  if (hideTimer) {
+    clearTimeout(hideTimer)
+    hideTimer = null
+  }
+  showHomeMenu.value = true
+}
+
+function startHideTimer() {
+  // 設置延遲隱藏
+  hideTimer = setTimeout(() => {
+    showHomeMenu.value = false
+    hideTimer = null
+  }, 200)
+}
+
+function cancelHideTimer() {
+  // 取消隱藏計時器
+  if (hideTimer) {
+    clearTimeout(hideTimer)
+    hideTimer = null
+  }
+}
+
+function hideMenu() {
+  // 立即隱藏選單
+  if (hideTimer) {
+    clearTimeout(hideTimer)
+    hideTimer = null
+  }
+  showHomeMenu.value = false
+  selectedMenuIndex.value = -1 // 重置選中索引到 Home
+  hoveredItem.value = null
+  // 重置所有標籤狀態
+  showProfileLabel.value = false
+  showJobsLabel.value = false
+  showDashboardLabel.value = false
+  showCommunityLabel.value = false
+}
+
+function goToHome() {
+  // 如果選單已經顯示，直接導航到 Home 頁面
+  // 先清除計時器和關閉選單，然後跳轉
+  if (hideTimer) {
+    clearTimeout(hideTimer)
+    hideTimer = null
+  }
+  showHomeMenu.value = false
+  router.push('/home')
+}
+
+function goToChat() {
+  hideMenu()
+  router.push('/chat')
+}
+
+function goToNews() {
+  hideMenu()
+  router.push('/news')
+}
+
+function goToPage(path: string) {
+  hideMenu()
+  router.push(path)
+}
+
+// 觸控事件處理函數
+function handleTouchStart(item: string) {
+  hoveredItem.value = item
+  // 顯示對應的標籤
+  switch (item) {
+    case 'profile':
+      showProfileLabel.value = true
+      break
+    case 'jobs':
+      showJobsLabel.value = true
+      break
+    case 'dashboard':
+      showDashboardLabel.value = true
+      break
+    case 'community':
+      showCommunityLabel.value = true
+      break
+  }
+}
+
+function handleTouchEnd() {
+  // 短暫延遲後清除懸停狀態和標籤
+  setTimeout(() => {
+    hoveredItem.value = null
+    showProfileLabel.value = false
+    showJobsLabel.value = false
+    showDashboardLabel.value = false
+    showCommunityLabel.value = false
+  }, 150)
+}
+
+function scrollByStep(amount: number) {
+  console.log('Scrolling by', amount)
+  const content = document.querySelector('.main-content') as HTMLElement
+  if (content) {
+    content.scrollBy({
+      top: amount,
+      behavior: 'smooth'
+    })
+  }
+}
+
+function isInBottomBar(): boolean {
+  const active = document.activeElement as HTMLElement
+  console.log('Active element:', active)
+  if (!active) return false
+  return active.closest('.bottom-nav') !== null
+}
+
+// 鍵盤導航函數
+function handleKeyPress(event: KeyboardEvent) {
+  if (showHomeMenu.value) {
+    switch (event.key) {
+      case 'ArrowLeft':
+        event.preventDefault()
+        navigateLeft()
+        break
+      case 'ArrowRight':
+        event.preventDefault()
+        navigateRight()
+        break
+      case 'Enter':
+        event.preventDefault()
+        selectCurrentItem()
+        break
+      case 'Escape':
+        event.preventDefault()
+        hideMenu()
+        break
+    }
+  } else {
+    const inBottomBar = isInBottomBar()
+    console.log(inBottomBar)
+    // 沒有選單開啟 → 全域 scroll
+    if (event.key === 'ArrowDown' && inBottomBar) {
+      event.preventDefault()
+      scrollByStep(50)
+    }
+  }
+}
+
+function navigateLeft() {
+  if (selectedMenuIndex.value === -1) {
+    // 如果在 Home，向左選到 Profile
+    selectedMenuIndex.value = 0
+    updateSelection()
+  } else if (selectedMenuIndex.value === 0) {
+    // 如果在 Profile，關閉選單（回到 Home 未展開狀態）
+    hideMenu()
+  } else {
+    // 在其他項目時，向左移動
+    selectedMenuIndex.value--
+    updateSelection()
+  }
+}
+
+function navigateRight() {
+  if (selectedMenuIndex.value === -1) {
+    // 如果在 Home，向右選到 Community
+    selectedMenuIndex.value = 3
+    updateSelection()
+  } else if (selectedMenuIndex.value === 3) {
+    // 如果在 Community，關閉選單（回到 Home 未展開狀態）
+    hideMenu()
+  } else {
+    // 在其他項目時，向右移動
+    selectedMenuIndex.value++
+    updateSelection()
+  }
+}
+
+function updateSelection() {
+  // 清除所有標籤
+  showProfileLabel.value = false
+  showJobsLabel.value = false
+  showDashboardLabel.value = false
+  showCommunityLabel.value = false
+  hoveredItem.value = null
+
+  if (selectedMenuIndex.value === -1) {
+    // 選中 Home，不顯示任何項目標籤
+    return
+  }
+
+  // 設置當前選中項目
+  const currentItem = menuItems[selectedMenuIndex.value]
+  hoveredItem.value = currentItem
+
+  switch (currentItem) {
+    case 'profile':
+      showProfileLabel.value = true
+      break
+    case 'jobs':
+      showJobsLabel.value = true
+      break
+    case 'dashboard':
+      showDashboardLabel.value = true
+      break
+    case 'community':
+      showCommunityLabel.value = true
+      break
+  }
+}function selectCurrentItem() {
+  if (selectedMenuIndex.value === -1) {
+    // 選中 Home
+    goToHome()
+    return
+  }
+
+  const currentItem = menuItems[selectedMenuIndex.value]
+  switch (currentItem) {
+    case 'profile':
+      goToPage('/profile/' + getUserId())
+      break
+    case 'jobs':
+      goToPage('/job')
+      break
+    case 'dashboard':
+      goToPage('/dashboard')
+      break
+    case 'community':
+      goToPage('/profile')
+      break
+  }
+}
+
+// 監聽路由變化，關閉選單
+watch(route, () => {
+  hideMenu()
+})
+
+// 生命週期鉤子
+onMounted(() => {
+  window.addEventListener('keydown', handleKeyPress)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyPress)
+  if (hideTimer) {
+    clearTimeout(hideTimer)
+  }
+})
+</script>
+
+<style scoped>
+@font-face {
+  font-family: RobotoMono;
+  src: url(import.meta.env.BASE_URL + 'RobotoMono.ttf');
+}
+
+.app-container {
+  width: 240px;
+  height: 320px;
+  margin: 0 auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #f8f8f8;
+  font-family: RobotoMono, sans-serif;
+  position: relative;
+  max-width: 240px;
+  max-height: 320px;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  font-size: 14px;
+  transition: opacity 0.3s ease; /* 添加淡化過渡效果 */
+}
+
+/* 當 Home 選單展開時，淡化主內容 */
+.app-container:has(.home-menu-overlay) .main-content {
+  opacity: 0.3; /* 淡化主內容到 30% 透明度 */
+}
+
+/* 底部導航欄 */
+.bottom-nav {
+  position: relative;
+  height: 45px; /* 從 60px 降低到 45px */
+  background: rgb(42, 65, 102); /* 改為藍色背景 */
+  border-top: 1px solid #e0e0e0;
+  z-index: 1001; /* 設置導航欄層級 */
+}
+
+.nav-container {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  color: rgba(255, 255, 255, 0.7); /* 預設半透明白色 */
+}
+
+.nav-item.home-item {
+  background: transparent; /* 改為透明背景，與其他按鈕一致 */
+  border-radius: 0; /* 移除圓形設計 */
+  width: auto; /* 改為自動寬度 */
+  height: auto; /* 改為自動高度 */
+  color: rgba(255, 255, 255, 0.7); /* 使用與其他按鈕相同的半透明白色 */
+  margin-top: 0; /* 移除負邊距，讓它與其他按鈕對齊 */
+  box-shadow: none; /* 移除陰影 */
+  z-index: 1001;
+  position: relative;
+  padding: 8px 12px; /* 與其他按鈕使用相同的內邊距 */
+}
+
+.nav-item.home-item .material-icons-round {
+  color: rgba(255, 255, 255, 0.7) !important; /* 使用與其他按鈕相同的半透明白色 */
+}
+
+.nav-item.home-item .nav-label {
+  color: white !important; /* 標籤保持白色 */
+}
+
+.nav-item.home-item.active {
+  color: white; /* 被選中時變為白色 */
+}
+
+.nav-item.home-item.active .material-icons-round {
+  color: white !important; /* 被選中時圖示變為白色 */
+}
+
+.nav-item {
+  color: rgba(255, 255, 255, 0.7); /* 預設半透明白色 */
+}
+.nav-item.active {
+  color: white; /* 被選中的按鈕變白色 */
+}
+
+.nav-item.selected {
+  color: white; /* 選中狀態下的按鈕變白色 */
+  background: rgba(255, 255, 255, 0.1); /* 添加淡淡的背景高亮 */
+}
+
+.nav-item.selected .material-icons-round {
+  color: white !important;
+}
+
+.nav-item .material-icons-round {
+  font-size: 20px; /* 從 24px 調整為 20px */
+  margin-bottom: 2px;
+}
+
+.nav-label {
+  font-size: 9px;
+  font-weight: 500;
+  white-space: nowrap;
+  color: white; /* 標籤文字白色 */
+  animation: labelFadeIn 0.2s ease-in-out;
+}
+
+/* Home展開選單 - 圓弧形浮動選單 */
+.home-menu-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.circular-menu {
+  position: absolute;
+  bottom: 0px; /* 距離底部導航欄的距離 */
+  width: 200px;
+  height: 130px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: auto; /* 恢復選單的鼠標事件 */
+  z-index: 1002; /* 確保在導航欄之上 */
+}
+
+.menu-item {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  z-index: 1003; /* 確保選單項目在最上層 */
+  opacity: 0;
+  transform: scale(0);
+  /* 增加觸摸目標區域 */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* 確保觸摸反應靈敏 */
+  touch-action: manipulation;
+}
+
+.menu-item:hover,
+.menu-item.hover,
+.menu-item.selected {
+  transform: scale(1.1);
+  background: rgb(42, 65, 102);
+  color: white;
+}
+
+.menu-item .material-icons-round {
+  font-size: 20px;
+  color: rgb(42, 65, 102);
+  margin-bottom: 2px;
+}
+
+/* 為 Jobs 和 Dashboard 調整圖示間距 */
+.item-2 .material-icons-round,
+.item-3 .material-icons-round {
+  margin-bottom: 0;
+  margin-top: 2px;
+}
+
+.menu-item:hover .material-icons-round,
+.menu-item.hover .material-icons-round,
+.menu-item.selected .material-icons-round {
+  color: white;
+}
+
+/* 懸浮狀態下 Jobs 和 Dashboard 的圖示間距 */
+.item-2:hover .material-icons-round,
+.item-2.hover .material-icons-round,
+.item-2.selected .material-icons-round,
+.item-3:hover .material-icons-round,
+.item-3.hover .material-icons-round,
+.item-3.selected .material-icons-round {
+  margin-bottom: 0;
+  margin-top: 2px;
+}
+
+.item-label {
+  font-size: 6px;
+  font-weight: 600;
+  color: rgb(42, 65, 102);
+  white-space: nowrap;
+  animation: labelFadeIn 0.2s ease-in-out;
+}
+
+.menu-item:hover .item-label,
+.menu-item.hover .item-label,
+.menu-item.selected .item-label {
+  color: white;
+  animation: labelFadeIn 0.2s ease-in-out;
+}
+
+/* 圓弧形排列 - 沿著半圓弧均勻分布四個選項 */
+/* 使用圓弧數學計算：半徑80px，角度從-135°到-45°均勻分布 */
+.item-1 {
+  bottom: 5px;   /* Profile - 左下角，提高位置避免與導航欄重疊 */
+  left: 15px;
+  animation: menuItemAppear 0.4s ease-out 0.1s forwards;
+}
+
+.item-2 {
+  bottom: 37px;   /* Jobs - 左上角 */
+  left: 51px;
+  animation: menuItemAppear 0.4s ease-out 0.2s forwards;
+}
+
+.item-3 {
+  bottom: 37px;   /* Dashboard - 右上角 */
+  right: 51px;
+  animation: menuItemAppear 0.4s ease-out 0.3s forwards;
+}
+
+.item-4 {
+  bottom: 5px;   /* Community - 右下角，提高位置避免與導航欄重疊 */
+  right: 15px;
+  animation: menuItemAppear 0.4s ease-out 0.4s forwards;
+}
+
+@keyframes labelFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes menuItemAppear {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* 未讀狀態動畫 */
+.nav-item .material-icons-round {
+  animation: none;
+}
+
+.nav-item:has(.material-icons-round:contains('mark_unread_chat_alt')) .material-icons-round,
+.nav-item:has(.material-icons-round:contains('notifications_active')) .material-icons-round {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.nav-item {
+  color: rgba(255, 255, 255, 0.7); /* 預設半透明白色 */
+}
+.nav-item.active {
+  color: white; /* 被選中的按鈕變白色 */
+}
+</style>

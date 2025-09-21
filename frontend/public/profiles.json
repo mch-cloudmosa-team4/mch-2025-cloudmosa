@@ -1,0 +1,6 @@
+{
+    "profiles": [
+        {"id": 1, "displayName": "Megan", "avatarId": 1, "birthday": "1990-01-01", "gender": 1, "locationId": 1, "bio": "Hello!", "languageId": 1, "created_at": "2025-9-17", "updated_at": "2025-9-17"},
+        {"id": 2, "displayName": "Tsai", "avatarId": 2, "birthday": "1990-01-02", "gender": 2, "locationId": 2, "bio": "Hey!", "languageId": 2, "created_at": "2025-9-17", "updated_at": "2025-9-17"}
+    ]
+}
