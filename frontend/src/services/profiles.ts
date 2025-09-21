@@ -61,6 +61,7 @@ export async function getMyProfile(token: string) {
     bio: string
     primary_language_code: string
   }) {
+    console.log("[updateMyProfileALl] payload: ", payload)
     const res = await fetch(`${API_BASE_URL}/api/v1/profile/me`, {
       method: 'PUT',
       headers: {
@@ -69,6 +70,7 @@ export async function getMyProfile(token: string) {
       },
       body: JSON.stringify(payload), // 必須序列化
     })
+    console.log("[updateMyProfileALl] res: ", res)
   
     if (!res.ok) {
       throw new Error(`Failed to update profile: ${res.status} ${res.statusText}`)
@@ -80,9 +82,7 @@ export async function getMyProfile(token: string) {
   
   // 查詢用戶資料
   export async function getProfiles(token: string, userIds: string) {
-    const query = Array.isArray(userIds) ? userIds.join(',') : userIds
-    console.log("[getProfiles] Query: ", query)
-    const res = await fetch(`${API_BASE_URL}/api/v1/profile?user_ids=${query}`, {
+    const res = await fetch(`${API_BASE_URL}/api/v1/profile?user_ids=${userIds}`, {
         method: 'GET',
         headers: {
             "Authorization": `Bearer ${token}`,
@@ -97,9 +97,10 @@ export async function getMyProfile(token: string) {
             "Content-Type": "application/json",
         },
     })
+    console.log("[getProfiles] Secondres: ")
 
     if (!secondRes.ok) {
-    throw new Error(`[getProfiles] Second fetch failed: ${secondRes.status} ${secondRes.statusText}`)
+        throw new Error(`[getProfiles] Second fetch failed: ${secondRes.status} ${secondRes.statusText}`)
     }
 
     const data = await secondRes.json()

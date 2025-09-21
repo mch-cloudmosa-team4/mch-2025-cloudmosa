@@ -6,7 +6,6 @@
       <h2 class="name">{{ profile.displayName }}</h2>
       <p><strong>Birthday:</strong> {{ profile.birthday }}</p>
       <p><strong>Gender:</strong> {{ profile.gender }}</p>
-      <p><strong>Location:</strong> {{ profile.location_id }}</p>
       <p><strong>Bio:</strong> {{ profile.bio }}</p>
       <p><strong>Language:</strong> {{ profile.primary_language_code }}</p>
     </div>

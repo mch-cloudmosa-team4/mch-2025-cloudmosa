@@ -76,6 +76,7 @@ onMounted(async () => {
 async function saveProfile() {
   try {
     const token = localStorage.getItem('auth_token')
+    console.log("[updateMyProfileAll] token: ", token)
     await updateMyProfileAll(token, {
       display_name: profile.value.display_name,
       birth_date: profile.value.birthday,
