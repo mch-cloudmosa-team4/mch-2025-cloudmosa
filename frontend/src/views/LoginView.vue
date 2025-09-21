@@ -154,6 +154,7 @@ function handleKeys(e) {
     if (currentElement === userRef.value) currentIndex = 0
     else if (currentElement === passRef.value) currentIndex = 1
     else if (currentElement === btnRef.value) currentIndex = 2
+    else if (currentElement === btnRef2.value) currentIndex = 3
 
     const direction = e.key === 'ArrowDown' ? -1 : 1
     const newIndex = currentIndex + direction
