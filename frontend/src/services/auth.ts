@@ -1,7 +1,7 @@
 // API 基礎 URL - 從環境變量獲取，或使用默認值
 import { getLocationWithAddress, type LocationData } from '../utils/location'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://203.116.30.130:8000'
 
 interface LoginResponse {
   access_token: string
@@ -146,19 +146,11 @@ export function logout(): void {
   localStorage.removeItem('auth_phone')
 }
 
-export function getUserId(): number | null {
+export function getUserId(): string | null {
   const id = localStorage.getItem('auth_user_id')
-  // 為了向後兼容，如果存儲的是數字字符串，返回數字
-  // 如果是 UUID，轉換為一個固定的數字（或者你可以保持字符串）
-  if (!id) return null
-  
-  // 檢查是否是純數字
-  const numId = parseInt(id)
-  if (!isNaN(numId)) return numId
-  
-  // 如果是 UUID，為了兼容性返回一個 hash 或固定數字
-  // 這裡簡單地返回 1，你可以根據需要調整
-  return 1
+  console.log("My User ID: ", id)
+
+  return id
 }
 
 export function getUserUUID(): string | null {

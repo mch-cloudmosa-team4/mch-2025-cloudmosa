@@ -27,16 +27,31 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getUserId } from '../services/auth'
-const myId = getUserId()
+import { getProfiles } from '../services/profiles'
 
+const myId = getUserId()
+console.log("My user ID: ", myId)
 const route = useRoute()
 const router = useRouter()
 const profile = ref<any>(null)
 
 onMounted(async () => {
-  const res = await fetch(import.meta.env.BASE_URL + 'profiles.json')
-  const data = await res.json()
-  profile.value = data.profiles.find((p: any) => p.id === parseInt(route.params.id as string))
+  // const res = await fetch(import.meta.env.BASE_URL + 'profiles.json')
+  // const data = await res.json()
+  // profile.value = data.profiles.find((p: any) => p.id === parseInt(route.params.id as string))
+  try {
+    const token = localStorage.getItem('auth_token')
+    console.log("Auth token: ", token)
+    const userId = getUserId()
+    console.log("Query user id: ", userId)
+    const data = await getProfiles(token, userId) // API 支援多個 user_ids
+    if (data && data.profiles && data.profiles.length > 0) {
+      profile.value = data.profiles[0]
+    }
+    console.log("Profile Detail value: ", profile.value)
+  } catch (err) {
+    console.error('Failed to load profile:', err)
+  }
 })
 
 function goToEdit() {

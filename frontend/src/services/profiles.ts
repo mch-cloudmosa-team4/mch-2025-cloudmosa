@@ -47,12 +47,21 @@ export async function getMyProfile(token: string) {
   }
   
   // 查詢用戶資料
-  export async function getProfiles(token: string, userIds: number[] | string[]) {
+  export async function getProfiles(token: string, userIds: string) {
     const query = Array.isArray(userIds) ? userIds.join(',') : userIds
-    const res = await axios.get(`${API_BASE_URL}?user_ids=${query}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+    console.log("[getProfiles] Query: ", query)
+    // const res = await axios.get(`${API_BASE_URL}/api/v1/profile?user_ids=${query}`, {
+    //   headers: {
+    //     Authorization: `Bearer ${token}`,
+    //   },
+    // })
+    const res = await fetch(`${API_BASE_URL}/api/v1/profile?user_ids=${query}`, {
+        method: 'GET',
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+            },
     })
-    return res.data
+    console.log("[getProfiles] res: ", res)
+    return await res.json()
   }

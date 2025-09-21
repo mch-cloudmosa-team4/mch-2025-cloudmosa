@@ -143,8 +143,9 @@ const menuItems = ['profile', 'jobs', 'dashboard', 'community'] // 選單項目�
 let hideTimer: number | null = null
 
 // 計算屬性
-const isLoginPage = computed(() => route.path === '/login')
-
+const isLoginPage = computed(() => 
+  route.path === '/login' || route.path === '/register'
+)
 const activeTab = computed(() => {
   const currentRoute = route.name as string
   if (!currentRoute) return 'home'

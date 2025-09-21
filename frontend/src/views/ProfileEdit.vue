@@ -63,24 +63,44 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { isAuthed } from '@/services/auth'
+import { getMyProfile, updateMyProfileAll } from '../services/profiles'
 
 const route = useRoute()
 const router = useRouter()
 const profile = ref<any>(null)
 
 onMounted(async () => {
-  const res = await fetch(import.meta.env.BASE_URL + 'profiles.json')
-  console.log('Fetching profiles.json', res)
-  const data = await res.json()
-  profile.value = data.profiles.find((p: any) => p.id === parseInt(route.params.id as string))
-  console.log('Loaded profile: ', profile.value)
+  // const res = await fetch(import.meta.env.BASE_URL + 'profiles.json')
+  // console.log('Fetching profiles.json', res)
+  // const data = await res.json()
+  // profile.value = data.profiles.find((p: any) => p.id === parseInt(route.params.id as string))
+  // console.log('Loaded profile: ', profile.value)
+  try {
+    const token = localStorage.getItem('auth_token')
+    const data = await getMyProfile(token)
+    profile.value = data  // 直接用後端回傳的格式
+  } catch (err) {
+    console.error('Failed to load profile:', err)
+  }
 })
 
-function saveProfile() {
-  console.log('Saving profile:', profile.value)
-  // 這裡可以呼叫 API 更新 (PUT /api/v1/profile/me)
-  alert('Profile updated successfully!')
-  router.push('/profile/' + profile.value.id)
+async function saveProfile() {
+  try {
+    const token = localStorage.getItem('auth_token')
+    await updateMyProfileAll(token, {
+      display_name: profile.value.display_name,
+      birth_date: profile.value.birth_date,
+      gender: profile.value.gender,
+      bio: profile.value.bio,
+      primary_language_code: profile.value.primary_language_code,
+    })
+    alert('Profile updated successfully!')
+    router.push('/profile')
+  } catch (err) {
+    console.error('Failed to update profile:', err)
+    alert('Failed to update profile.')
+  }
 }
 </script>
 
