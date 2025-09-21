@@ -6,13 +6,7 @@
       <!-- Display Name -->
       <label>
         Display Name
-        <input v-model="profile.displayName" type="text" required />
-      </label>
-
-      <!-- Avatar ID -->
-      <label>
-        Avatar ID
-        <input v-model="profile.avatarId" type="number" min="0" />
+        <input v-model="profile.display_name" type="text" required />
       </label>
 
       <!-- Birthday -->
@@ -30,13 +24,7 @@
           <option value="2">Female</option>
         </select>
       </label>
-
-      <!-- Location -->
-      <label>
-        Location
-        <input v-model="profile.locationId" type="text" placeholder="Location code" />
-      </label>
-
+      
       <!-- Bio -->
       <label>
         Bio
@@ -46,7 +34,7 @@
       <!-- Language -->
       <label>
         Language
-        <input v-model="profile.languageId" type="text" placeholder="en, zh, jp..." />
+        <input v-model="profile.primary_language_code" type="text" placeholder="en, zh, jp..." />
       </label>
 
       <!-- Buttons -->
@@ -79,7 +67,7 @@ onMounted(async () => {
   try {
     const token = localStorage.getItem('auth_token')
     const data = await getMyProfile(token)
-    profile.value = data  // 直接用後端回傳的格式
+    profile.value = data
   } catch (err) {
     console.error('Failed to load profile:', err)
   }
@@ -90,7 +78,7 @@ async function saveProfile() {
     const token = localStorage.getItem('auth_token')
     await updateMyProfileAll(token, {
       display_name: profile.value.display_name,
-      birth_date: profile.value.birth_date,
+      birth_date: profile.value.birthday,
       gender: profile.value.gender,
       bio: profile.value.bio,
       primary_language_code: profile.value.primary_language_code,
