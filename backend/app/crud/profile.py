@@ -33,6 +33,18 @@ class ProfileCRUD:
             return db.query(Profile).filter(Profile.user_id == user_uuid).first()
         except ValueError:
             return None
+        
+    def get_all(self, db: Session) -> List[Profile]:
+        """
+        Get all profiles
+        
+        Args:
+            db: Database session
+            
+        Returns:
+            List of all profiles
+        """
+        return db.query(Profile).all()
     
     def get_multi_by_user_ids(
         self, 
