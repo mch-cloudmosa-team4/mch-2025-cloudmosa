@@ -86,7 +86,7 @@ Authorization: Bearer {{access_token}}
 
 {
   "display_name": "John Doe Updated",
-  "birth_date": "1990-01-01",
+  "birthday": "1990-01-01",
   "gender": "female",
   "bio": "Updated bio - Software developer"
 }
@@ -98,7 +98,7 @@ Authorization: Bearer {{access_token}}
 
 {
   "display_name": "John Doe Updated",
-  "birth_date": "1990-01-01",
+  "birthday": "1990-03-15",
   "gender": "female",
   "bio": "Updated bio - Software developer",
   "primary_language_code": "en"
