@@ -41,7 +41,7 @@ onMounted(async () => {
     console.log("Auth token: ", token)
     const userId = getUserId()
     console.log("Query user id: ", userId)
-    const data = await getProfiles(token, userId) // API 支援多個 user_ids
+    const data = await getProfiles(token, route.params.id) // API 支援多個 user_ids
     console.log("Profile Detail data: ", data)
     profile.value = data[0]
     // if (data && data.profiles && data.profiles.length > 0) {

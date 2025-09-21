@@ -10,9 +10,9 @@
     </div>
     <button @click="goMe()">Go to My Profile</button>
     <ul>
-      <li v-for="p in profiles" :key="p.id">
-        <button @click="goDetail(p.id)">
-          {{ p.displayName }}
+      <li v-for="p in profiles" :key="p.user_id">
+        <button @click="goDetail(p.user_id)">
+          {{ p.display_name }}
         </button>
       </li>
     </ul>
@@ -23,22 +23,21 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { getUserId } from '../services/auth'
-import { getProfiles } from '../services/profiles'
+import { getProfiles, getAllProfile } from '../services/profiles'
+
 
 const profiles = ref([])
 const search = ref('')
 const router = useRouter()
 
 onMounted(async () => {
-  // const res = await fetch(import.meta.env.BASE_URL + 'profiles.json')
-  // const data = await res.json()
-  // profiles.value = data.profiles
   try {
     const token = localStorage.getItem('auth_token')
-    console.log("Auth token", token)
-    // TODO: Get all profiles
-    const res = await getProfiles(token, [1, 2, 3])
+    if (!token) throw new Error('No auth token found')
+
+    const res = await getAllProfile(token)
     profiles.value = res.profiles
+    console.log("Profile List profiles: ", profiles)
   } catch (err) {
     console.error('Failed to fetch profiles:', err)
   }

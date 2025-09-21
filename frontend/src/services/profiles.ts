@@ -107,3 +107,21 @@ export async function getMyProfile(token: string) {
     console.log("[getProfiles] data: ", data)
     return data
   }
+
+  export async function getAllProfile(token: string) {
+    const res = await fetch(`${API_BASE_URL}/api/v1/profile/all`, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    })
+  
+    if (!res.ok) {
+      throw new Error(`[getAllProfile] Failed: ${res.status} ${res.statusText}`)
+    }
+  
+    const data = await res.json()
+    console.log("[getAllProfile] data:", data)
+    return data
+  }
