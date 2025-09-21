@@ -11,7 +11,7 @@ import re
 
 class LocationResponse(BaseModel):
     """Schema for location response"""
-    id: str = Field(description="Location ID")
+    id: UUID = Field(description="Location ID")
     country: str = Field(description="Country name")
     country_code: str = Field(description="Country code (ISO 3166-1 alpha-2)")
     city: str = Field(description="City name")
