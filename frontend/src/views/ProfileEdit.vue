@@ -19,7 +19,7 @@
       <label>
         Gender
         <select v-model="profile.gender">
-          <option value="not_specified">Not specified</option>
+          <!-- <option value="not_specified">Not specified</option> -->
           <option value="male">Male</option>
           <option value="female">Female</option>
           <option value="other">Other</option>
@@ -41,7 +41,7 @@
       <!-- Buttons -->
       <div class="actions">
         <button type="submit" class="save-btn">Save</button>
-        <button type="button" class="cancel-btn" @click="$router.push('/profile')">
+        <button type="button" class="cancel-btn" @click="$router.push(`/profile/${ myId}`)">
           Cancel
         </button>
       </div>
