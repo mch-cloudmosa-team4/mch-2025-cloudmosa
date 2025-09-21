@@ -1,0 +1,294 @@
+### Location API 測試
+
+# 設定全域變數
+@host = http://localhost:8000
+@api = /api/v1
+@access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ODk5Y2UyMy1jODdmLTRhYmQtYTFmOC0xYWUzNWEyNGFmMzQiLCJleHAiOjE3NTg0MzA3MzksInR5cGUiOiJhY2Nlc3MifQ.Olq5JNYrZsPCRAurckzihQsohH0qe5VYpG_syqWopAQ
+@location_id = 550e8400-e29b-41d4-a716-446655440000
+@country_name = Taiwan
+
+### 獲取所有位置（預設分頁）
+GET {{host}}{{api}}/locations
+Content-Type: application/json
+
+### 獲取所有位置（自訂分頁）
+GET {{host}}{{api}}/locations?skip=0&limit=10
+Content-Type: application/json
+
+### 搜尋位置
+GET {{host}}{{api}}/locations/search?q=taipei
+Content-Type: application/json
+
+### 搜尋位置（自訂分頁）
+GET {{host}}{{api}}/locations/search?q=new&skip=0&limit=5
+Content-Type: application/json
+
+### 獲取所有國家
+GET {{host}}{{api}}/locations/countries
+Content-Type: application/json
+
+### 獲取特定國家的城市
+GET {{host}}{{api}}/locations/countries/{{country_name}}/cities
+Content-Type: application/json
+
+### 獲取美國的城市
+GET {{host}}{{api}}/locations/countries/United States/cities
+Content-Type: application/json
+
+### 獲取熱門位置
+GET {{host}}{{api}}/locations/popular
+Content-Type: application/json
+
+### 獲取熱門位置（限制數量）
+GET {{host}}{{api}}/locations/popular?limit=5
+Content-Type: application/json
+
+### 獲取位置統計資訊
+GET {{host}}{{api}}/locations/stats
+Content-Type: application/json
+
+### 根據 ID 獲取位置
+GET {{host}}{{api}}/locations/{{location_id}}
+Content-Type: application/json
+
+### 建立新位置（需要認證）
+POST {{host}}{{api}}/locations
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+    "country": "Taiwan",
+    "country_code": "TW",
+    "city": "Taipei"
+}
+
+### 建立新位置 - 更多範例
+POST {{host}}{{api}}/locations
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+    "country": "Japan",
+    "country_code": "JP",
+    "city": "Tokyo"
+}
+
+### 建立新位置 - 美國紐約
+POST {{host}}{{api}}/locations
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+    "country": "United States",
+    "country_code": "US",
+    "city": "New York"
+}
+
+### 建立新位置 - 英國倫敦
+POST {{host}}{{api}}/locations
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+    "country": "United Kingdom",
+    "country_code": "GB",
+    "city": "London"
+}
+
+### 測試建立重複位置（應該失敗）
+POST {{host}}{{api}}/locations
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+    "country": "Taiwan",
+    "country_code": "TW",
+    "city": "Taipei"
+}
+
+### 測試建立位置 - 錯誤的國家代碼（應該失敗）
+POST {{host}}{{api}}/locations
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+    "country": "Taiwan",
+    "country_code": "TWN",
+    "city": "Kaohsiung"
+}
+
+### 測試建立位置 - 缺少必填欄位（應該失敗）
+POST {{host}}{{api}}/locations
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+    "country": "Taiwan",
+    "city": "Taichung"
+}
+
+### 更新位置（需要認證）
+PUT {{host}}{{api}}/locations/{{location_id}}
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+    "country": "Taiwan",
+    "country_code": "TW",
+    "city": "New Taipei City"
+}
+
+### 部分更新位置 - 只更新城市名稱
+PUT {{host}}{{api}}/locations/{{location_id}}
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{
+    "city": "Taoyuan"
+}
+
+### 批次建立位置（需要認證）
+POST {{host}}{{api}}/locations/bulk
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+[
+    {
+        "country": "Taiwan",
+        "country_code": "TW",
+        "city": "Kaohsiung"
+    },
+    {
+        "country": "Taiwan", 
+        "country_code": "TW",
+        "city": "Taichung"
+    },
+    {
+        "country": "Singapore",
+        "country_code": "SG",
+        "city": "Singapore"
+    },
+    {
+        "country": "South Korea",
+        "country_code": "KR",
+        "city": "Seoul"
+    },
+    {
+        "country": "Australia",
+        "country_code": "AU",
+        "city": "Sydney"
+    }
+]
+
+### 批次建立更多位置
+POST {{host}}{{api}}/locations/bulk
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+[
+    {
+        "country": "Canada",
+        "country_code": "CA", 
+        "city": "Toronto"
+    },
+    {
+        "country": "Canada",
+        "country_code": "CA",
+        "city": "Vancouver"
+    },
+    {
+        "country": "France",
+        "country_code": "FR",
+        "city": "Paris"
+    },
+    {
+        "country": "Germany",
+        "country_code": "DE",
+        "city": "Berlin"
+    },
+    {
+        "country": "Netherlands",
+        "country_code": "NL",
+        "city": "Amsterdam"
+    }
+]
+
+### 測試空的批次建立（應該失敗）
+POST {{host}}{{api}}/locations/bulk
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+[]
+
+### 刪除位置（需要認證）
+DELETE {{host}}{{api}}/locations/{{location_id}}
+Authorization: Bearer {{access_token}}
+
+### 測試刪除不存在的位置（應該失敗）
+DELETE {{host}}{{api}}/locations/00000000-0000-0000-0000-000000000000
+Authorization: Bearer {{access_token}}
+
+### 測試取得不存在的位置（應該失敗）
+GET {{host}}{{api}}/locations/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+
+### 測試無認證建立位置（應該失敗）
+POST {{host}}{{api}}/locations
+Content-Type: application/json
+
+{
+    "country": "Taiwan",
+    "country_code": "TW",
+    "city": "Hsinchu"
+}
+
+### 測試無認證更新位置（應該失敗）
+PUT {{host}}{{api}}/locations/{{location_id}}
+Content-Type: application/json
+
+{
+    "city": "Updated City"
+}
+
+### 測試無認證刪除位置（應該失敗）
+DELETE {{host}}{{api}}/locations/{{location_id}}
+
+### 測試無認證批次建立（應該失敗）
+POST {{host}}{{api}}/locations/bulk
+Content-Type: application/json
+
+[
+    {
+        "country": "Taiwan",
+        "country_code": "TW",
+        "city": "Unauthorized City"
+    }
+]
+
+### 搜尋 - 測試各種關鍵字
+GET {{host}}{{api}}/locations/search?q=united
+Content-Type: application/json
+
+### 搜尋 - 測試大小寫不敏感
+GET {{host}}{{api}}/locations/search?q=TOKYO
+Content-Type: application/json
+
+### 搜尋 - 測試部分匹配
+GET {{host}}{{api}}/locations/search?q=tai
+Content-Type: application/json
+
+### 搜尋 - 測試空字串（應該失敗）
+GET {{host}}{{api}}/locations/search?q=
+Content-Type: application/json
+
+### 測試分頁邊界值
+GET {{host}}{{api}}/locations?skip=0&limit=1
+Content-Type: application/json
+
+### 測試超出限制的分頁（應該失敗或調整）
+GET {{host}}{{api}}/locations?skip=0&limit=10000
+Content-Type: application/json
+
+### 測試負數分頁參數（應該失敗）
+GET {{host}}{{api}}/locations?skip=-1&limit=10
+Content-Type: application/json
