@@ -2,16 +2,13 @@
   <main>
     <div class="filters">
       <input
+        v-model="searchQuery"
         type="text"
         placeholder="Search jobs..."
         class="search-box"
+        @input="onSearchInput"
+        @keyup.enter="performSearch"
       />
-      <select class="filter-select">
-        <option value="">Filter by status</option>
-        <option value="draft">Draft</option>
-        <option value="active">Active</option>
-        <option value="closed">Closed</option>
-      </select>
     </div>
     
     <!-- Loading 狀態 -->
@@ -61,6 +58,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
 const jobs = ref<any[]>([])
 const loading = ref(false)
 const error = ref('')
+const searchQuery = ref('')
+const searchTimeout = ref<number | null>(null)
 const router = useRouter()
 const route = useRoute()
 
@@ -79,6 +78,7 @@ interface Job {
   address: string
   end_date: string
   pictures: string[]
+  skills: string[]  // 新增 skills 欄位
   created_at: string
   updated_at: string
 }
@@ -154,6 +154,88 @@ const goJob = (id: string) => {
   router.push(`/job/${id}`)
 }
 
+// 搜尋工作
+async function searchJobs(searchStr: string = '', skip: number = 0, limit: number = 10) {
+  loading.value = true
+  error.value = ''
+  
+  try {
+    console.log('🔍 Searching jobs with query:', searchStr)
+    
+    const params = new URLSearchParams({
+      skip: skip.toString(),
+      limit: limit.toString()
+    })
+    
+    if (searchStr.trim()) {
+      params.append('search_str', searchStr.trim())
+    }
+    
+    const url = `${API_BASE_URL}/api/v1/search/jobs?${params}`
+    console.log('🌐 Search API URL:', url)
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    })
+    
+    console.log('📥 Search response received:', response.status, response.statusText)
+    
+    // 先獲取原始文本
+    const responseText = await response.text()
+    console.log('📥 Raw search response text:', responseText)
+    
+    if (!response.ok) {
+      let errorMessage = 'Failed to search jobs'
+      try {
+        const errorData = JSON.parse(responseText)
+        console.error('❌ Search error response data:', errorData)
+        errorMessage = errorData.detail || errorMessage
+      } catch {
+        errorMessage = `HTTP ${response.status}: ${response.statusText}`
+      }
+      throw new Error(errorMessage)
+    }
+    
+    // 解析 JSON
+    const data: Job[] = JSON.parse(responseText)
+    console.log('✅ Jobs searched successfully:', data)
+    console.log('📊 Number of jobs found:', data.length)
+    
+    jobs.value = data
+    
+  } catch (err: any) {
+    console.error('🚨 Search jobs error:', err)
+    error.value = err.message || 'Failed to search jobs'
+  } finally {
+    loading.value = false
+  }
+}
+
+// 處理搜尋輸入
+function onSearchInput() {
+  // 清除之前的 timeout
+  if (searchTimeout.value) {
+    clearTimeout(searchTimeout.value)
+  }
+  
+  // 設置新的 timeout，延遲搜尋
+  searchTimeout.value = window.setTimeout(() => {
+    performSearch()
+  }, 500) // 500ms 延遲
+}
+
+// 執行搜尋
+function performSearch() {
+  const query = searchQuery.value.trim()
+  if (query === '') {
+    // 如果搜尋為空，回到獲取所有工作
+    fetchJobs()
+  } else {
+    searchJobs(query)
+  }
+}
+
 // 導航到創建工作頁面
 function goToCreate() {
   router.push(`/job/create`)
@@ -178,15 +260,6 @@ function goToCreate() {
   border-radius: 50px;
   font-size: 13px;
   width: 80%;
-}
-
-.filter-select {
-  width: 85%;
-  padding: 6px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 13px;
-  background: #f9f9f9;
 }
 
 .job-btn {
