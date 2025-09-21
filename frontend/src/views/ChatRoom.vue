@@ -51,6 +51,7 @@ const chatBox = ref(null)
 
 onMounted(async () => {
   const res = await fetch(import.meta.env.BASE_URL + 'messages.json')
+  console.log("RES: ", res)
   const data = await res.json()
   messages.value = data.messages
 

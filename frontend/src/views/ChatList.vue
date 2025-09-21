@@ -18,7 +18,7 @@
 
     <!-- 聊天室清單 -->
     <ul>
-      <li v-for="c in myConversations" :key="c.id" class="chat-item">
+      <li v-for="c in conversations" :key="c.id" class="chat-item">
         <button class="chat-btn" @click="goChat(c.id)">
           <!-- 頭像 -->
           <img src="/pig.png" alt="avatar" class="chat-avatar" />
@@ -49,7 +49,11 @@ const myId = getUserId()
 onMounted(async () => {
   const res = await fetch(import.meta.env.BASE_URL + 'conversations.json')
   const data = await res.json()
-  conversations.value = data.conversations
+  conversations.value = [{
+            "id": 1,
+            "user_1_id": 1,
+            "user_2_id": 2
+        }]
 })
 
 const myConversations = computed(() =>
