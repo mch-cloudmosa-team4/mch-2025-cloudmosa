@@ -21,9 +21,10 @@
       <span>Password</span>
       <input
         ref="passRef"
-        v-model="password"
+        v-model.trim="password"
         type="password"
         autocomplete="current-password"
+        placeholder="Enter your password"
         @focus="focusedIndex = 1"
         @keydown="handleKeys"
       />
@@ -40,7 +41,12 @@
       {{ loading ? 'Signing in...' : 'Login (Enter)' }}
     </button>
 
-    <button ref="btnRef2" class="btn" @click="$router.push('/register')" @focus="focusedIndex = 3">
+    <button
+      ref="btnRef2"
+      class="btn"
+      @click="$router.push('/register')"
+      @focus="focusedIndex = 3"
+      @keydown="handleKeys">
       Register
     </button>
 
@@ -87,7 +93,7 @@ const focusedIndex = ref(0)
 
 onMounted(() => {
   if (isAuthed()) router.replace('/home')
-  window.addEventListener('keydown', handleKeys)
+  // window.addEventListener('keydown', handleKeys)
   
   // 顯示位置資訊狀態
   locationStatus.value = { type: 'info', message: '🌍 Location will be requested during login' }
@@ -98,7 +104,7 @@ onMounted(() => {
   })
 })
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeys)
+  // window.removeEventListener('keydown', handleKeys)
   // 清理定時器
   if (errorTimeout) {
     clearTimeout(errorTimeout)
@@ -156,7 +162,7 @@ function handleKeys(e) {
     else if (currentElement === btnRef.value) currentIndex = 2
     else if (currentElement === btnRef2.value) currentIndex = 3
 
-    const direction = e.key === 'ArrowDown' ? -1 : 1
+    const direction = e.key === 'ArrowDown' ? 1 : -1
     const newIndex = currentIndex + direction
     focusAt(newIndex)
   }
