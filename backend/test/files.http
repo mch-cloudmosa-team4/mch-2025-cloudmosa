@@ -1,7 +1,7 @@
 @host = http://localhost:8000
 @api = /api/v1
 # update this to the actual file.id from the upload
-@id = f81bd3bb-8b9c-4c93-9234-ff036e0ca648
+@id = 5b583821-8aa7-4194-b4f1-0c239812cd63
 
 ### Upload a file to MinIO (uses local test file)
 # @name upload

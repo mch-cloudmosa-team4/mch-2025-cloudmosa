@@ -58,7 +58,7 @@ class Job(Base):
     status = Column(Enum(JobStatus), default=JobStatus.DRAFT, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
-    embedding = Column(Vector(settings.embedding_model_dimension), nullable=False)
+    embedding = Column(Vector(settings.embedding_model_dimension), nullable=True)
     
     # Relationships
     employer = relationship("User", back_populates="employer_jobs")

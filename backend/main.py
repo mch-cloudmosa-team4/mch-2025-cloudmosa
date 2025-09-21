@@ -15,7 +15,7 @@ from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
 
 from app.config import settings
-from app.router import health_router, items_router, auth_router, profile_router, files_router, job_router, application_router
+from app.router import health_router, items_router, auth_router, profile_router, files_router, job_router, application_router, search_router
 from app.utils import logger, format_error_response
 from app.database import create_tables, ensure_extensions
 
@@ -124,6 +124,7 @@ app.include_router(auth_router, prefix=settings.api_prefix)
 app.include_router(profile_router, prefix=settings.api_prefix)
 app.include_router(job_router, prefix=settings.api_prefix)
 app.include_router(application_router, prefix=settings.api_prefix)
+app.include_router(search_router, prefix=settings.api_prefix)
 
 
 # Custom OpenAPI schema

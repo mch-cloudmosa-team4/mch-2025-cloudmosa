@@ -26,7 +26,7 @@ class JobRequirementCRUD:
         """
         return db.query(JobRequirement).filter(JobRequirement.job_id == job_id).all()
 
-    def create(self, db: Session, job_id: str, skill_id: str, min_level: Optional[int]) -> JobRequirement:
+    def create(self, db: Session, job_id: str, skill_id: str, min_level: int = 1) -> JobRequirement:
         """
         Create new jobs
 
@@ -59,6 +59,7 @@ class JobRequirementCRUD:
             Deleted jobs or None if not found
         """
         db_objs = db.query(JobRequirement).filter(JobRequirement.job_id == job_id).all()
+        print(db_objs)
         if db_objs:
             for db_obj in db_objs:
                 db.delete(db_obj)
