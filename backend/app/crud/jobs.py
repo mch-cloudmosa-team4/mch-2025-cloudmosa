@@ -33,7 +33,7 @@ class JobCRUD:
         db: Session,
         skip: int = 0,
         limit: int = 100,
-        active_only: bool = True
+        active_only: bool = False
     ) -> List[Job]:
         """
         Get multiple job with pagination
@@ -60,7 +60,7 @@ class JobCRUD:
         search_str: str,
         skip: int = 0,
         limit: int = 100,
-        active_only: bool = True
+        active_only: bool = False
     ) -> List[Job]:
         """
         Search jobs with input search string
@@ -158,7 +158,7 @@ class JobCRUD:
             db.commit()
         return db_obj
 
-    def count(self, db: Session, active_only: bool = True) -> int:
+    def count(self, db: Session, active_only: bool = False) -> int:
         """
         Count total jobs
 
