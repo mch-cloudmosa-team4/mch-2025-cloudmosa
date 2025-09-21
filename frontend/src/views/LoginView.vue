@@ -40,7 +40,7 @@
       {{ loading ? 'Signing in...' : 'Login (Enter)' }}
     </button>
 
-    <button class="btn" @click="$router.push('/register')" @focus="focusedIndex = 3">
+    <button ref="btnRef2" class="btn" @click="$router.push('/register')" @focus="focusedIndex = 3">
       Register
     </button>
 
@@ -81,7 +81,8 @@ let errorTimeout: NodeJS.Timeout | null = null
 const userRef = ref(null)
 const passRef = ref(null)
 const btnRef = ref(null)
-const focusables = [userRef, passRef, btnRef]
+const btnRef2 = ref(null)
+const focusables = [userRef, passRef, btnRef, btnRef2]
 const focusedIndex = ref(0)
 
 onMounted(() => {
