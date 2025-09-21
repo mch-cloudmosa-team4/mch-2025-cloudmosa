@@ -3,6 +3,7 @@
     <h1>Profiles</h1>
     <div class="filters">
       <input
+        v-model="search"
         type="text"
         placeholder="Search people..."
         class="search-box"
@@ -10,12 +11,12 @@
     </div>
     <button @click="goMe()">Go to My Profile</button>
     <ul>
-      <li v-for="p in profiles" :key="p.user_id">
-        <button @click="goDetail(p.user_id)">
-          {{ p.display_name }}
-        </button>
-      </li>
-    </ul>
+  <li v-for="p in filteredProfiles" :key="p.user_id">
+      <button @click="goDetail(p.user_id)">
+        {{ p.display_name }}
+      </button>
+    </li>
+  </ul>
   </main>
 </template>
 
