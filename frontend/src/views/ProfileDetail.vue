@@ -4,21 +4,19 @@
 
     <div class="profile-card">
       <h2 class="name">{{ profile.displayName }}</h2>
-      <p><strong>ID:</strong> {{ profile.id }}</p>
-      <p><strong>Avatar ID:</strong> {{ profile.avatarId }}</p>
       <p><strong>Birthday:</strong> {{ profile.birthday }}</p>
       <p><strong>Gender:</strong> {{ profile.gender }}</p>
-      <p><strong>Location:</strong> {{ profile.locationId }}</p>
+      <p><strong>Location:</strong> {{ profile.location_id }}</p>
       <p><strong>Bio:</strong> {{ profile.bio }}</p>
-      <p><strong>Language:</strong> {{ profile.languageId }}</p>
-      <p><strong>Created:</strong> {{ profile.created_at }}</p>
-      <p><strong>Updated:</strong> {{ profile.updated_at }}</p>
+      <p><strong>Language:</strong> {{ profile.primary_language_code }}</p>
     </div>
 
     <button
-      v-if="profile.id == myId"
+      v-if="profile.user_id == myId"
       class="edit-btn" @click="goToEdit">
       ✎
+      <p>{{ profile.user_ids }}</p>
+      <p>{{ profile.user_ids }}</p>
     </button>
   </main>
 </template>
@@ -45,10 +43,12 @@ onMounted(async () => {
     const userId = getUserId()
     console.log("Query user id: ", userId)
     const data = await getProfiles(token, userId) // API 支援多個 user_ids
-    if (data && data.profiles && data.profiles.length > 0) {
-      profile.value = data.profiles[0]
-    }
-    console.log("Profile Detail value: ", profile.value)
+    console.log("Profile Detail data: ", data)
+    profile.value = data[0]
+    // if (data && data.profiles && data.profiles.length > 0) {
+    //   profile.value = data.profiles[0]
+    // }
+    console.log("Profile Detail profile.value: ", profile.value)
   } catch (err) {
     console.error('Failed to load profile:', err)
   }

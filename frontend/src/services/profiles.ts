@@ -62,6 +62,20 @@ export async function getMyProfile(token: string) {
             "Content-Type": "application/json",
             },
     })
-    console.log("[getProfiles] res: ", res)
-    return await res.json()
+    console.log("[getProfiles] res: ", res.json())
+    const secondRes = await fetch(res.url, {
+        method: 'GET',
+        headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+        },
+    })
+
+    if (!secondRes.ok) {
+    throw new Error(`[getProfiles] Second fetch failed: ${secondRes.status} ${secondRes.statusText}`)
+    }
+
+    const data = await secondRes.json()
+    console.log("[getProfiles] data: ", data)
+    return data
   }
