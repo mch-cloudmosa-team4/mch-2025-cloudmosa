@@ -19,9 +19,10 @@
       <label>
         Gender
         <select v-model="profile.gender">
-          <option value="0">Not specified</option>
-          <option value="1">Male</option>
-          <option value="2">Female</option>
+          <option value="not_specified">Not specified</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
         </select>
       </label>
       
