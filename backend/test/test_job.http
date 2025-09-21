@@ -1,0 +1,68 @@
+
+# 設定全域變數
+@host = http://localhost:8000
+@access_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkY2ZkOThmNS0zYzNlLTQ2MmUtOTljZS04NTkyYmE4ODA1NGMiLCJleHAiOjE3NTgzOTc5OTcsInR5cGUiOiJhY2Nlc3MifQ.7J749x-q-AznHC-fLXeVxJLnaoQz5S2US-OODBH93sE
+@refresh_token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkY2ZkOThmNS0zYzNlLTQ2MmUtOTljZS04NTkyYmE4ODA1NGMiLCJleHAiOjE3NjA5ODgxOTcsInR5cGUiOiJyZWZyZXNoIn0.TTmmS2SOz6QpQFsrlje7KufrpbXPxfkg5AXUNiQKWHk
+@user_id = dcfd98f5-3c3e-462e-99ce-8592ba88054c
+
+
+POST {{host}}/api/v1/jobs/
+Content-Type: application/json
+
+{
+    "employer_id": "{{user_id}}",
+    "title": "yoyo",
+    "description": "timmy",
+    "reward": "kdfjkdjfkd",
+    "work_type": "one_time",
+    "required_people": 1,
+    "start_date": "2025-01-01",
+    "status": "published",
+    "skills": ["1185a7d9-876d-40ec-bd5f-0dbb41097c0e"]
+}
+
+
+###
+PUT {{host}}/api/v1/jobs/
+Content-Type: application/json
+
+{
+  "title": "bad",
+  "id": "dadfd221-29c9-4bf1-acf0-77c3c5dca80c"
+}
+
+# "title": "banana",
+# "status": "cancelled",
+
+
+###
+GET {{host}}/api/v1/jobs/dadfd221-29c9-4bf1-acf0-77c3c5dca80c
+Content-Type: application/json
+
+{
+}
+
+
+###
+GET {{host}}/api/v1/jobs/
+Content-Type: application/json
+
+{
+    "limit": 30
+}
+
+
+###
+DELETE  {{host}}/api/v1/jobs/85b2334f-84a5-459c-8098-d9ddbe08547e
+Content-Type: application/json
+
+{
+}
+
+
+###
+GET {{host}}/api/v1/search/jobs?search_str=apple
+Content-Type: application/json
+
+{
+}

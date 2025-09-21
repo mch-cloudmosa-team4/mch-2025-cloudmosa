@@ -22,6 +22,7 @@ from .profile import (
     ProfileUpdateResponse
 )
 from .jobs import JobBase, JobCreate, JobUpdate, JobResponse
+from .applications import ApplicationBase, ApplicationCreate, ApplicationUpdate, ApplicationResponse
 from .skills import (
     SkillBase,
     SkillCreate,
@@ -67,6 +68,10 @@ __all__ = [
     "JobCreate",
     "JobUpdate",
     "JobResponse",
+    "ApplicationBase",
+    "ApplicationCreate",
+    "ApplicationUpdate",
+    "ApplicationResponse",
     "SkillBase",
     "SkillCreate",
     "SkillUpdate",
