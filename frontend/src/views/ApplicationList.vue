@@ -4,11 +4,12 @@
       <li v-for="a in myApplications" :key="a.id">
         <button class="job-btn" @click="goDetail(a.id)">
           <div class="application-header">
-            <span class="application-type">status</span>
+            <span class="application-type">{{ getStatusText(a.status) }}</span>
           </div>
           <div class="job-info">
             <p>
               <strong>Application #{{ a.id }}</strong><br />Job {{ a.job_id }}
+              <br><small>{{ formatDate(a.created_at) }}</small>
             </p>
           </div>
         </button>
@@ -20,22 +21,32 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { getUserId } from '../services/auth'
+import { getUserId, getAuthToken } from '../services/auth'
+import { getMyApplications, getStatusText, formatDate } from '../services/applications'
 
 const router = useRouter()
 const applications = ref([])
 const myId = getUserId()
 
 onMounted(async () => {
-  const res = await fetch(import.meta.env.BASE_URL + 'applications.json')
-  const data = await res.json()
-  applications.value = data.applications
+  try {
+    const token = getAuthToken()
+    if (!token) {
+      throw new Error('No authentication token found')
+    }
+    
+    const data = await getMyApplications(token, { limit: 100 })
+    applications.value = data
+  } catch (error) {
+    console.error('❌ Error fetching applications:', error)
+    applications.value = []
+    // 可以添加用戶友好的錯誤提示
+    alert('無法載入申請列表，請檢查網路連線或重新登入')
+  }
 })
 
-// 只取 applicant_id = 我的 application
-const myApplications = computed(() =>
-  applications.value.filter((a) => a.applicant_id === myId)
-)
+// API already returns only current user's applications
+const myApplications = computed(() => applications.value)
 
 function goDetail(id) {
   router.push(`/application/${id}`)

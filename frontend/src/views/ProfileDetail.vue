@@ -3,22 +3,19 @@
     <h1 class="title">Profile</h1>
 
     <div class="profile-card">
-      <h2 class="name">{{ profile.displayName }}</h2>
-      <p><strong>ID:</strong> {{ profile.id }}</p>
-      <p><strong>Avatar ID:</strong> {{ profile.avatarId }}</p>
+      <h2 class="name">{{ profile.display_name }}</h2>
       <p><strong>Birthday:</strong> {{ profile.birthday }}</p>
       <p><strong>Gender:</strong> {{ profile.gender }}</p>
-      <p><strong>Location:</strong> {{ profile.locationId }}</p>
       <p><strong>Bio:</strong> {{ profile.bio }}</p>
-      <p><strong>Language:</strong> {{ profile.languageId }}</p>
-      <p><strong>Created:</strong> {{ profile.created_at }}</p>
-      <p><strong>Updated:</strong> {{ profile.updated_at }}</p>
+      <p><strong>Language:</strong> {{ profile.primary_language_code }}</p>
     </div>
 
     <button
-      v-if="profile.id == myId"
+      v-if="profile.user_id == myId"
       class="edit-btn" @click="goToEdit">
       ✎
+      <p>{{ profile.user_ids }}</p>
+      <p>{{ profile.user_ids }}</p>
     </button>
   </main>
 </template>
@@ -27,16 +24,33 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getUserId } from '../services/auth'
-const myId = getUserId()
+import { getProfiles } from '../services/profiles'
 
+const myId = getUserId()
+console.log("My user ID: ", myId)
 const route = useRoute()
 const router = useRouter()
 const profile = ref<any>(null)
 
 onMounted(async () => {
-  const res = await fetch(import.meta.env.BASE_URL + 'profiles.json')
-  const data = await res.json()
-  profile.value = data.profiles.find((p: any) => p.id === parseInt(route.params.id as string))
+  // const res = await fetch(import.meta.env.BASE_URL + 'profiles.json')
+  // const data = await res.json()
+  // profile.value = data.profiles.find((p: any) => p.id === parseInt(route.params.id as string))
+  try {
+    const token = localStorage.getItem('auth_token')
+    console.log("Auth token: ", token)
+    const userId = getUserId()
+    console.log("Query user id: ", userId)
+    const data = await getProfiles(token, route.params.id) // API 支援多個 user_ids
+    console.log("Profile Detail data: ", data)
+    profile.value = data[0]
+    // if (data && data.profiles && data.profiles.length > 0) {
+    //   profile.value = data.profiles[0]
+    // }
+    console.log("Profile Detail profile.value: ", profile.value)
+  } catch (err) {
+    console.error('Failed to load profile:', err)
+  }
 })
 
 function goToEdit() {
@@ -80,7 +94,7 @@ function goToEdit() {
 .name {
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
   text-align: center;
 }
 

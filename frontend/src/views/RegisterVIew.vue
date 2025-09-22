@@ -6,19 +6,13 @@
       <!-- Name -->
       <label>
         Name
-        <input v-model="form.name" type="text" placeholder="Your prefered name" required />
-      </label>
-
-      <!-- Email -->
-      <label>
-        Email
-        <input v-model="form.email" type="email" placeholder="example@mail.com" required />
+        <input v-model="form.name" type="text" placeholder="Your preferred name" required />
       </label>
 
       <!-- Phone -->
       <label>
         Phone
-        <input v-model="form.phone" type="tel" placeholder="09xx-xxx-xxx" required />
+        <input v-model="form.phone" type="tel" placeholder="+886-900-000-000" required />
       </label>
 
       <!-- Password -->
@@ -26,27 +20,6 @@
         Password
         <input v-model="form.password" type="password" placeholder="******" required />
       </label>
-
-      <!-- Location -->
-      <label>
-        Location
-        <input
-          v-model="locationSearch"
-          type="text"
-          placeholder="Search location..."
-          class="search-box"
-        />
-        <select v-model="form.location" required>
-          <option
-            v-for="loc in filteredLocations"
-            :key="loc.code"
-            :value="loc.code"
-          >
-            {{ loc.name }}
-          </option>
-        </select>
-      </label>
-
       <button type="submit" class="submit-btn">Register</button>
     </form>
   </main>
@@ -55,6 +28,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { register } from '../services/auth'
 
 // router
 const router = useRouter()
@@ -62,10 +36,8 @@ const router = useRouter()
 // 表單資料
 const form = ref({
   name: '',
-  email: '',
   phone: '',
   password: '',
-  location: ''
 })
 
 // location 選項（代號 + 名稱）
@@ -87,11 +59,22 @@ const filteredLocations = computed(() =>
 )
 
 // submit handler
-function handleRegister() {
-  console.log('Register data:', form.value)
-  // 這裡可以改成送出 API 請求
-  alert(`Register success! Welcome ${form.value.name}`)
-  router.push('/login')
+async function handleRegister() {
+  try {
+    console.log('📤 Register data:', form.value)
+
+    await register({
+      phone: form.value.phone,
+      password: form.value.password,
+      display_name: form.value.name
+    })
+
+    // alert(`🎉 Register success! Welcome ${form.value.name}`)
+    router.push('/login')
+  } catch (err: any) {
+    console.error('❌ Register error:', err)
+    alert(`Register failed: ${err.message || err}`)
+  }
 }
 </script>
 

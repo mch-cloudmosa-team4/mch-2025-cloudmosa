@@ -6,13 +6,7 @@
       <!-- Display Name -->
       <label>
         Display Name
-        <input v-model="profile.displayName" type="text" required />
-      </label>
-
-      <!-- Avatar ID -->
-      <label>
-        Avatar ID
-        <input v-model="profile.avatarId" type="number" min="0" />
+        <input v-model="profile.display_name" type="text" required />
       </label>
 
       <!-- Birthday -->
@@ -25,18 +19,13 @@
       <label>
         Gender
         <select v-model="profile.gender">
-          <option value="0">Not specified</option>
-          <option value="1">Male</option>
-          <option value="2">Female</option>
+          <!-- <option value="not_specified">Not specified</option> -->
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
         </select>
       </label>
-
-      <!-- Location -->
-      <label>
-        Location
-        <input v-model="profile.locationId" type="text" placeholder="Location code" />
-      </label>
-
+      
       <!-- Bio -->
       <label>
         Bio
@@ -46,13 +35,13 @@
       <!-- Language -->
       <label>
         Language
-        <input v-model="profile.languageId" type="text" placeholder="en, zh, jp..." />
+        <input v-model="profile.primary_language_code" type="text" placeholder="en, zh, jp..." />
       </label>
 
       <!-- Buttons -->
       <div class="actions">
         <button type="submit" class="save-btn">Save</button>
-        <button type="button" class="cancel-btn" @click="$router.push('/profile')">
+        <button type="button" class="cancel-btn" @click="$router.push(`/profile/${ myId}`)">
           Cancel
         </button>
       </div>
@@ -63,24 +52,45 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { isAuthed, getUserId } from '@/services/auth'
+import { getMyProfile, updateMyProfileAll } from '../services/profiles'
 
 const route = useRoute()
 const router = useRouter()
 const profile = ref<any>(null)
+const myId = getUserId()
 
 onMounted(async () => {
-  const res = await fetch(import.meta.env.BASE_URL + 'profiles.json')
-  console.log('Fetching profiles.json', res)
-  const data = await res.json()
-  profile.value = data.profiles.find((p: any) => p.id === parseInt(route.params.id as string))
-  console.log('Loaded profile: ', profile.value)
+  // const res = await fetch(import.meta.env.BASE_URL + 'profiles.json')
+  // console.log('Fetching profiles.json', res)
+  // const data = await res.json()
+  // profile.value = data.profiles.find((p: any) => p.id === parseInt(route.params.id as string))
+  // console.log('Loaded profile: ', profile.value)
+  try {
+    const token = localStorage.getItem('auth_token')
+    const data = await getMyProfile(token)
+    profile.value = data
+  } catch (err) {
+    console.error('Failed to load profile:', err)
+  }
 })
 
-function saveProfile() {
-  console.log('Saving profile:', profile.value)
-  // 這裡可以呼叫 API 更新 (PUT /api/v1/profile/me)
-  alert('Profile updated successfully!')
-  router.push('/profile/' + profile.value.id)
+async function saveProfile() {
+  try {
+    const token = localStorage.getItem('auth_token')
+    console.log("[updateMyProfileAll] token: ", token)
+    await updateMyProfileAll(token, {
+      display_name: profile.value.display_name,
+      birthday: profile.value.birthday,
+      gender: profile.value.gender,
+      bio: profile.value.bio,
+      primary_language_code: profile.value.primary_language_code,
+    })
+    router.push(`/profile/${myId}`)
+  } catch (err) {
+    console.error('Failed to update profile:', err)
+    alert('Failed to update profile.')
+  }
 }
 </script>
 

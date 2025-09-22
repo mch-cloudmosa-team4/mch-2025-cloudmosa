@@ -3,6 +3,7 @@
     <h1>Profiles</h1>
     <div class="filters">
       <input
+        v-model="search"
         type="text"
         placeholder="Search people..."
         class="search-box"
@@ -10,30 +11,40 @@
     </div>
     <button @click="goMe()">Go to My Profile</button>
     <ul>
-      <li v-for="p in profiles" :key="p.id">
-        <button @click="goDetail(p.id)">
-          {{ p.displayName }}
-        </button>
-      </li>
-    </ul>
+  <li v-for="p in filteredProfiles" :key="p.user_id">
+      <button @click="goDetail(p.user_id)">
+        {{ p.display_name }}
+      </button>
+    </li>
+  </ul>
   </main>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { getUserId } from '../services/auth'
+import { getProfiles, getAllProfile } from '../services/profiles'
+
 
 const profiles = ref([])
+const search = ref('')
 const router = useRouter()
 
 onMounted(async () => {
-  const res = await fetch(import.meta.env.BASE_URL + 'profiles.json')
-  const data = await res.json()
-  profiles.value = data.profiles
+  try {
+    const token = localStorage.getItem('auth_token')
+    if (!token) throw new Error('No auth token found')
+
+    const res = await getAllProfile(token)
+    profiles.value = res.profiles
+    console.log("Profile List profiles: ", profiles)
+  } catch (err) {
+    console.error('Failed to fetch profiles:', err)
+  }
 })
 
-function goDetail(id) {
+function goDetail(id: any) {
   router.push(`/profile/${id}`)
 }
 
@@ -41,6 +52,13 @@ function goMe() {
   console.log('Going to my profile:', getUserId())
   router.push(`/profile/${getUserId()}`)
 }
+
+const filteredProfiles = computed(() => {
+  if (!search.value) return profiles.value
+  return profiles.value.filter((p) =>
+    p.display_name.toLowerCase().includes(search.value.toLowerCase())
+  )
+})
 </script>
 <style scoped>
 main {
